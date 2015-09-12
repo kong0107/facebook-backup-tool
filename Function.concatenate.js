@@ -5,8 +5,11 @@
  *
  * Note that "this function" does NOT run the "input functions". It's the
  * "returned function" that runs the "input functions" of "this function".
- * Arguments for "input functions" are needed only when "returned function"
- * is executed.
+ * In other words, "input functions" are not executed until the "returned
+ * function" is executed.
+ * So arguments for "input functions" are needed only when the "returned 
+ * function" is executed.
+ * 
  * Input functions can be assigned by an argument list, or you can put all
  * input functions in an array and treat the array as the only argument of 
  * this function.
