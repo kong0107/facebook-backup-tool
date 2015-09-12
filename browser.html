@@ -1,0 +1,304 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Facebook Graph API Object Browser</title>
+		<style type="text/css">
+			dl {
+				margin-top: 0;
+				border-left: 1px solid #ccc;
+			}
+			dt {
+				font-weight: bold;
+			}
+			dt > div {
+				font-weight: normal;
+				white-space: normal;
+			}
+			dd {
+				margin: 0 0 1em 0;
+				padding-left: 40px;
+				border-bottom: 1px solid #ccc;
+				white-space: pre;
+			}
+			.newest {
+				background-color: #ddd;
+			}
+			.new {
+				text-decoration: none;
+				vertical-align: super;
+				font-size: smaller;
+			}
+		</style>
+		<script type="text/javascript" src="insertAfter.js"></script>
+		<script type="text/javascript">
+			var what = function() {
+				//var r = ['☄', '₪', '☢', '☀'];
+				var r = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
+				return r[Math.floor(r.length * Math.random())];
+			}();
+
+
+			function cewc(tag, content) { /// create element with content
+				var ele = document.createElement(tag);
+				var content = (typeof content == 'undefined' || typeof content.nodeType == 'undefined')
+					? document.createTextNode(content)
+					: content
+				;
+				ele.appendChild(content);
+				return ele;
+			}
+
+			var renew = function() {
+				var newest;
+				return function(node) {
+					if(newest) newest.classList.remove('newest');
+					newest = node;
+					newest.classList.add('newest');
+				};
+			}();
+
+			function href(graphRequest) {
+				return document.location.pathname + '?' + graphRequest;
+			}
+
+			function obj2dom(obj) {
+				if(typeof obj == 'undefined') return document.createTextNode('undefined');
+				if(typeof obj === null) return document.createTextNode('null');
+				if(typeof obj != 'object') return document.createTextNode(obj.toString());
+				if(Array.isArray(obj)) {
+					if(obj.length == 0) return document.createTextNode('empty array');
+					var ol = document.createElement('OL');
+					for(var i = 0; i < obj.length; ++i)
+						ol.appendChild(cewc('LI', obj2dom(obj[i])));
+					return ol;
+				}
+				var dl = document.createElement('DL');
+				if(obj.id) {
+					dl.appendChild(cewc('DT', 'id'));
+					var dd = document.createElement('DD');
+					var a = cewc('A', obj.id);
+					a.href = href(obj.id);
+					var d = a.cloneNode();
+					d.textContent = what;
+					d.classList.add('new');
+					a.onclick = function() {
+						getMeta(obj.id, dl.parentNode);
+						return false;
+					};
+					dd.appendChild(a);
+					dd.appendChild(document.createTextNode(' '));
+					dd.appendChild(d);
+					dl.appendChild(dd);
+				}
+				for(var i in obj) {
+					if(i == 'id') continue;
+					dl.appendChild(cewc('DT', i));
+					if(i == 'next' || i == 'previous') {
+						var a = cewc('A', obj[i]);
+						a.href = obj[i];
+						a.onclick = function() {
+							var target = a;
+							return function() {
+								FB.api(this.href, function(r) {
+									target.parentNode.replaceChild(obj2dom(r), target);
+								});
+								return false;
+							};
+						}();
+						dl.appendChild(cewc('DD', a));
+					}
+					else dl.appendChild(cewc('DD', obj2dom(obj[i])));
+				}
+				return dl;
+			}
+
+			function getMeta(node_id, display) {
+				FB.api(node_id, {metadata: 1}, function(r) {
+					console.log(r);
+					if(r.error) {
+						display.appendChild(obj2dom(r));
+						return;
+					}
+					var fields = r.metadata.fields;
+					var connections = r.metadata.connections;
+					var dl = document.createElement('DL');
+					dl.appendChild(cewc('DT', 'id'));
+
+					var dd = cewc('DD', r.id + ' ');
+					var a = cewc('A', what);
+					a.href = href(r.id);
+					a.classList.add('new');
+					dd.appendChild(a);
+					dl.appendChild(dd);
+					dl.appendChild(cewc('DT', 'type'));
+					dl.appendChild(cewc('DD', r.metadata.type));
+					for(var i in r) {
+						if(i == 'id' || i == 'metadata') continue;
+						dl.appendChild(cewc('DT', i));
+						dl.appendChild(cewc('DD', obj2dom(r[i])));
+					}
+
+					var dt = cewc('DT', 'fields');
+					dt.onclick = function() {
+						for(
+							var target = this.nextSibling.firstChild.firstChild;
+							target;
+							target = target.nextSibling
+						) {
+							target.firstChild.onclick();
+						}
+					};
+					dl.appendChild(dt);
+					//dl.appendChild(cewc('DT', 'fields'));
+
+					var fieldDD = document.createElement('DD');
+					var fieldList = document.createElement('DL');
+					for(var i = 0; i < fields.length; ++i) {
+						var field = fields[i];
+						var dt = document.createElement('DT');
+						var a = cewc('A', field.name);
+						a.href = href(node_id + '?fields=' + field.name);
+						var d = a.cloneNode();
+						d.textContent = what;
+						d.classList.add('new');
+						a.onclick = function() {
+							var isClicked = false;
+							var n = node_id;
+							var f = field.name;
+							return function() {
+								if(isClicked) return false;
+								isClicked = true;
+								var target = this.parentNode;
+								FB.api(n, {fields: f}, function(r) {
+									var dom = cewc('DD', obj2dom(r.error ? r : r[f]));
+									target.parentNode.insertAfter(dom, target);
+									renew(dom);
+								});
+								return false;
+							};
+						}();
+						dt.appendChild(a);
+						dt.appendChild(document.createTextNode(' '));
+						dt.appendChild(d);
+						dt.appendChild(document.createTextNode(' (' + field.type + ')'));
+						dt.appendChild(cewc('DIV', field.description));
+						fieldList.appendChild(dt);
+					}
+					fieldDD.appendChild(fieldList);
+					dl.appendChild(fieldDD);
+
+					
+					
+					var dt = cewc('DT', 'connections');
+					dt.onclick = function() {
+						for(
+							var target = this.nextSibling.firstChild.firstChild;
+							target;
+							target = target.nextSibling
+						) {
+							target.firstChild.onclick();
+						}
+					};
+					dl.appendChild(dt);					
+					//dl.appendChild(cewc('DT', 'connections'));
+					
+					var conDD = document.createElement('DD');
+					var conList = document.createElement('DL');
+					for(var i in connections) {
+						var dt = document.createElement('DT');
+						var a = cewc('A', i);
+						a.href = href(node_id + '/' + i);
+						var d = a.cloneNode();
+						d.textContent = what;
+						d.classList.add('new');
+						a.onclick = function() {
+							var isClicked = false;
+							var path = connections[i];
+							return function() {
+								if(isClicked) return false;
+								isClicked = true;
+								var target = this.parentNode;
+								FB.api(path, function(r) {
+									target.parentNode.insertAfter(cewc('DD', obj2dom(r)), target);
+									renew(target.nextSibling);
+								});
+								return false;
+							};
+						}();
+						dt.appendChild(a);
+						dt.appendChild(document.createTextNode(' '));
+						dt.appendChild(d);
+						conList.appendChild(dt);
+					}
+					conDD.appendChild(conList);
+					dl.appendChild(conDD);
+
+					while(display.firstChild) display.removeChild(display.firstChild);
+					display.appendChild(dl);
+
+					renew(display);
+				});
+			}
+
+			function main() {
+				var c = document.getElementById('contents');
+				var s = document.location.search;
+				var path = (s.length > 1) ? s.substr(1) : 'me/posts?fields=id,type,message,message_tags,story,story_tags,with_tags,created_time,updated_time,application,parent_id,place,link,object_id,name,description,is_hidden,privacy';
+				// me/posts?fields=id,type,message,message_tags,story,story_tags,created_time,updated_time,application,is_hidden,parent_id,place,link,object_id,name,description,privacy
+				document.getElementsByName('path')[0].value = path;
+				if(path.indexOf('?') > 0 || path.indexOf('/') > 0) FB.api(path, function(r) {
+					console.log(r);
+					c.appendChild(obj2dom(r));
+					renew(c);
+				});
+				else getMeta(path, c);
+			}
+		</script>
+	</head>
+	<body>
+		<script type="text/javascript">
+			window.fbAsyncInit = function() {
+				FB.init({
+					version    : 'v2.4',
+					appId      : '1598824630378971',
+					xfbml      : false,
+					status     : true
+				});
+				/***
+				  * Check permission: https://developers.facebook.com/docs/facebook-login/permissions/v2.4#reference
+				  */
+				FB.getLoginStatus(function(response) {
+					if(response.status == 'connected') main();
+					else FB.login(main, {scope: 'user_posts,user_photos'});
+				});
+			};
+
+			(function(d, s, id){
+				var js, fjs = d.getElementsByTagName(s)[0];
+				if (d.getElementById(id)) {return;}
+				js = d.createElement(s); js.id = id;
+				js.src = "//connect.facebook.net/zh_TW/sdk.js";
+				fjs.parentNode.insertBefore(js, fjs);
+			}(document, 'script', 'facebook-jssdk'));
+
+			window.onload = function() {
+				var orig = window.onload || function(){};
+				return function() {
+					var s = document.location.search.substr(1);
+					document.getElementsByTagName('FORM')[0].onsubmit = function() {
+						document.location.search = '?' + document.getElementsByName('path')[0].value;
+						return false;
+					};
+					return orig.apply(this, arguments);
+				};
+			}();
+		</script>
+		<form>
+			Requesting path:
+			<input type="text" name="path" size="80">
+			<input type="submit">
+		</form>
+		<div id="contents"></div>
+	</body>
+</html>

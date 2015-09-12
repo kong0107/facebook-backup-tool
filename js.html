@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<style type="text/css">
+		pre {
+			margin: 0;
+		}
+		code {
+			display: block;
+		}
+		thead th {
+			text-align: left;
+			padding-left: 0.25em;
+		}
+		th, td {
+			vertical-align: top;
+		}
+		thead {
+			background-color: #ccc;
+		}
+	</style>
+	<script type="text/javascript" src="obj2table.js"></script>
+</head>
+<body>
+    <script>
+		function p(ele) {
+			if(typeof ele.nodeType == 'undefined') {
+				var text = ele;
+				ele = document.createElement('CODE');
+				ele.appendChild(document.createTextNode(text));
+			}
+			document.body.appendChild(ele);
+		}
+		function createAnchor(name, text) {
+			var a = document.createElement('A');
+			a.name = name;
+			a.appendChild(document.createTextNode(text));
+			return a;
+		}
+
+      window.fbAsyncInit = function() {
+        FB.init({
+		  version    : 'v2.4',
+          appId      : '1598824630378971',
+          xfbml      : false,
+		  status     : true
+        });
+
+		var iteration = 0;
+		var iMax = Infinity;
+		var errorCount = 0;
+		var errorMax = 5;
+		var path = '/me/feed?limit=5&fields=id,created_time,link,message,attachments,comments{id,created_time,from,message,attachment,comments}';
+		//path = '/10154193091691393_10154206363841393?fields=id,application,caption,description,created_time,message,link,name,attachments,comments';
+		//path = '/me?fields=id,name,age_range&metadata=1';
+		var starttime;
+		function main() {
+			starttime = Date.now();
+			//var ta = document.getElementById('textarea');
+			if(iteration == iMax) {
+				p(createAnchor('end', 'Reached iteration limit ' + iMax));
+				document.location.hash = 'end';
+				return;
+			}
+
+			++iteration;
+			p(createAnchor(iteration, '#' + iteration));
+
+			p(new Date);
+			FB.api(path, function(r) {
+				p(Date.now() - starttime + ' milliseconds');
+				if(typeof r.error != 'undefined' || typeof r.data == 'undefined'
+				) {
+					console.log(path);
+					console.log(r);
+					p(createAnchor('end', 'Error'));
+					document.location.hash = 'end';
+					return;
+				}
+				else if(r.data.length == 0 || typeof r.paging == 'undefined') {
+					console.log(path);
+					console.log(r);
+					if(errorCount == errorMax) {
+						p('No more data.');
+						return;
+					}
+					p('No more data?');
+					++errorCount;
+					setTimeout(main, 1000);
+				}
+				var c = document.getElementById('content');
+				//c.replaceChild(obj2table(r, 1), c.firstChild);
+				document.getElementById('json').value += ',' + JSON.stringify(r);
+				/*for(var i = 0; i < r.data.length; ++i) {
+					if(ta.value.length) ta.value += ',';
+					ta.value += JSON.stringify(r.data[i]);
+				}*/
+				path = r.paging.next;
+				setTimeout(main, 1000);
+			});
+		}
+
+		FB.getLoginStatus(function(response) {
+			if(response.status == 'connected') main();
+			else FB.login(main, {scope: 'user_posts'});
+		});
+      };
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "//connect.facebook.net/zh_TW/sdk.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+
+    </script>
+	<!--textarea id="textarea"></textarea-->
+	<div id="content"><div></div></div>
+	<textarea id="json"></textarea>
+</body>
+</html>

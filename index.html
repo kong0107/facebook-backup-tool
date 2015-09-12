@@ -1,0 +1,142 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Backup Your Facebook Posts on Your Own Timeline</title>
+		<style type="text/css">
+			#log {
+				white-space: pre;
+				height: 8em;
+				overflow: auto;
+				resize: vertical;
+				background-color: #ccc;
+			}
+			em {
+				font-weight: bold;
+			}
+			#result {
+				width: 100%;
+				height: 10em;
+				resize: vertical;
+			}
+		</style>
+		<script type="text/javascript" src="insertAfter.js"></script>
+		<script type="text/javascript">
+			var button;
+
+			window.onload = function() {
+				button = document.querySelector('button');
+				button.onclick = function() {
+					FB.login(function(r) {
+						if(r.authResponse) {
+							main();
+							button.disabled = 'disabled';
+							button.textContent = 'Requesting data from Facebook ...';
+							document.querySelector('#result').textContent = '[\n]';
+						}
+						else log('User cancelled login or did not fully authorize.');
+					}
+					, {scope: 'user_posts'});
+				};
+			};
+
+			function log(str) {
+				var l = document.querySelector('#log');
+				l.textContent = (new Date).toLocaleTimeString() + "\t" + str + "\n" + l.textContent;
+			}
+
+			var iteration = 0;
+			var iMax = 5;//Infinity;
+			var path = '/me/posts?fields=id,type,message,message_tags,story,story_tags,with_tags,created_time,updated_time,application,parent_id,place,link,object_id,name,description,privacy';
+			function main() {
+				log('#' + (++iteration) + ', requesting ' + path);
+				var result = document.querySelector('#result');
+				var startTime = Date.now();
+				FB.api(path, function(r) {
+					log('Gets response in ' + (Date.now() - startTime) + ' milliseconds.');
+					if(r.error) {
+						console.log(r);
+						log(JSON.stringify(r.error));
+						button.textContent = 'Error';
+						return;
+					}
+					if(!r.data || !r.data.length) {
+						console.log(r);
+						log('No more data. Finish.');
+						button.textContent = 'Finished. You can copy the JSON now.';
+						return;
+					}
+
+
+					var str = result.textContent.slice(0, -1);
+					for(var i = 0; i < r.data.length; ++i) {
+						/// Parse data
+						var post = r.data[i];
+						/*if(post.privacy.description != 'Public') continue;
+						delete post.privacy;*/
+						if(post.story_tags) delete post.story_tags['0'];
+
+						/// Add to shown text
+						if(str.length > 2) str += ',\n';
+						str += JSON.stringify(post);
+					}
+					str += ']';
+					result.textContent = str;
+					log('Data size: ' + (str.length + 1));
+
+
+					if(!r.paging || !r.paging.next) {
+						console.log(r);
+						log('No more data. Finish.');
+						button.textContent = 'Finished. You can copy the JSON now.';
+						return;
+					}
+
+					if(iteration == iMax) {
+						log('Reached iteration limit ' + iMax);
+						button.textContent = 'Finished. You can copy the JSON now.';
+						console.log(JSON.parse(result.textContent));
+						return;
+					}
+
+					path = r.paging.next;
+					setTimeout(main, 1000);
+				});
+			}
+		</script>
+	</head>
+	<body>
+		<script type="text/javascript">
+			window.fbAsyncInit = function() {
+				FB.init({
+					version    : 'v2.4',
+					appId      : '1598824630378971',
+					xfbml      : false,
+					status     : true
+				});
+			};
+
+			(function(d, s, id){
+				var js, fjs = d.getElementsByTagName(s)[0];
+				if (d.getElementById(id)) {return;}
+				js = d.createElement(s); js.id = id;
+				js.src = "//connect.facebook.net/zh_TW/sdk.js";
+				fjs.parentNode.insertBefore(js, fjs);
+			}(document, 'script', 'facebook-jssdk'));
+		</script>
+		<h1>Backup Your Facebook Posts on Your Own Timeline</h1>
+		<h2>Notes</h2>
+		<ol>
+			<li>This tool only output a JSON string. You may need some programming background to understand how to work on the output.</li>
+			<li>You have to log into Facebook and authenticate this application to continue.</li>
+			<li>The process may run over 10 minutes and cost much memory of your computer. Be patient and don't be surprised if the browser crushes. Mobile devices are usually not suitable for this.</li>
+			<li>There will be no file downloading after all backup actions done. You have to copy and paste the result to a plain text file by yoursef.</li>
+			<li>Private posts are also in the output. You shall check there's no sensitive information before sharing the output.</li>
+		</ol>
+		<h2>Take Action</h2>
+		<button>Backup!</button>
+		<div id="log"></div>
+		<h2>Result</h2>
+		<textarea id="result"></textarea>
+	</body>
+</html>

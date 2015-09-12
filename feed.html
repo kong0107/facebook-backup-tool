@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Facebook JavaScript SDK test</title>
+		<style type="text/css">
+		</style>
+		<script type="text/javascript" src="insertAfter.js"></script>
+		<script type="text/javascript">
+		</script>
+	</head>
+	<body>
+		<script type="text/javascript">
+			window.fbAsyncInit = function() {
+				FB.init({
+					version    : 'v2.4',
+					appId      : '1598824630378971',
+					xfbml      : false,
+					status     : true
+				});
+				FB.getLoginStatus(function(response) {
+					if(response.status == 'connected') main();
+					else FB.login(main, {scope: 'user_posts'});
+				});
+			};
+
+			(function(d, s, id){
+				var js, fjs = d.getElementsByTagName(s)[0];
+				if (d.getElementById(id)) {return;}
+				js = d.createElement(s); js.id = id;
+				js.src = "//connect.facebook.net/zh_TW/sdk.js";
+				fjs.parentNode.insertBefore(js, fjs);
+			}(document, 'script', 'facebook-jssdk'));
+		</script>
+		均會有人物、感受、地點、時間
+		<ol>
+			<li>純文字 10154259765866393</li>
+			<li>單張圖片 10154259219811393</li>
+			<li>多張圖片</li>
+			<li>連結 10154259321806393</li>
+			<li>應用程式所張貼</li>
+			<li>轉貼自他人的文字／圖片 10154259214331393</li>
+			<li>轉貼自他人的連結 10154258015896393</li>
+			<li>轉貼人物／專頁／活動／社團…<br>https://developers.facebook.com/docs/graph-api/using-graph-api#search</li>
+		</ol>
+	</body>
+</html>
