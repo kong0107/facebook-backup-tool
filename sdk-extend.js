@@ -8,7 +8,6 @@ if(!window.fbAsyncInit)
 window.fbAsyncInit = function(){
 	var orig = window.fbAsyncInit;
 	return function() {
-
 		/**
 		 * Throw an error if FB.api gets an error response.
 		 *
@@ -72,10 +71,10 @@ window.fbAsyncInit = function(){
 		};
 
 		/**
-		 * Run function depending on whether the permission is granted.
+		 * Run function depending on whether the permissions are granted.
 		 *
-		 * If the permission `perm` is granted, execute `granted` and passed
-		 * all granted permissions;
+		 * If the permissions are granted, execute `granted` and passed
+		 * not only tested permissions but all granted ones in an array;
 		 * otherwise, execute `declined` and passed declined permissions.
 		 * Wrong permission names are treated as declined.
 		 *
@@ -96,7 +95,6 @@ window.fbAsyncInit = function(){
 			});
 		};
 
-
 		/**
 		 * Request the permission(s) and run different functions.
 		 *
@@ -109,7 +107,6 @@ window.fbAsyncInit = function(){
 			}, {scope: perms.toString(), auth_type: 'rerequest'});
 		};
 
-
 		/**
 		 * Keep asking for the designated permission(s) until all granted.
 		 *
@@ -120,6 +117,18 @@ window.fbAsyncInit = function(){
 				FB.requestPermission(perms, callback, recur);
 			};
 			recur();
+		};
+
+		/**
+		 * Revoke a single permission.
+		 *
+		 * Revoking a permission which is already declined
+		 * would still return success.
+		 *
+		 * @see https://developers.facebook.com/docs/graph-api/reference/user/permissions
+		 */
+		FB.revokePermission = function(perm, callback) {
+			FB.apiwt('me/permissions/' + perm, 'delete', callback);
 		};
 
 		return orig.apply(this, arguments);

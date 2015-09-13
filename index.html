@@ -27,19 +27,20 @@
 			window.onload = function() {
 				button = document.querySelector('button');
 				button.onclick = function() {
-					//FB.ifPermitted('user_posts'
-
-
-					FB.login(function(r) {
-						if(r.authResponse) {
+					button.disabled = 'disabled';
+					log('Checking permission ...');
+					FB.requestPermission(
+						'user_posts',
+						function() {
 							main();
-							button.disabled = 'disabled';
 							button.textContent = 'Requesting data from Facebook ...';
 							document.querySelector('#result').textContent = '[\n]';
+						},
+						function() {
+							log('User cannelled login or did not permit access to `user_posts`');
+							button.disabled = '';
 						}
-						else log('User cancelled login or did not fully authorize.');
-					}
-					, {scope: 'user_posts'});
+					);
 				};
 			};
 
@@ -127,6 +128,7 @@
 				fjs.parentNode.insertBefore(js, fjs);
 			}(document, 'script', 'facebook-jssdk'));
 		</script>
+		<script type="text/javascript" src="sdk-extend.js"></script>
 		<h1>Backup Your Facebook Posts on Your Own Timeline</h1>
 		<h2>Notes</h2>
 		<ol>
