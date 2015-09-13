@@ -30,7 +30,7 @@
 				font-size: smaller;
 			}
 		</style>
-		<script type="text/javascript" src="insertAfter.js"></script>
+		<script type="text/javascript" src="Node.insertAfter.js"></script>
 		<script type="text/javascript">
 			var what = function() {
 				//var r = ['☄', '₪', '☢', '☀'];
@@ -188,8 +188,8 @@
 					fieldDD.appendChild(fieldList);
 					dl.appendChild(fieldDD);
 
-					
-					
+
+
 					var dt = cewc('DT', 'connections');
 					dt.onclick = function() {
 						for(
@@ -200,9 +200,9 @@
 							target.firstChild.onclick();
 						}
 					};
-					dl.appendChild(dt);					
+					dl.appendChild(dt);
 					//dl.appendChild(cewc('DT', 'connections'));
-					
+
 					var conDD = document.createElement('DD');
 					var conList = document.createElement('DL');
 					for(var i in connections) {

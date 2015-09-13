@@ -20,13 +20,16 @@
 				resize: vertical;
 			}
 		</style>
-		<script type="text/javascript" src="insertAfter.js"></script>
+		<script type="text/javascript" src="Node.insertAfter.js"></script>
 		<script type="text/javascript">
 			var button;
 
 			window.onload = function() {
 				button = document.querySelector('button');
 				button.onclick = function() {
+					//FB.ifPermitted('user_posts'
+
+
 					FB.login(function(r) {
 						if(r.authResponse) {
 							main();
@@ -73,8 +76,8 @@
 						/// Parse data
 						var post = r.data[i];
 						/*if(post.privacy.description != 'Public') continue;
-						delete post.privacy;*/
-						if(post.story_tags) delete post.story_tags['0'];
+						delete post.privacy;
+						if(post.story_tags) delete post.story_tags['0'];*/
 
 						/// Add to shown text
 						if(str.length > 2) str += ',\n';
@@ -93,7 +96,7 @@
 					}
 
 					if(iteration == iMax) {
-						log('Reached iteration limit ' + iMax);
+						log('(debug usage) Reached iteration limit ' + iMax);
 						button.textContent = 'Finished. You can copy the JSON now.';
 						console.log(JSON.parse(result.textContent));
 						return;
