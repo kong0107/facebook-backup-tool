@@ -15,15 +15,22 @@ This is unfinished.
 2. Request the first page.
 
 ```javascript
-FB.apiwt('me/posts', function(r) {
-  r.data.asyncEach(function(post, resume) {
-    /// ...
-    /// check if there are more comments.
-    /// ...
-    ajax.post('createPost.php', post, resume);
+@see https://blog.jcoglan.com/2010/08/30/the-potentially-asynchronous-loop/
+var path = 'me/posts';
+var a = function() {
+  FB.apiwt(path, function(r) {
+    path = r.paging.previous;
+    r.data.asyncEach(
+      function(post, resume) {
+        /// ...
+        /// check if there are more comments.
+        /// ...
+        ajax.post('createPost.php', post, resume);
+      },
+      a ///< To support this argument, modify `asyncEach` to have a callback function executed when the iteration ends.
+    );
   });
-  /// ...
-  /// treat next page
-  /// ...
-});
+};
+
+a();
 ```
