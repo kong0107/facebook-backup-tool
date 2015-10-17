@@ -9,3 +9,21 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 
 # Warning
 This is unfinished.
+
+# Algorithm
+1. Decide to use `/user/feed` or `/user/posts`. The former would show posts that this person was tagged in. [ref](https://developers.facebook.com/docs/graph-api/reference/v2.5/user/feed)
+2. Request the first page.
+
+```javascript
+FB.apiwt('me/posts', function(r) {
+  r.data.asyncEach(function(post, resume) {
+    /// ...
+    /// check if there are more comments.
+    /// ...
+    ajax.post('createPost.php', post, resume);
+  });
+  /// ...
+  /// treat next page
+  /// ...
+});
+```
