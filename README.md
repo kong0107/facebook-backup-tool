@@ -18,14 +18,15 @@ This is unfinished.
 @see https://blog.jcoglan.com/2010/08/30/the-potentially-asynchronous-loop/
 var path = 'me/posts';
 var a = function() {
+  if(!path) return;
   FB.apiwt(path, function(r) {
     path = r.paging.previous;
     r.data.asyncEach(
       function(post, resume) {
-        /// ...
-        /// check if there are more comments.
-        /// ...
         ajax.post('createPost.php', post, resume);
+        post.comments.asyncEach(function(comment, r2) {
+          ajax.post('createComment.php', comment, r2);
+        });
       },
       a ///< To support this argument, modify `asyncEach` to have a callback function executed when the iteration ends.
     );
