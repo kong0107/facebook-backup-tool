@@ -131,6 +131,31 @@ window.fbAsyncInit = function(){
 			FB.apiwt('me/permissions/' + perm, 'delete', callback);
 		};
 
+		/**
+		 * Go through every node until there's no more pagination.
+		 *
+		 * Synchronously call `cbForEach` and pass each element of the query
+		 * result. If there are more pages, then query them and continue
+		 * passing elements of the result data to `cbForEach`.
+		 * Note that `cbForEach` is NOT called for each query, but for each
+		 * element in each query.
+		 * Call `cbForFin` when there's no more data.
+		 *
+		 * In short, usually, `cbForEach` would be called several times,
+		 * but `cbForFin` would be called only once.
+		 *
+		 * @param cbForNode	called for each result data element and taking
+		 *					the element as the only argument.
+		 * @param cbForReq	called for each API request, which means
+		 *					one page of the result
+		 * @param cbForFin	called when everything above are finished
+		 * @see https://developers.facebook.com/docs/graph-api/using-graph-api#paging
+		 */
+		FB.traverseEveryResults = function(path, params, cbForNode, cbForFin, cbForReq) {
+
+		};
+
+
 		return orig.apply(this, arguments);
-	}
+	};
 }()

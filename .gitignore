@@ -1,0 +1,5 @@
+vendor/
+data/
+journal/
+_tmp/
+config.php
