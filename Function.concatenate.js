@@ -13,9 +13,9 @@
  * Input functions can be assigned by an argument list, or you can put all
  * input functions in an array and treat the array as the only argument of 
  * this function.
- * When calling the returned function, the first argument would be parsed
- * to the first input function, the second argument to the second input
- * function, and so on.
+ * When calling the returned function, the first argument would be treated
+ * as the argument list of the first input function, the second argument
+ * as the argument list of the second one, and so on.
  *
  * This function shall not be named as `concat`; 
  * otherwise String.prototype.concat would be overrided.
