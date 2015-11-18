@@ -3,3 +3,7 @@ data/
 journal/
 _tmp/
 config.php
+*.0
+*.ns
+*.lock
+*.bson
