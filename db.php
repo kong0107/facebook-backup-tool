@@ -1,6 +1,6 @@
 <?php
 try {
-	$db = new MongoClient();
+	$dbCon = new MongoClient();
 } catch(MongoConnectionException $e) {
 	header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
 	$result = array(
@@ -12,4 +12,5 @@ try {
 	);
 	exit(json_encode($result));
 }
+$db = $db->facebook;
 ?>
