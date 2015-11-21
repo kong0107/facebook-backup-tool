@@ -12,5 +12,5 @@ try {
 	);
 	exit(json_encode($result));
 }
-$db = $db->facebook;
+$db = $dbCon->facebook;
 ?>

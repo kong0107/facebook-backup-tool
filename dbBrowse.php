@@ -60,7 +60,7 @@
 		</script>
 		<style>
 			input[type=number] { width: 3em; }
-			td, article { white-space: pre; font-family: monospace; }
+			td, article { white-space: pre-wrap; font-family: monospace; }
 			div { margin-bottom: 1em; }
 			#pagination { position: fixed; top: 0; right: 0; background-color: #ccc; padding: 0.5em; text-align: center; line-height: 150%; }
 		</style>
@@ -95,17 +95,17 @@
 		<section ng-if="col">
 			<h2>Documents</h2>
 			There is/are {{col_count | number}} document(s) in the collection.
+			<article ng-repeat="doc in docs">{{doc|json}}</article>
 			<table border="1">
 				<thead>
 					<tr><th ng-repeat="field in fields">{{field}}</th></tr>
 				</thead>
 				<tbody>
 					<tr ng-repeat="doc in docs">
-						<td ng-repeat="field in fields">{{doc[field]}}</td>
+						<td ng-repeat="field in fields">{{doc[field]|json}}</td>
 					</tr>
 				</tbody>
 			</table>
-			<article ng-repeat="doc in docs">{{doc|json}}</article>
 		</section>
 	</body>
 </html>
