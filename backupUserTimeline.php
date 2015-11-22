@@ -1,7 +1,7 @@
 <?php
 	require_once 'core.php';
 	require_once 'db.php';
-	
+
 	$online = true;
 
 	function upsert($collect, $arr) {
@@ -132,11 +132,13 @@
 		print_r($post['message']); echo '<hr>';
 		if($online) upsert('post', $post);
 	}
-	
-	$ru = $_SERVER['PHP_SELF'] . '?' . substr($response->getDecodedBody()['paging']['next'], 31);
 
-	printf('<a href="%s">Request the next page</a>', $ru);
-	if($online) echo "<script>setTimeout(function(){location.href = '$ru';}, 5000);</script>";
+	$next = $response->getDecodedBody()['paging']['next'];
+	if($next) {
+		$ru = $_SERVER['PHP_SELF'] . '?' . substr($next, 31);
+		printf('<a href="%s">Request the next page</a>', $ru);
+		if($online) echo "<script>setTimeout(function(){location.href = '$ru';}, 5000);</script>";
+	}
 ?>
 </body>
 </html>
