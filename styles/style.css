@@ -1,0 +1,103 @@
+h1, .page_about {
+	display: inline-block;
+	margin: 0.67em;
+}
+
+nav li {
+	cursor: pointer;
+	display: inline-block;
+	border-left: 1px solid #ccc;
+	padding: 0.2em;
+}
+.focus {
+	font-weight: bold;
+}
+#about dt {
+	clear: both;
+	float: left;
+}
+#about dd {
+	clear: right;
+	margin-left: 16em;
+	white-space: pre-wrap;
+	font-family: monospace;
+	margin-bottom: 1em;
+}
+
+
+article {
+	border-top: 1px solid #888;
+	margin-top: 1em;
+	padding-top: 0.5em;
+	line-height: 125%;
+	clear: both;
+}
+.metadata {
+	text-align: right;
+	float: right;
+	clear: both;
+	background-color: #ccc;
+	font-size: smaller;
+	padding: 0.25em;
+	margin: 0.25em;
+}
+.metadata p {
+	margin: 0;
+}
+.message {
+	white-space: pre-wrap;
+}
+.link_container {
+	clear: both;
+	border-left: 2px solid #888;
+	margin: 0.5em 0 0 1em;
+	padding: 0 0.5em;
+}
+.description {
+	white-space: pre-wrap;
+	font-size: smaller;
+	margin: 0;
+}
+.tags {
+	margin: 0.5em 0 0 0;
+	padding: 0;
+	list-style-type: none;
+}
+.tags li {
+	display: inline-block;
+	margin: 0.2em;
+	padding: 0.2em;
+	border-left: 1px solid #ccc;
+}
+
+
+.comment {
+	clear: both;
+	padding: 0.5em;
+	width: 600px;
+}
+.comment:nth-child(odd) {
+	background-color: #ccc;
+}
+.comment:nth-child(even) {
+	background-color: #ddd;
+}
+.comment .created_time {
+	font-size: smaller;
+	color: #888;
+}
+.comment_id {
+	float: right;
+}
+.cc {
+	margin: 0.25em 0.25em 0.25em 2em;
+	padding: 0.25em;
+}
+.comment:nth-child(odd) .cc:nth-child(odd),
+.comment:nth-child(even) .cc:nth-child(even) {
+	background-color: #ccc;
+}
+.comment:nth-child(odd) .cc:nth-child(even),
+.comment:nth-child(even) .cc:nth-child(odd) {
+	background-color: #ddd;
+}

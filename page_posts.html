@@ -8,16 +8,7 @@
 		angular.module("myApp", []).controller("main", function($scope, $http) {
 			$http.get("data/page_kong.sex_post.json").then(
 				function(r) {	// success callback
-					//console.log('success', r);
 					$scope.posts = r.data;
-					/**
-					 * to the hash position?
-					 */
-					/*if(location.hash.length > 1) {
-						var h = location.hash;
-						location.hash = '#';
-						setTimeout(function(){ location.hash = h; }, 200);
-					}*/
 				}, 
 				function(r) {	// error callback
 					console.log('error', r);
@@ -36,30 +27,6 @@
 				return (known_fields.indexOf(field) != -1);
 			}
 		});
-		
-		/**
-		 * Create a DOM containing text with links to the tagged targets.
-		 *
-		 * You can combine `story` and `story_tags`, or `message` and 
-		 * `message_tags` with this function.
-		 */
-		function combine_tags(text, tags) {		
-			var c = document.createElement('DIV');
-			for(var i = 0; i < tags.length; ++i) {
-				var tag = tags[i];
-				var a = document.createElement('A');
-				a.href = 'https://www.facebook.com/' + tag.id;
-				if(tag.name) a.title = tag.name;
-				a.appendChild.textContent = text.substr(tag.offset, tag.length);
-				c.appendChild(a);
-				var next = (i == tags.length - 1)
-					? text.length
-					: tags[i+1].offset
-				;
-				c.appendChild(document.createTextNode(text.substring(tag.offset+tag.length, next)));
-			}
-			return c;
-		}
 	</script>
 	<style>
 		article {
