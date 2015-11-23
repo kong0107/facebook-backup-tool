@@ -27,25 +27,36 @@
 				var p = post_id.split('_');
 				return 'https://www.facebook.com/' + p[0] + '/posts/' + p[1];
 			}
+			$scope.isKnownField = function(field) {
+				var known_fields = [
+					'_id', 'created_time', 'updated_time', 'place',
+					'with_tags', 'message', 'message_tags', 'story', 'story_tags',
+					'object_id', 'parent_id', 'link', 'name', 'description'
+				];
+				return (known_fields.indexOf(field) != -1);
+			}
 		});
 		
 		/**
-		 * Create a DOM containing `story` with links to the tagged targets.
+		 * Create a DOM containing text with links to the tagged targets.
+		 *
+		 * You can combine `story` and `story_tags`, or `message` and 
+		 * `message_tags` with this function.
 		 */
-		function story_html(story, tags) {		
+		function combine_tags(text, tags) {		
 			var c = document.createElement('DIV');
 			for(var i = 0; i < tags.length; ++i) {
 				var tag = tags[i];
 				var a = document.createElement('A');
 				a.href = 'https://www.facebook.com/' + tag.id;
 				if(tag.name) a.title = tag.name;
-				a.appendChild.textContent = story.substr(tag.offset, tag.length);
+				a.appendChild.textContent = text.substr(tag.offset, tag.length);
 				c.appendChild(a);
 				var next = (i == tags.length - 1)
-					? story.length
+					? text.length
 					: tags[i+1].offset
 				;
-				c.appendChild(document.createTextNode(story.substring(tag.offset+tag.length, next)));
+				c.appendChild(document.createTextNode(text.substring(tag.offset+tag.length, next)));
 			}
 			return c;
 		}
@@ -70,7 +81,7 @@
 		.metadata p {
 			margin: 0;
 		}
-		.message {
+		.message, fieldset {
 			white-space: pre-wrap;
 		}
 		.link_container {
@@ -83,6 +94,17 @@
 			white-space: pre-wrap;
 			font-size: smaller;
 			margin: 0;
+		}
+		.tags {
+			margin: 0.5em 0 0 0;
+			padding: 0;
+			list-style-type: none;
+		}
+		.tags li {
+			display: inline-block;
+			margin: 0.2em;
+			padding: 0.2em;
+			border-left: 1px solid #ccc;
 		}
 	</style>
 	<base target="_blank">
@@ -107,6 +129,23 @@
 			<a class="link" href="{{post.link}}">{{post.name}}</a>
 			<blockquote class="description">{{post.description}}</blockquote>
 		</div>
+		<ul class="tags">
+			<!--li ng-if="post.place">
+				<a title="`place` must be the last one of `story_tags`?" ng-attr-href="{{'https://www.facebook.com/'+post.place.id}}">{{post.place.name}}</a>
+			</li-->
+			<li ng-repeat="tag in post.story_tags" ng-if="tag.offset && tag.name">
+				<a ng-attr-href="{{'https://www.facebook.com/'+tag.id}}">{{tag.name}}</a>
+			</li>
+			<li ng-repeat="tag in post.message_tags" ng-if="tag.name">
+				<a ng-attr-href="{{'https://www.facebook.com/'+tag.id}}">{{tag.name}}</a>
+			</li>
+			<li ng-repeat="tag in post.with_tags">
+				<a ng-attr-href="{{'https://www.facebook.com/'+tag.id}}">{{tag.name}}</a>
+			</li>
+		</ul>
+		<!--fieldset ng-repeat="(field, value) in post" ng-if="!isKnownField(field)">
+			<legend>{{field}}</legend>{{value|json}}
+		</fieldset-->
 	</article>
 </body>
 </html>
