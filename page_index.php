@@ -1,5 +1,6 @@
 <?php
 	require_once 'db.php';
+	$page_id = '481065478629613';
 	$page_id = '299951923544433';
 	$page = $db->page->findOne(array('_id'=> $page_id));
 	$posts = iterator_to_array($db->selectCollection("page_{$page_id}_post")->find(), false);
