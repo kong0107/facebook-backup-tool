@@ -1,0 +1,112 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Facebook Page Timeline Backup</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+	<script>
+		angular.module("myApp", []).controller("main", function($scope, $http) {
+			$http.get("data/page_kong.sex_post.json").then(
+				function(r) {	// success callback
+					//console.log('success', r);
+					$scope.posts = r.data;
+					/**
+					 * to the hash position?
+					 */
+					/*if(location.hash.length > 1) {
+						var h = location.hash;
+						location.hash = '#';
+						setTimeout(function(){ location.hash = h; }, 200);
+					}*/
+				}, 
+				function(r) {	// error callback
+					console.log('error', r);
+				}
+			);
+			$scope.createLinkById = function(post_id) {
+				var p = post_id.split('_');
+				return 'https://www.facebook.com/' + p[0] + '/posts/' + p[1];
+			}
+		});
+		
+		/**
+		 * Create a DOM containing `story` with links to the tagged targets.
+		 */
+		function story_html(story, tags) {		
+			var c = document.createElement('DIV');
+			for(var i = 0; i < tags.length; ++i) {
+				var tag = tags[i];
+				var a = document.createElement('A');
+				a.href = 'https://www.facebook.com/' + tag.id;
+				if(tag.name) a.title = tag.name;
+				a.appendChild.textContent = story.substr(tag.offset, tag.length);
+				c.appendChild(a);
+				var next = (i == tags.length - 1)
+					? story.length
+					: tags[i+1].offset
+				;
+				c.appendChild(document.createTextNode(story.substring(tag.offset+tag.length, next)));
+			}
+			return c;
+		}
+	</script>
+	<style>
+		article {
+			border-top: 1px solid #888;
+			margin-top: 1em;
+			padding-top: 0.5em;
+			line-height: 125%;
+			clear: both;
+		}
+		.metadata {
+			text-align: right;
+			float: right;
+			clear: both;
+			background-color: #ccc;
+			font-size: smaller;
+			padding: 0.25em;
+			margin: 0.25em;
+		}
+		.metadata p {
+			margin: 0;
+		}
+		.message {
+			white-space: pre-wrap;
+		}
+		.link_container {
+			clear: both;
+			border-left: 2px solid #888;
+			margin: 0.5em 0 0 1em;
+			padding: 0 0.5em;
+		}
+		.description {
+			white-space: pre-wrap;
+			font-size: smaller;
+			margin: 0;
+		}
+	</style>
+	<base target="_blank">
+</head>
+<body ng-app="myApp" ng-controller="main">
+	<h1>Facebook Page</h1>
+	<article ng-repeat="post in posts | orderBy: '-created_time'">
+		<div class="metadata">
+			<a class="_id" ng-attr-href="{{createLinkById(post._id)}}" name="{{post._id}}">{{post._id}}</a>
+			<p>
+				published time: 
+				<time class="created_time">{{post.created_time}}</time>
+			</p>
+			<p ng-if="post.created_time!=post.updated_time">
+				newest comment:
+				<time class="updated_time">{{post.updated_time}}</time>
+			</p>
+		</div>
+		<div class="story" ng-if="post.story">{{post.story}}</div>
+		<div class="message" ng-if="post.message">{{post.message}}</div>
+		<div class="link_container" ng-if="post.link">
+			<a class="link" href="{{post.link}}">{{post.name}}</a>
+			<blockquote class="description">{{post.description}}</blockquote>
+		</div>
+	</article>
+</body>
+</html>
