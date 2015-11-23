@@ -14,10 +14,20 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script>
 		angular.module("myApp", []).controller("main", function($scope) {
-			$scope.tab = "about";
 			$scope.page = <?=json_encode($page)?>;
 			$scope.post = <?=json_encode($post)?>;
 			$scope.comments = <?=json_encode($comments)?>;
+			
+			$scope.post_url = $scope.page.link + 'posts/' + $scope.post._id.split('_')[1];
+			
+			var ct = '&comment_tracking=%7B%22tn%22%3A%22R9%22%7D';
+			$scope.getCommentUrl = function(comment_id) {
+				return $scope.post_url + '?comment_id=' + comment_id.split('_')[1] + ct;
+			}
+			$scope.getCCUrl = function(cc_id) {
+				var p = cc_id.split('_');
+				return $scope.post_url + '?comment_id=' + p[0] + '&reply_comment_id=' + p[1] + ct;
+			}
 		});
 	</script>
 	<style>
@@ -27,6 +37,7 @@
 			padding-top: 0.5em;
 			line-height: 125%;
 			clear: both;
+			width: 1000px;
 		}
 		.metadata {
 			text-align: right;
@@ -67,15 +78,33 @@
 		}
 		.comment {
 			clear: both;
-		}
-		.comment:nth-child(even) {
-			background-color: #def;
+			padding: 0.5em;
+			width: 600px;
 		}
 		.comment:nth-child(odd) {
-			background-color: #fed;
+			background-color: #ccc;
+		}
+		.comment:nth-child(even) {
+			background-color: #ddd;
+		}
+		.comment .created_time {
+			font-size: smaller;
+			color: #888;
+		}
+		.comment_id {
+			float: right;
 		}
 		.cc {
-			margin-left: 2em;
+			margin: 0.25em 0.25em 0.25em 2em;
+			padding: 0.25em;
+		}
+		.comment:nth-child(odd) .cc:nth-child(odd),
+		.comment:nth-child(even) .cc:nth-child(even) {
+			background-color: #ccc;
+		}
+		.comment:nth-child(odd) .cc:nth-child(even),
+		.comment:nth-child(even) .cc:nth-child(odd) {
+			background-color: #ddd;
 		}
 	</style>
 </head>
@@ -85,7 +114,7 @@
 	<h2>Post</h2>
 	<article>
 		<div class="metadata">
-			<a class="_id" ng-attr-href="{{createLinkById(post._id)}}" name="{{post._id}}">{{post._id}}</a>
+			<a class="_id" ng-attr-href="{{post_url}}" name="{{post._id}}">{{post._id}}</a>
 			<p>
 				published time:
 				<time class="created_time" datetime="{{post.created_time}}">{{post.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}</time>
@@ -112,23 +141,18 @@
 				<a ng-attr-href="{{'https://www.facebook.com/'+tag.id}}">{{tag.name}}</a>
 			</li>
 		</ul>
-		<h3 ng-if="post.comment_count">Comments</h3>
+		<h3 ng-if="post.comment_count">{{post.comment_count}} comment{{post.comment_count > 1 ? 's' : ''}}</h3>
 		<section class="comment" ng-repeat="comment in comments | orderBy: '-created_time'">
-			<div class="metadata">
-				<a class="_id" name="{{comment._id}}">{{comment._id}}</a>
-				<p>
-					published time:
-					<time class="created_time" datetime="{{comment.created_time}}">{{comment.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}</time>
-				</p>
-			</div>
-			<div class="from">
-				<a ng-attr-href="https://www.facebook.com/{{comment.from.id}}">{{comment.from.name}}</a>
-			</div>
+			<a class="comment_id" name="{{comment._id}}" ng-attr-href="{{getCommentUrl(comment._id)}}">
+				<time class="created_time" datetime="{{comment.created_time}}">{{comment.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}</time>
+			</a>
+			<a class="from" ng-attr-href="https://www.facebook.com/{{comment.from.id}}">{{comment.from.name}}</a>
 			<div class="message" ng-if="comment.message">{{comment.message}}</div>
 			<div class="cc" ng-repeat="cc in comment.comments | orderBy: '-created_time'">
-				<div class="from">
-					<a ng-attr-href="https://www.facebook.com/{{cc.from.id}}">{{cc.from.name}}</a>
-				</div>
+				<a class="comment_id" name="{{cc.id}}" ng-attr-href="{{getCCUrl(cc.id)}}">
+					<time class="created_time" datetime="{{cc.created_time}}">{{cc.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}</time>
+				</a>
+				<a ng-attr-href="https://www.facebook.com/{{cc.from.id}}">{{cc.from.name}}</a>
 				<div class="message" ng-if="comment.message">{{cc.message}}</div>
 			</div>
 		</section>
