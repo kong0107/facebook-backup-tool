@@ -72,7 +72,7 @@
 			<div>
 				Select database:<br>
 				<label ng-repeat="db in dbs">
-					<input name="db" type="radio" value="{{db}}" ng-checked="db=='<?=$_GET['db']?>'">{{db}}
+					<input name="db" type="radio" value="{{db}}" ng-checked="db=='<?=$_GET['db']?>'" onclick="this.form.submit();">{{db}}
 				</label>
 			</div>
 			<div ng-if="db">

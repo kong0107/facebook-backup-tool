@@ -13,4 +13,18 @@ try {
 	exit(json_encode($result));
 }
 $db = $dbCon->facebook;
+
+
+function upsert($collect, $arr) {
+	global $db;
+	$arr['_id'] = $id = $arr['id'];
+	unset($arr['id']);
+	$db->selectCollection($collect)->update(
+		array('_id' => $id),
+		$arr,
+		array('upsert' => true)
+	);
+	return $id;
+}
+
 ?>
