@@ -54,32 +54,33 @@
 		/**
 		 * Load every permitted field.
 		 */
-		/*
-		$fields = $info['metadata']['fields'];
-		$excluded_field_names = array(
-			'ad_campaign', 'promotion_eligible', 'owner_business'
-		);
-		$permitted_fields = array();
-		$excluded_fields = array();
-		foreach($fields as $field_info) {
-			if(in_array($field_info['name'], $excluded_field_names))
-				$excluded_fields[$field_info['name']] = $field_info;
-			else $permitted_fields[$field_info['name']] = $field_info;
+		if(!$_GET['request']) {
+			$fields = $info['metadata']['fields'];
+			$excluded_field_names = array(
+				'ad_campaign', 'promotion_eligible', 'owner_business'
+			);
+			$permitted_fields = array();
+			$excluded_fields = array();
+			foreach($fields as $field_info) {
+				if(in_array($field_info['name'], $excluded_field_names))
+					$excluded_fields[$field_info['name']] = $field_info;
+				else $permitted_fields[$field_info['name']] = $field_info;
+			}
+			
+			$requestUrl = "/$page_id?fields=" . implode(',', array_keys($permitted_fields));
+			$info = $fb->get($requestUrl)->getDecodedBody();
+			
+			echo '<dl>';
+			foreach($info as $field => $data) {
+				$field_info = $permitted_fields[$field];
+				echo "<dt title=\"{$field_info['description']}\">$field</dt>";
+				echo '<dd>';
+				var_dump($data);
+				echo '</dd>';
+			}
+			echo '</dl>';
+			upsert('page', $info);
 		}
-		
-		$requestUrl = "/$page_id?fields=" . implode(',', array_keys($permitted_fields));
-		$info = $fb->get($requestUrl)->getDecodedBody();
-		
-		echo '<dl>';
-		foreach($info as $field => $data) {
-			$field_info = $permitted_fields[$field];
-			echo "<dt title=\"{$field_info['description']}\">$field</dt>";
-			echo '<dd>';
-			var_dump($data);
-			echo '</dd>';
-		}
-		echo '</dl>';
-		upsert('page', $info);*/
 		
 		/**
 		 * Save all milestones.
