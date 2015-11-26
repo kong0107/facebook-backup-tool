@@ -1,0 +1,72 @@
+<!DOCTYPE HTML>
+<html ng-app="myApp">
+<head>
+	<meta charset="utf-8">
+	<title>Node Metadata of Facebook Graph API</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script src="//connect.facebook.net/en_US/sdk.js"></script>
+	<script>
+		angular.module("myApp", []).controller("main", function($scope) {
+			$scope.metadata = {};
+			$scope.message = "Loading files ...";
+			window.fbAsyncInit = function() {
+				FB.init({
+					version    : 'v2.5',
+					appId      : '1598824630378971',
+					xfbml      : false,
+					status     : true
+				});
+				/***
+				  * Check permission: https://developers.facebook.com/docs/facebook-login/permissions/v2.4#reference
+				  */
+				FB.getLoginStatus(function(response) {
+					if(response.status == 'connected') main();
+					else FB.login(main, {scope: ''});
+				});
+			};
+			$.getScript("js/sdk-extend.js");
+			
+			var nodes = {
+				user: 'me',
+				page: '20531316728',
+				album: '494827881728',
+				event: '884140984960637',
+				page_milestone: '10152580066656729', ///< weird...
+				photo: '10154189880711729',
+				post: '20531316728_10154207315386729',
+				video: '10154207315386729',
+				videolist: '1630970700485728'
+			};
+			
+			var main = function() {
+				$scope.message = "Fetching metadata ...";
+				$scope.$apply();
+				var params = { batch : [] };
+				for(var type in nodes) {
+					var op = { method: "GET" };
+					op.relative_url = nodes[type] + "?metadata=1";
+					params.batch.push(op);
+				}
+				FB.api("/", "POST", params, function(r) {
+					for(var i = 0; i < r.length; ++i) {
+						var n = JSON.parse(r[i].body).metadata;
+						var md = {fields: n.fields, connections: []};
+						for(var j in n.connections)
+							md.connections.push(j);
+						$scope.metadata[n.type] = md;
+					}
+					$scope.message = "Done. Copy the following text and save as a JSON file."
+					$scope.$apply();
+				});
+			};
+		});
+	</script>
+	<style></style>
+</head>
+<body ng-controller="main">
+	<h1>Node Metadata of Facebook Graph API</h1>
+	<p ng-bind="message"></p>
+	<pre ng-bind="metadata|json"></pre>
+</body>
+</html>

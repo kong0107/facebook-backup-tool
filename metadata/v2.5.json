@@ -1,0 +1,1706 @@
+{
+  "user": {
+    "fields": [
+      {
+        "name": "id",
+        "description": "The id of this person's user account. This ID is unique to each app and cannot be used across different apps. [Our upgrade guide provides more information about app-specific IDs](/docs/apps/upgrading/#upgrading_v2_0_user_ids)",
+        "type": "numeric string"
+      },
+      {
+        "name": "about",
+        "description": "The About Me section of this person's profile",
+        "type": "string"
+      },
+      {
+        "name": "age_range",
+        "description": "The age segment for this person expressed as a minimum and maximum age. For example, more than 18, less than 21.",
+        "type": "agerange"
+      },
+      {
+        "name": "bio",
+        "description": "The person's bio",
+        "type": "string"
+      },
+      {
+        "name": "birthday",
+        "description": "The person's birthday.  This is a fixed format string, like `MM/DD/YYYY`.  However, people can control who can see the year they were born separately from the month and day so this string can be only the year (YYYY) or the month + day (MM/DD)",
+        "type": "string"
+      },
+      {
+        "name": "context",
+        "description": "Social context for this person",
+        "type": "usercontext"
+      },
+      {
+        "name": "currency",
+        "description": "The person's local currency information",
+        "type": "currency"
+      },
+      {
+        "name": "devices",
+        "description": "The list of devices the person is using. This will return only iOS and Android devices",
+        "type": "list<userdevice>"
+      },
+      {
+        "name": "education",
+        "description": "The person's education",
+        "type": "list<educationexperience>"
+      },
+      {
+        "name": "email",
+        "description": "The person's primary email address listed on their profile. This field will not be returned if no valid email address is available",
+        "type": "string"
+      },
+      {
+        "name": "favorite_athletes",
+        "description": "Athletes the person likes",
+        "type": "list<experience>"
+      },
+      {
+        "name": "favorite_teams",
+        "description": "Sports teams the person likes",
+        "type": "list<experience>"
+      },
+      {
+        "name": "first_name",
+        "description": "The person's first name",
+        "type": "string"
+      },
+      {
+        "name": "gender",
+        "description": "The gender selected by this person, `male` or `female`. This value will be omitted if the gender is set to a custom value",
+        "type": "string"
+      },
+      {
+        "name": "hometown",
+        "description": "The person's hometown",
+        "type": "page"
+      },
+      {
+        "name": "inspirational_people",
+        "description": "The person's inspirational people",
+        "type": "list<experience>"
+      },
+      {
+        "name": "install_type",
+        "description": "Install type",
+        "type": "enum"
+      },
+      {
+        "name": "installed",
+        "description": "Is the app making the request installed?",
+        "type": "bool"
+      },
+      {
+        "name": "interested_in",
+        "description": "Genders the person is interested in",
+        "type": "list<string>"
+      },
+      {
+        "name": "is_shared_login",
+        "description": "Is this a shared login (e.g. a gray user)",
+        "type": "bool"
+      },
+      {
+        "name": "is_verified",
+        "description": "People with large numbers of followers can have the authenticity of their identity [manually verified by Facebook](https://www.facebook.com/help/196050490547892). This field indicates whether the person's profile is verified in this way. This is distinct from the `verified` field",
+        "type": "bool"
+      },
+      {
+        "name": "languages",
+        "description": "Facebook Pages representing the languages this person knows",
+        "type": "list<experience>"
+      },
+      {
+        "name": "last_name",
+        "description": "The person's last name",
+        "type": "string"
+      },
+      {
+        "name": "link",
+        "description": "A link to the person's Timeline",
+        "type": "string"
+      },
+      {
+        "name": "location",
+        "description": "The person's current location as entered by them on their profile. This field is not related to check-ins",
+        "type": "page"
+      },
+      {
+        "name": "locale",
+        "description": "The person's locale",
+        "type": "string"
+      },
+      {
+        "name": "meeting_for",
+        "description": "What the person is interested in meeting for",
+        "type": "list<string>"
+      },
+      {
+        "name": "middle_name",
+        "description": "The person's middle name",
+        "type": "string"
+      },
+      {
+        "name": "name",
+        "description": "The person's full name",
+        "type": "string"
+      },
+      {
+        "name": "name_format",
+        "description": "The person's name formatted to correctly handle Chinese, Japanese, or Korean ordering",
+        "type": "string"
+      },
+      {
+        "name": "payment_pricepoints",
+        "description": "The person's payment pricepoints",
+        "type": "paymentpricepoints"
+      },
+      {
+        "name": "test_group",
+        "description": "Platform test group",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "political",
+        "description": "The person's political views",
+        "type": "string"
+      },
+      {
+        "name": "relationship_status",
+        "description": "The person's relationship status",
+        "type": "string"
+      },
+      {
+        "name": "religion",
+        "description": "The person's religion",
+        "type": "string"
+      },
+      {
+        "name": "security_settings",
+        "description": "Security settings",
+        "type": "securitysettings"
+      },
+      {
+        "name": "significant_other",
+        "description": "The person's significant other",
+        "type": "user"
+      },
+      {
+        "name": "sports",
+        "description": "Sports this person likes",
+        "type": "list<experience>"
+      },
+      {
+        "name": "quotes",
+        "description": "The person's favorite quotes",
+        "type": "string"
+      },
+      {
+        "name": "third_party_id",
+        "description": "A string containing an anonymous, but unique identifier for the person. You can use this identifier with third parties",
+        "type": "string"
+      },
+      {
+        "name": "timezone",
+        "description": "The person's current timezone offset from UTC",
+        "type": "float (min: -24) (max: 24)"
+      },
+      {
+        "name": "token_for_business",
+        "description": "A token that is the same across a business's apps. Access to this token requires that the person be logged into your app. This token will change if the business owning the app changes",
+        "type": "string"
+      },
+      {
+        "name": "updated_time",
+        "description": "Updated time",
+        "type": "datetime"
+      },
+      {
+        "name": "shared_login_upgrade_required_by",
+        "description": "The time that the shared loginneeds to be upgraded to Business Manager by",
+        "type": "datetime"
+      },
+      {
+        "name": "verified",
+        "description": "Indicates whether the account has been verified. This is distinct from the `is_verified` field. Someone is considered verified if they take any of the following actions:\n\n* Register for mobile\n* Confirm their account via SMS\n* Enter a valid credit card\n",
+        "type": "bool"
+      },
+      {
+        "name": "video_upload_limits",
+        "description": "Video upload limits",
+        "type": "videouploadlimits"
+      },
+      {
+        "name": "viewer_can_send_gift",
+        "description": "Can the viewer send a gift to this person?",
+        "type": "bool"
+      },
+      {
+        "name": "website",
+        "description": "The person's website",
+        "type": "string"
+      },
+      {
+        "name": "work",
+        "description": "Details of a person`s work experience",
+        "type": "list<workexperience>"
+      },
+      {
+        "name": "public_key",
+        "description": "The person's PGP public key",
+        "type": "string"
+      },
+      {
+        "name": "cover",
+        "description": "The person's cover photo",
+        "type": "coverphoto"
+      }
+    ],
+    "connections": [
+      "favorite_requests",
+      "request_history",
+      "accounts",
+      "achievements",
+      "adaccounts",
+      "adaccountgroups",
+      "adcontracts",
+      "admined_groups",
+      "adnetworkanalytics",
+      "albums",
+      "applications",
+      "apprequests",
+      "apprequestformerrecipients",
+      "books",
+      "brand_teams",
+      "businesses",
+      "businesssettinglogs",
+      "checkins",
+      "commission_splits",
+      "conversations",
+      "domains",
+      "events",
+      "family",
+      "feed",
+      "stream_filters",
+      "friendlists",
+      "friendrequests",
+      "friends",
+      "ids_for_business",
+      "insights",
+      "integrated_plugin_feed",
+      "invitable_friends",
+      "games",
+      "groups",
+      "home",
+      "inbox",
+      "likes",
+      "locations",
+      "movies",
+      "music",
+      "notifications",
+      "notify_me",
+      "objects",
+      "outbox",
+      "ownerapps",
+      "payment.subscriptions",
+      "payments",
+      "payment_transactions",
+      "permissions",
+      "photos",
+      "picture",
+      "tagged_places",
+      "platformrequests",
+      "pokes",
+      "posts",
+      "privacy_options",
+      "promotable_domains",
+      "promotable_events",
+      "ratings",
+      "scores",
+      "screennames",
+      "taggable_friends",
+      "tagged",
+      "television",
+      "threads",
+      "updates",
+      "videos",
+      "video_broadcasts"
+    ]
+  },
+  "page": {
+    "fields": [
+      {
+        "name": "id",
+        "description": "Page ID. No access token is required to access this field",
+        "type": "numeric string"
+      },
+      {
+        "name": "about",
+        "description": "Information about the Page",
+        "type": "string"
+      },
+      {
+        "name": "access_token",
+        "description": "The access token you can use to act as the Page. Only visible to Page Admins",
+        "type": "string"
+      },
+      {
+        "name": "ad_campaign",
+        "description": "The Page's currently running promotion campaign",
+        "type": "adcampaign"
+      },
+      {
+        "name": "affiliation",
+        "description": "Affiliation of this person. Applicable to Pages representing people",
+        "type": "string"
+      },
+      {
+        "name": "app_id",
+        "description": "App ID for app-owned Pages and app Pages",
+        "type": "id"
+      },
+      {
+        "name": "app_links",
+        "description": "AppLinks data associated with the Page's URL",
+        "type": "applinks"
+      },
+      {
+        "name": "artists_we_like",
+        "description": "Artists the band likes. Applicable to Bands",
+        "type": "string"
+      },
+      {
+        "name": "attire",
+        "description": "Dress code of the business. Applicable to Restaurants or Nightlife. Can be one of Casual, Dressy or Unspecified",
+        "type": "string"
+      },
+      {
+        "name": "awards",
+        "description": "The awards information of the film. Applicable to Films",
+        "type": "string"
+      },
+      {
+        "name": "band_interests",
+        "description": "Band interests. Applicable to Bands",
+        "type": "string"
+      },
+      {
+        "name": "band_members",
+        "description": "Members of the band. Applicable to Bands",
+        "type": "string"
+      },
+      {
+        "name": "best_page",
+        "description": "The best available Page on Facebook for the concept represented by this Page. The best available Page takes into account authenticity and the number of likes",
+        "type": "page"
+      },
+      {
+        "name": "bio",
+        "description": "Biography of the band. Applicable to Bands",
+        "type": "string"
+      },
+      {
+        "name": "birthday",
+        "description": "Birthday of this person. Applicable to Pages representing people",
+        "type": "string"
+      },
+      {
+        "name": "booking_agent",
+        "description": "Booking agent of the band. Applicable to Bands",
+        "type": "string"
+      },
+      {
+        "name": "built",
+        "description": "Year vehicle was built. Applicable to Vehicles",
+        "type": "string"
+      },
+      {
+        "name": "business",
+        "description": "The Business associated with this Page.  Visible only with a page access token or a user access token that has admin rights on the page"
+      },
+      {
+        "name": "can_checkin",
+        "description": "Whether this page has checkin functionality enabled",
+        "type": "bool"
+      },
+      {
+        "name": "can_post",
+        "description": "Whether the current session user can post on this Page",
+        "type": "bool"
+      },
+      {
+        "name": "category",
+        "description": "The Page's category. e.g. Product/Service, Computers/Technology",
+        "type": "string"
+      },
+      {
+        "name": "category_list",
+        "description": "The Page's sub-categories",
+        "type": "list<pagecategory>"
+      },
+      {
+        "name": "company_overview",
+        "description": "The company overview. Applicable to Companies",
+        "type": "string"
+      },
+      {
+        "name": "contact_address",
+        "description": "The mailing or contact address for this page. This field will be blank if the contact address is the same as the physical address",
+        "type": "mailingaddress"
+      },
+      {
+        "name": "context",
+        "description": "Social context for this Page",
+        "type": "opengraphcontext"
+      },
+      {
+        "name": "country_page_likes",
+        "description": "If this is a Page in a Global Pages hierarchy, the number of people who are being directed to this Page.",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "cover",
+        "description": "Information about the page's cover photo",
+        "type": "coverphoto"
+      },
+      {
+        "name": "culinary_team",
+        "description": "Culinary team of the business. Applicable to Restaurants or Nightlife",
+        "type": "string"
+      },
+      {
+        "name": "current_location",
+        "description": "Current location of the Page",
+        "type": "string"
+      },
+      {
+        "name": "description",
+        "description": "The description of the Page",
+        "type": "string"
+      },
+      {
+        "name": "description_html",
+        "description": "The description of the Page in raw HTML",
+        "type": "string"
+      },
+      {
+        "name": "directed_by",
+        "description": "The director of the film. Applicable to Films",
+        "type": "string"
+      },
+      {
+        "name": "display_subtext",
+        "description": "Subtext about the Page being viewed",
+        "type": "string"
+      },
+      {
+        "name": "emails",
+        "description": "The emails listed in the About section of a Page",
+        "type": "list<string>"
+      },
+      {
+        "name": "features",
+        "description": "Features of the vehicle. Applicable to Vehicles",
+        "type": "string"
+      },
+      {
+        "name": "food_styles",
+        "description": "The restaurant's food styles. Applicable to Restaurants",
+        "type": "list<string>"
+      },
+      {
+        "name": "founded",
+        "description": "When the company was founded. Applicable to Pages in the Company category",
+        "type": "string"
+      },
+      {
+        "name": "general_info",
+        "description": "General information provided by the Page",
+        "type": "string"
+      },
+      {
+        "name": "general_manager",
+        "description": "General manager of the business. Applicable to Restaurants or Nightlife",
+        "type": "string"
+      },
+      {
+        "name": "genre",
+        "description": "The genre of the film. Applicable to Films",
+        "type": "string"
+      },
+      {
+        "name": "global_brand_page_name",
+        "description": "The name of the Page with country codes appended for Global Brand Pages. Only visible to the Page admin",
+        "type": "string"
+      },
+      {
+        "name": "global_brand_root_id",
+        "description": "This brand's global Root ID",
+        "type": "numeric string"
+      },
+      {
+        "name": "has_added_app",
+        "description": "Indicates whether this Page has added the app making the query in a Page tab",
+        "type": "bool"
+      },
+      {
+        "name": "leadgen_tos_accepted",
+        "description": "Indicates whether a user has accepted the TOS for running LeadGen Ads on the Page",
+        "type": "bool"
+      },
+      {
+        "name": "hometown",
+        "description": "Hometown of the band. Applicable to Bands",
+        "type": "string"
+      },
+      {
+        "name": "hours",
+        "description": "Indicates a single range of opening hours for a day. Each day can have 2 different hours ranges. The keys in the map are in the form of `{day}_{number}_{status}`.  `{day}` should be the first 3 characters of the day of the week, `{number}` should be either 1 or 2 to allow for the two different hours ranges per day. `{status}` should be either `open` or `close` to delineate the start or end of a time range. An example would be `mon_1_open` with value `17:00` and `mon_1_close` with value `21:15` which would represent a single opening range of 5pm to 9:15pm on Mondays",
+        "type": "map<string, string>"
+      },
+      {
+        "name": "impressum",
+        "description": "Legal information about the Page publishers",
+        "type": "string"
+      },
+      {
+        "name": "influences",
+        "description": "Influences on the band. Applicable to Bands",
+        "type": "string"
+      },
+      {
+        "name": "is_always_open",
+        "description": "Indicates whether this location is always open",
+        "type": "bool"
+      },
+      {
+        "name": "is_community_page",
+        "description": "Indicates whether the Page is a community Page",
+        "type": "bool"
+      },
+      {
+        "name": "is_permanently_closed",
+        "description": "Whether the business corresponding to this Page is permanently closed",
+        "type": "bool"
+      },
+      {
+        "name": "is_published",
+        "description": "Indicates whether the Page is published and visible to non-admins",
+        "type": "bool"
+      },
+      {
+        "name": "is_unclaimed",
+        "description": "Indicates whether the Page is unclaimed",
+        "type": "bool"
+      },
+      {
+        "name": "is_verified",
+        "description": "Pages with a large number of followers can be manually verified by Facebook as [having an authentic identity](https://www.facebook.com/help/196050490547892). This field indicates whether the page is verified by this process",
+        "type": "bool"
+      },
+      {
+        "name": "link",
+        "description": "The Page's Facebook URL",
+        "type": "string"
+      },
+      {
+        "name": "location",
+        "description": "The location of this place. Applicable to all Places",
+        "type": "location"
+      },
+      {
+        "name": "mission",
+        "description": "The company mission. Applicable to Companies",
+        "type": "string"
+      },
+      {
+        "name": "mpg",
+        "description": "MPG of the vehicle. Applicable to Vehicles",
+        "type": "string"
+      },
+      {
+        "name": "name",
+        "description": "The name of the Page",
+        "type": "string"
+      },
+      {
+        "name": "name_with_location_descriptor",
+        "description": "The name of the Page with its location and/or global brand descriptor",
+        "type": "string"
+      },
+      {
+        "name": "network",
+        "description": "The TV network for the TV show. Applicable to TV Shows",
+        "type": "string"
+      },
+      {
+        "name": "new_like_count",
+        "description": "The number of people who have liked the Page, since the last login. Only visible to a page admin",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "offer_eligible",
+        "description": "Offer eligibility status. Only visible to a page admin",
+        "type": "bool"
+      },
+      {
+        "name": "parent_page",
+        "description": "Parent Page for this Page",
+        "type": "page"
+      },
+      {
+        "name": "parking",
+        "description": "Parking information. Applicable to Businesses and Places",
+        "type": "pageparking"
+      },
+      {
+        "name": "payment_options",
+        "description": "Payment options accepted by the business. Applicable to Restaurants or Nightlife",
+        "type": "pagepaymentoptions"
+      },
+      {
+        "name": "personal_info",
+        "description": "Personal information. Applicable to Pages representing People",
+        "type": "string"
+      },
+      {
+        "name": "personal_interests",
+        "description": "Personal interests. Applicable to Pages representing People",
+        "type": "string"
+      },
+      {
+        "name": "pharma_safety_info",
+        "description": "Pharmacy safety information. Applicable to Pharmaceutical companies",
+        "type": "string"
+      },
+      {
+        "name": "phone",
+        "description": "Phone number provided by a Page",
+        "type": "string"
+      },
+      {
+        "name": "plot_outline",
+        "description": "The plot outline of the film. Applicable to Films",
+        "type": "string"
+      },
+      {
+        "name": "press_contact",
+        "description": "Press contact information of the band. Applicable to Bands",
+        "type": "string"
+      },
+      {
+        "name": "price_range",
+        "description": "Price range of the business. Applicable to Restaurants or Nightlife. Can be one of `$` (0-10), `$$` (10-30), `$$$` (30-50), `$$$$` (50+) or `Unspecified`",
+        "type": "string"
+      },
+      {
+        "name": "produced_by",
+        "description": "The productor of the film. Applicable to Films",
+        "type": "string"
+      },
+      {
+        "name": "products",
+        "description": "The products of this company. Applicable to Companies",
+        "type": "string"
+      },
+      {
+        "name": "promotion_eligible",
+        "description": "Reason why a post isn't eligible for boosting. Only visible to Page Admins",
+        "type": "bool"
+      },
+      {
+        "name": "promotion_ineligible_reason",
+        "description": "Reason, for which boosted posts are not eligible. Only visible to a page admin",
+        "type": "string"
+      },
+      {
+        "name": "public_transit",
+        "description": "Public transit to the business. Applicable to Restaurants or Nightlife",
+        "type": "string"
+      },
+      {
+        "name": "record_label",
+        "description": "Record label of the band. Applicable to Bands",
+        "type": "string"
+      },
+      {
+        "name": "release_date",
+        "description": "The film's release date. Applicable to Films",
+        "type": "string"
+      },
+      {
+        "name": "restaurant_services",
+        "description": "Services the restaurant provides. Applicable to Restaurants",
+        "type": "pagerestaurantservices"
+      },
+      {
+        "name": "restaurant_specialties",
+        "description": "The restaurant's specialties. Applicable to Restaurants",
+        "type": "pagerestaurantspecialties"
+      },
+      {
+        "name": "schedule",
+        "description": "The air schedule of the TV show. Applicable to TV Shows",
+        "type": "string"
+      },
+      {
+        "name": "screenplay_by",
+        "description": "The screenwriter of the film. Applicable to Films",
+        "type": "string"
+      },
+      {
+        "name": "season",
+        "description": "The season information of the TV Show. Applicable to TV Shows",
+        "type": "string"
+      },
+      {
+        "name": "starring",
+        "description": "The cast of the film. Applicable to Films",
+        "type": "string"
+      },
+      {
+        "name": "start_info",
+        "description": "Information about when the entity represented by the Page was started",
+        "type": "pagestartinfo"
+      },
+      {
+        "name": "store_location_descriptor",
+        "description": "Location Page's store location descriptor",
+        "type": "string"
+      },
+      {
+        "name": "store_number",
+        "description": "Unique store number for this location Page",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "studio",
+        "description": "The studio for the film production. Applicable to Films",
+        "type": "string"
+      },
+      {
+        "name": "talking_about_count",
+        "description": "The number of people talking about this Page",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "engagement",
+        "description": "The social sentence and like count information for this Page. This is the same info used for the like button",
+        "type": "engagement"
+      },
+      {
+        "name": "single_line_address",
+        "description": "The page address, if any, in a simple single line format.",
+        "type": "string"
+      },
+      {
+        "name": "place_type",
+        "description": "For places, the category of the place",
+        "type": "enum"
+      },
+      {
+        "name": "unread_message_count",
+        "description": "Unread message count for the Page. Only visible to a page admin",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "unread_notif_count",
+        "description": "Number of unread notifications. Only visible to a page admin",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "unseen_message_count",
+        "description": "Unseen message count for the Page. Only visible to a page admin",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "username",
+        "description": "The alias of the Page. For example, for www.facebook.com/platform the username is 'platform'",
+        "type": "string"
+      },
+      {
+        "name": "voip_info",
+        "description": "Voip info",
+        "type": "voipinfo"
+      },
+      {
+        "name": "website",
+        "description": "The URL of the Page's website",
+        "type": "string"
+      },
+      {
+        "name": "were_here_count",
+        "description": "The number of visits to this Page's location. If the Page setting *Show map, check-ins and star ratings on the Page* (under *Page Settings > Page Info > Address*) is disabled, then this value will also be disabled",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "written_by",
+        "description": "The writer of the TV show. Applicable to TV Shows",
+        "type": "string"
+      },
+      {
+        "name": "featured_video",
+        "description": "Video Featured by the Page.  Only visible to the Page admin",
+        "type": "video"
+      },
+      {
+        "name": "owner_business",
+        "description": "owner business of this object",
+        "type": "business"
+      },
+      {
+        "name": "last_used_time",
+        "description": "last used time of this object by the current viewer",
+        "type": "datetime"
+      },
+      {
+        "name": "asset_score",
+        "description": "relevance score of an asset",
+        "type": "float"
+      },
+      {
+        "name": "checkins",
+        "description": "Number of checkins at a place represented by a Page",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "likes",
+        "description": "The number of users who like the Page. For Global Brand Pages this is the count for all pages across the brand.",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "members",
+        "description": "Members of this org. Applicable to Pages representing Team Orgs",
+        "type": "string"
+      }
+    ],
+    "connections": [
+      "call_to_actions",
+      "agencies",
+      "albums",
+      "blocked",
+      "businesssettinglogs",
+      "conversations",
+      "events",
+      "featured_videos_collection",
+      "feed",
+      "global_brand_children",
+      "insights",
+      "instagram_accounts",
+      "leadgen_forms",
+      "place_topics",
+      "locations",
+      "milestones",
+      "notes",
+      "notifications",
+      "offers",
+      "photos",
+      "picture",
+      "posts",
+      "promotable_posts",
+      "questions",
+      "ratings",
+      "roles",
+      "rtb_dynamic_posts",
+      "screennames",
+      "settings",
+      "subscribed_apps",
+      "tabs",
+      "tagged",
+      "threads",
+      "video_broadcasts",
+      "videos",
+      "video_lists",
+      "video_copyright_matches",
+      "leadgen_qualifiers",
+      "rich_media_documents"
+    ]
+  },
+  "album": {
+    "fields": [
+      {
+        "name": "id",
+        "description": "The album ID",
+        "type": "numeric string"
+      },
+      {
+        "name": "can_upload",
+        "description": "Whether the viewer can upload photos to this album",
+        "type": "bool"
+      },
+      {
+        "name": "count",
+        "description": "Number of photos in this album",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "cover_photo",
+        "description": "Album cover photo id",
+        "type": "photo"
+      },
+      {
+        "name": "created_time",
+        "description": "The time the album was initially created",
+        "type": "datetime"
+      },
+      {
+        "name": "description",
+        "description": "The description of the album",
+        "type": "string"
+      },
+      {
+        "name": "from",
+        "description": "The profile that created the album",
+        "type": "user|page"
+      },
+      {
+        "name": "link",
+        "description": "A link to this album on Facebook",
+        "type": "token with structure: url"
+      },
+      {
+        "name": "location",
+        "description": "The textual location of the album",
+        "type": "string"
+      },
+      {
+        "name": "name",
+        "description": "The title of the album",
+        "type": "string"
+      },
+      {
+        "name": "privacy",
+        "description": "The privacy settings for the album",
+        "type": "string"
+      },
+      {
+        "name": "type",
+        "description": "The type of the album: profile, mobile, wall, normal or album",
+        "type": "string"
+      },
+      {
+        "name": "updated_time",
+        "description": "The last time the album was updated",
+        "type": "datetime"
+      },
+      {
+        "name": "event",
+        "description": "If this object has a place, the event associated with the place",
+        "type": "event"
+      },
+      {
+        "name": "place",
+        "description": "The place associated with this album",
+        "type": "place"
+      },
+      {
+        "name": "backdated_time",
+        "description": "A user-specified time for when this object was created",
+        "type": "datetime"
+      },
+      {
+        "name": "backdated_time_granularity",
+        "description": "How accurate the backdated time is",
+        "type": "enum"
+      }
+    ],
+    "connections": [
+      "photos",
+      "picture",
+      "likes",
+      "comments",
+      "sharedposts"
+    ]
+  },
+  "event": {
+    "fields": [
+      {
+        "name": "id",
+        "description": "The event ID",
+        "type": "numeric string"
+      },
+      {
+        "name": "category",
+        "description": "The category of the event",
+        "type": "enum"
+      },
+      {
+        "name": "cover",
+        "description": "Cover picture",
+        "type": "coverphoto"
+      },
+      {
+        "name": "description",
+        "description": "Long-form description",
+        "type": "string"
+      },
+      {
+        "name": "type",
+        "description": "The type of the event",
+        "type": "enum"
+      },
+      {
+        "name": "end_time",
+        "description": "End time, if one has been set",
+        "type": "string"
+      },
+      {
+        "name": "is_viewer_admin",
+        "description": "Whether the viewer is admin or not",
+        "type": "bool"
+      },
+      {
+        "name": "is_page_owned",
+        "description": "Whether the event is created by page or not",
+        "type": "bool"
+      },
+      {
+        "name": "can_guests_invite",
+        "description": "Can guests invite friends",
+        "type": "bool"
+      },
+      {
+        "name": "guest_list_enabled",
+        "description": "Can see guest list",
+        "type": "bool"
+      },
+      {
+        "name": "name",
+        "description": "Event name",
+        "type": "string"
+      },
+      {
+        "name": "owner",
+        "description": "The profile that created the event"
+      },
+      {
+        "name": "parent_group",
+        "description": "The group the event belongs to",
+        "type": "group"
+      },
+      {
+        "name": "place",
+        "description": "Event Place information",
+        "type": "place"
+      },
+      {
+        "name": "start_time",
+        "description": "Start time",
+        "type": "string"
+      },
+      {
+        "name": "ticket_uri",
+        "description": "The link users can visit to buy a ticket to this event",
+        "type": "string"
+      },
+      {
+        "name": "timezone",
+        "description": "Timezone",
+        "type": "enum"
+      },
+      {
+        "name": "updated_time",
+        "description": "Last update time",
+        "type": "datetime"
+      },
+      {
+        "name": "attending_count",
+        "description": "Number of people attending the event",
+        "type": "int32"
+      },
+      {
+        "name": "declined_count",
+        "description": "Number of people who declined the event",
+        "type": "int32"
+      },
+      {
+        "name": "maybe_count",
+        "description": "Number of people who maybe going to the event",
+        "type": "int32"
+      },
+      {
+        "name": "noreply_count",
+        "description": "Number of people who did not reply to the event",
+        "type": "int32"
+      },
+      {
+        "name": "interested_count",
+        "description": "Number of people interested in the event",
+        "type": "int32"
+      }
+    ],
+    "connections": [
+      "admins",
+      "attending",
+      "interested",
+      "declined",
+      "maybe",
+      "noreply",
+      "roles",
+      "feed",
+      "posts",
+      "comments",
+      "photos",
+      "picture",
+      "videos"
+    ]
+  },
+  "page_milestone": {
+    "connections": [
+      "photos"
+    ]
+  },
+  "photo": {
+    "fields": [
+      {
+        "name": "id",
+        "description": "The photo ID",
+        "type": "numeric string"
+      },
+      {
+        "name": "album",
+        "description": "The album this photo is in",
+        "type": "album"
+      },
+      {
+        "name": "created_time",
+        "description": "The time this photo was published",
+        "type": "datetime"
+      },
+      {
+        "name": "can_delete",
+        "description": "A boolean indicating if the viewer can delete the photo",
+        "type": "bool"
+      },
+      {
+        "name": "can_tag",
+        "description": "A boolean indicating if the viewer can tag the photo",
+        "type": "bool"
+      },
+      {
+        "name": "from",
+        "description": "The profile (user or page) that uploaded this photo",
+        "type": "user|page"
+      },
+      {
+        "name": "height",
+        "description": "The height of this photo in pixels",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "icon",
+        "description": "The icon that Facebook displays when photos are published to News Feed",
+        "type": "string"
+      },
+      {
+        "name": "images",
+        "description": "The different stored representations of the photo. Can vary in number based upon the size of the original photo.",
+        "type": "list<platformimagesource>"
+      },
+      {
+        "name": "link",
+        "description": "A link to the photo on Facebook",
+        "type": "string"
+      },
+      {
+        "name": "name",
+        "description": "The user-provided caption given to this photo. Corresponds to `caption` when creating photos",
+        "type": "string"
+      },
+      {
+        "name": "name_tags",
+        "description": "An array containing an array of objects mentioned in the name field which contain the id, name, and type of each object as well as the offset and length which can be used to match it up with its corresponding string in the name field",
+        "type": "list<entityattextrange>"
+      },
+      {
+        "name": "page_story_id",
+        "description": "ID of the page story this corresponds to. May not be on all photos. Applies only to published photos",
+        "type": "string"
+      },
+      {
+        "name": "updated_time",
+        "description": "The last time the photo was updated",
+        "type": "datetime"
+      },
+      {
+        "name": "width",
+        "description": "The width of this photo in pixels",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "event",
+        "description": "If this object has a place, the event associated with the place",
+        "type": "event"
+      },
+      {
+        "name": "place",
+        "description": "Location associated with the photo, if any",
+        "type": "place"
+      },
+      {
+        "name": "backdated_time",
+        "description": "A user-specified time for when this object was created",
+        "type": "datetime"
+      },
+      {
+        "name": "backdated_time_granularity",
+        "description": "How accurate the backdated time is",
+        "type": "enum"
+      },
+      {
+        "name": "picture",
+        "description": "Link to the 100px wide representation of this photo",
+        "type": "string"
+      }
+    ],
+    "connections": [
+      "insights",
+      "tags",
+      "likes",
+      "comments",
+      "sharedposts"
+    ]
+  },
+  "post": {
+    "fields": [
+      {
+        "name": "id",
+        "description": "The story's id",
+        "type": "token with structure: post id"
+      },
+      {
+        "name": "actions",
+        "description": "TODO: fill in",
+        "type": "list"
+      },
+      {
+        "name": "admin_creator",
+        "description": "The admin creator of a Page Post. A page access token is required to access this field."
+      },
+      {
+        "name": "allowed_advertising_objectives",
+        "description": "Objectives under which this post can be advertised",
+        "type": "list<string>"
+      },
+      {
+        "name": "application",
+        "description": "For posts published by apps, the ID of that app. If the value is empty, it indicates a Facebook feature generated the post",
+        "type": "application"
+      },
+      {
+        "name": "call_to_action",
+        "description": "Call to action contained in the underlying post",
+        "type": "struct with keys: type, value"
+      },
+      {
+        "name": "caption",
+        "description": "An array of information about the attachment to the post",
+        "type": "string"
+      },
+      {
+        "name": "child_attachments",
+        "description": "Sub-shares of a multi-link share post",
+        "type": "list"
+      },
+      {
+        "name": "comments_mirroring_domain",
+        "description": "TODO: fill in",
+        "type": "string"
+      },
+      {
+        "name": "coordinates",
+        "description": "An array of information about the attachment to the post",
+        "type": "struct with keys: checkin_id, author_uid, page_id, target_id, target_href, coords, tagged_uids, timestamp, message, target_type"
+      },
+      {
+        "name": "created_time",
+        "description": "The time the post was published, expressed as UNIX timestamp",
+        "type": "datetime"
+      },
+      {
+        "name": "description",
+        "description": "An array of information about the attachment to the post",
+        "type": "string"
+      },
+      {
+        "name": "event",
+        "description": "If this Post has a place, the event associated with the place",
+        "type": "event"
+      },
+      {
+        "name": "expanded_height",
+        "description": "An array of information about the attachment to the post",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "expanded_width",
+        "description": "An array of information about the attachment to the post",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "feed_targeting",
+        "description": "Feed targeting information",
+        "type": "struct with keys: country, cities, regions, genders, age_min, age_max, education_statuses, college_years, relationship_statuses, interests, interested_in, user_adclusters, locales, countries, geo_locations, work_positions, work_employers, education_majors, education_schools, family_statuses, life_events, industries, politics, ethnic_affinity, generation, reach_estimate, fan_of, relevant_until_ts"
+      },
+      {
+        "name": "from",
+        "description": "The ID of the user, page, group, or event that published the post",
+        "type": "user|page"
+      },
+      {
+        "name": "full_picture",
+        "description": "An array of information about the attachment to the post",
+        "type": "string"
+      },
+      {
+        "name": "height",
+        "description": "An array of information about the attachment to the post",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "icon",
+        "description": "An array of information about the attachment to the post",
+        "type": "string"
+      },
+      {
+        "name": "is_app_share",
+        "description": "Whether or not the post references an app",
+        "type": "bool"
+      },
+      {
+        "name": "is_hidden",
+        "description": "Whether a post has been set to hidden",
+        "type": "bool"
+      },
+      {
+        "name": "is_instagram_eligible",
+        "description": "Whether this post can be promoted in Instagram",
+        "type": "bool"
+      },
+      {
+        "name": "is_popular",
+        "description": "Whether the post is currently popular. Based on whether the total actions as a percentage of reach exceeds a certain threshold",
+        "type": "bool"
+      },
+      {
+        "name": "is_published",
+        "description": "Whether the post is published",
+        "type": "bool"
+      },
+      {
+        "name": "is_expired",
+        "description": "Whether the post has expiration time that has passed",
+        "type": "bool"
+      },
+      {
+        "name": "is_spherical",
+        "description": "Whether the post is a spherical video post",
+        "type": "bool"
+      },
+      {
+        "name": "link",
+        "description": "An array of information about the attachment to the post",
+        "type": "string"
+      },
+      {
+        "name": "message",
+        "description": "The message written in the post",
+        "type": "string"
+      },
+      {
+        "name": "message_tags",
+        "description": "The list of tags in the post message",
+        "type": "list"
+      },
+      {
+        "name": "name",
+        "description": "An array of information about the attachment to the post",
+        "type": "string"
+      },
+      {
+        "name": "object_id",
+        "description": "An array of information about the attachment to the post",
+        "type": "string"
+      },
+      {
+        "name": "parent_id",
+        "description": "ID of the parent post",
+        "type": "token with structure: post id"
+      },
+      {
+        "name": "place",
+        "description": "ID of the place associated with the post",
+        "type": "place"
+      },
+      {
+        "name": "privacy",
+        "description": "The privacy settings for a post",
+        "type": "privacy"
+      },
+      {
+        "name": "promotion_status",
+        "description": "Status of the promotion, if the post was promoted",
+        "type": "string"
+      },
+      {
+        "name": "properties",
+        "description": "An array of information about the attachment to the post",
+        "type": "list"
+      },
+      {
+        "name": "scheduled_publish_time",
+        "description": "UNIX timestamp of the scheduled publish time for the post",
+        "type": "float"
+      },
+      {
+        "name": "shares",
+        "description": "Number of times the post has been shared",
+        "type": "struct with keys: count"
+      },
+      {
+        "name": "source",
+        "description": "An array of information about the attachment to the post",
+        "type": "string"
+      },
+      {
+        "name": "status_type",
+        "description": "The type of this story",
+        "type": "string"
+      },
+      {
+        "name": "story",
+        "description": "Text of stories not intentionally generated by users, such as those generated when two users become friends. You must have the \"Include recent activity stories\" migration enabled in your app to retrieve this field",
+        "type": "string"
+      },
+      {
+        "name": "story_tags",
+        "description": "The list of tags in the post description",
+        "type": "list"
+      },
+      {
+        "name": "subscribed",
+        "description": "Whether user is subscribed to the post",
+        "type": "bool"
+      },
+      {
+        "name": "target",
+        "description": "The profile this was posted on if different from the author",
+        "type": "profile"
+      },
+      {
+        "name": "targeting",
+        "description": "Ads targeting information of the post",
+        "type": "struct with keys: country, cities, regions, zips, genders, college_networks, work_networks, age_min, age_max, education_statuses, college_years, college_majors, political_views, relationship_statuses, interests, keywords, interested_in, user_clusters, user_clusters2, user_clusters3, user_adclusters, excluded_user_adclusters, custom_audiences, excluded_custom_audiences, locales, radius, connections, excluded_connections, friends_of_connections, countries, excluded_user_clusters, adgroup_id, user_event, qrt_versions, page_types, user_os, user_device, action_spec, action_spec_friend, action_spec_excluded, geo_locations, excluded_geo_locations, targeted_entities, conjunctive_user_adclusters, rtb_flag, wireless_carrier, site_category, work_positions, work_employers, education_majors, education_schools, family_statuses, life_events, behaviors, travel_status, industries, politics, markets, income, net_worth, home_type, home_ownership, home_value, ethnic_affinity, generation, household_composition, moms, office_type, interest_clusters_expansion, dynamic_audience_ids, product_audience_specs, excluded_product_audience_specs, exclusions, flexible_spec, engagement_specs, excluded_engagement_specs"
+      },
+      {
+        "name": "timeline_visibility",
+        "description": "Timeline visibility information of the post",
+        "type": "string"
+      },
+      {
+        "name": "type",
+        "description": "An array of information about the attachment to the post",
+        "type": "string"
+      },
+      {
+        "name": "updated_time",
+        "description": "The time the post was last updated, which occurs when a user comments on the post, expressed as a UNIX timestamp",
+        "type": "datetime"
+      },
+      {
+        "name": "via",
+        "description": "ID of the user or Page the post was shared from",
+        "type": "user|page"
+      },
+      {
+        "name": "width",
+        "description": "An array of information about the attachment to the post",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "picture",
+        "description": "An array of information about the attachment to the post",
+        "type": "string"
+      }
+    ],
+    "connections": [
+      "attachments",
+      "insights",
+      "sharedposts",
+      "to",
+      "with_tags",
+      "likes",
+      "comments"
+    ]
+  },
+  "video": {
+    "fields": [
+      {
+        "name": "id",
+        "description": "The video ID.",
+        "type": "numeric string"
+      },
+      {
+        "name": "created_time",
+        "description": "The time the video was initially published.",
+        "type": "datetime"
+      },
+      {
+        "name": "description",
+        "description": "The description of the video.",
+        "type": "string"
+      },
+      {
+        "name": "embed_html",
+        "description": "The HTML element that may be embedded in a Web page to play the video.",
+        "type": "string"
+      },
+      {
+        "name": "format",
+        "description": "The different formats of the video.",
+        "type": "list<videoformat>"
+      },
+      {
+        "name": "from",
+        "description": "The profile that created the video."
+      },
+      {
+        "name": "icon",
+        "description": "The icon that Facebook displays when videos are published to the feed.",
+        "type": "string"
+      },
+      {
+        "name": "is_instagram_eligible",
+        "description": "Whether the video is eligible to be promoted on Instagram",
+        "type": "bool"
+      },
+      {
+        "name": "length",
+        "description": "Duration of this video.",
+        "type": "float"
+      },
+      {
+        "name": "title",
+        "description": "The video title or caption.",
+        "type": "string"
+      },
+      {
+        "name": "status",
+        "description": "Object describing the status attributes of a video.",
+        "type": "videostatus"
+      },
+      {
+        "name": "source",
+        "description": "A URL to the raw, playable video file.",
+        "type": "string"
+      },
+      {
+        "name": "updated_time",
+        "description": "The last time the video or its caption was updated.",
+        "type": "datetime"
+      },
+      {
+        "name": "privacy",
+        "description": "Privacy setting for the video.",
+        "type": "privacy"
+      },
+      {
+        "name": "published",
+        "description": "Whether a post about this video is published.",
+        "type": "bool"
+      },
+      {
+        "name": "scheduled_publish_time",
+        "description": "The time that the video is scheduled to expire.",
+        "type": "datetime"
+      },
+      {
+        "name": "embeddable",
+        "description": "Whether the video is embeddable.",
+        "type": "bool"
+      },
+      {
+        "name": "content_category",
+        "description": "The content category of this video.",
+        "type": "enum"
+      },
+      {
+        "name": "permalink_url",
+        "description": "URL to the permalink page of the video.",
+        "type": "string"
+      },
+      {
+        "name": "event",
+        "description": "If this object has a place, the event associated with the place",
+        "type": "event"
+      },
+      {
+        "name": "place",
+        "description": "Location associated with the video, if any.",
+        "type": "place"
+      },
+      {
+        "name": "backdated_time",
+        "description": "The time when the video post was created.",
+        "type": "datetime"
+      },
+      {
+        "name": "backdated_time_granularity",
+        "description": "Accuracy of the backdated time.",
+        "type": "enum"
+      },
+      {
+        "name": "picture",
+        "description": "The URL for the thumbnail picture of the video.",
+        "type": "string"
+      }
+    ],
+    "connections": [
+      "auto_generated_captions",
+      "captions",
+      "tags",
+      "thumbnails",
+      "likes",
+      "comments",
+      "sharedposts"
+    ]
+  },
+  "videolist": {
+    "fields": [
+      {
+        "name": "id",
+        "description": "Video playlist ID",
+        "type": "numeric string"
+      },
+      {
+        "name": "creation_time",
+        "description": "The time when the playlist was created",
+        "type": "datetime"
+      },
+      {
+        "name": "description",
+        "description": "Description of the playlist",
+        "type": "string"
+      },
+      {
+        "name": "last_modified",
+        "description": "The time when the contents of the playlist was last changed",
+        "type": "datetime"
+      },
+      {
+        "name": "owner",
+        "description": "Owner of the playlist",
+        "type": "user|page"
+      },
+      {
+        "name": "title",
+        "description": "Title of the playlist",
+        "type": "string"
+      }
+    ],
+    "connections": [
+      "videos"
+    ]
+  }
+}

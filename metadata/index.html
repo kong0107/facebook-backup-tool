@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+<html ng-app="myApp">
+<head>
+	<meta charset="utf-8">
+	<title>Node Metadata of Facebook Graph API</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+	<script>
+		angular.module("myApp", []).controller("main", function($scope, $http) {
+			$http.get("v2.5.json").then(
+				function(r) {$scope.metadata = r.data;},
+				function(r) {console.log(r);}
+			);
+			$scope.form = {type: "post"};
+		});
+	</script>
+	<style>
+		.nodeType {
+			display: inline-block;
+			border: 1px solid #ccc;
+			font-weight: bold;
+			margin: 0.2em;
+			padding: 0.2em;
+		}
+		.checked { background-color: #def; }
+
+		#connections li { 
+			display: inline-block; 
+			margin: 0.4em;
+			padding: 0.1em;
+			border-bottom: 1px dashed #888;
+		}
+		/*#connections li:not(:last-of-type)::after {
+			content: ", ";
+		}*/
+		.fieldName { text-align: right; }
+		.fieldType {
+			font-family: monospace;
+			width: 10em;
+		}
+	</style>
+</head>
+<body ng-controller="main">
+	<h1>Node Metadata of Facebook Graph API</h1>
+	<a href="https://developers.facebook.com/docs/graph-api/reference">Graph API Reference</a>
+	<h2>Node Type</h2>
+	<label class="nodeType" ng-class="(t==form.type)?'checked':''" ng-repeat="(t, md) in metadata">
+		<input type="radio" ng-model="form.type" ng-value="t">{{t}}
+	</label>
+	<section id="connections">
+		<h3>Connections</h3>
+		<ul>
+			<li ng-repeat="c in metadata[form.type].connections">{{c}}</li>
+		</ul>
+	</section>
+	<section id="fields">
+		<h3>Fields</h3>
+		<table border="1">
+			<thead>
+				<tr>
+					<th scope="col">name</th>
+					<th scope="col">type</th>
+					<th scope="col">description</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="f in metadata[form.type].fields">
+					<th class="fieldName" scope="row">{{f.name}}</td>
+					<td class="fieldType">{{f.type}}</td>
+					<td class="fieldDesc">{{f.description}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</section>
+</body>
+</html>
