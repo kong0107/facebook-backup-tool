@@ -1,0 +1,160 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Facebook Data Crawler</title>
+	<script src="//connect.facebook.net/en_US/sdk.js"></script>
+	<script>
+		window.fbAsyncInit = function() {
+			FB.init({
+				version    : 'v2.5',
+				appId      : '1598824630378971',
+				xfbml      : false,
+				status     : true
+			});
+		};
+	</script>
+	<script src="js/sdk-extend.js"></script>
+	<script src="js/foo.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script>
+		angular.module("myApp", [])
+		.controller("main", function($scope) {
+			$scope.connections = {
+				user: [
+					'feed', 'posts', 'albums', 'photos', 'videos',
+					'admined_groups', 'groups', 'likes', 'friends', 'tagged'
+				],
+				page: [
+					'albums', 'events', 'feed', 'milestones', 'photos', 'posts', 'videos'
+				]
+
+			};
+
+			$scope.search = function() {
+				var q = $scope.q.trim();
+				if(!q.length) return;
+				if($.isNumeric(q)) {
+					$scope.showSelect = false;
+					$scope.showInfo(q);
+				}
+				else {
+					$scope.message = 'Searching page ...';
+					$scope.candidates = [];
+					FB.apiwt("search?type=page&q=" + q, function(r) {
+						if(r.data) {
+							$scope.message = '';
+							$scope.candidates = r.data;
+							$scope.showSelect = true;
+						}
+						else $scope.message = 'No results found.';
+						$scope.$apply();
+					});
+				}
+			};
+			$scope.showInfo = function(node_id) {
+				$scope.message = 'Fetching data ...';
+				$scope.nodeInfo = undefined;
+				FB.api(node_id + '?metadata=1', function(r) {
+					if(r.error) {
+						$scope.message = 'No such node.';
+						$scope.$apply();
+					}
+					else if(r.metadata.type != $scope.nodeType) {
+						$scope.message = 'Not a ' + $scope.nodeType + ' node.';
+						$scope.$apply();
+					}
+					else {	/// found a page node
+						var excludedFields = [
+							'token_for_business', ///< errors for user
+							'ad_campaign', 'promotion_eligible', 'owner_business',	/// errors for page
+							'context', 'currency', 'education', 'favorite_athletes', 'favorite_teams', 'languages', 'payment_pricepoints'
+						];
+						var ru = [];
+						for(var i = 0; i < r.metadata.fields.length; ++i) {
+							var fn = r.metadata.fields[i].name;
+							if($.inArray(fn, excludedFields) == -1) ru.push(fn);
+						}
+						ru = r.id + '?fields=' + ru.join(',');
+						FB.apiwt(ru, function(r) {
+							$scope.message = '';
+							$scope.nodeInfo = r;
+							$scope.$apply();
+						});
+					}
+				});
+			}
+			$scope.requestEdge = function(fieldName) {
+				$scope.message = 'Fetching data ...';
+				$scope.conData = null;
+				FB.apiwt($scope.nodeInfo.id + '/' + fieldName, function(r) {
+					$scope.message = '';
+					$scope.conData = r.data;
+					$scope.$apply();
+				});
+			}
+			$scope.clear = function() {
+				$scope.message = '';
+				$scope.q = '';
+				$scope.showSelect = false;
+				$scope.nodeInfo = undefined;
+				$scope.conData = null;
+			}
+		});
+	</script>
+	<style>
+		#message {
+			position: fixed;
+			left: 0;
+			bottom: 0;
+			margin: 0.2em;
+		}
+		.page_name {
+			display: inline-block;
+			border: 1px solid #ccc;
+			margin: 0.25em;
+			padding: 0.25em;
+		}
+	</style>
+</head>
+<body ng-app="myApp" ng-controller="main">
+	<h1>Facebook Data Crawler</h1>
+	<p id="message">{{message}}</p>
+	<h2>Choose what to crawl</h2>
+	<form method="get" action="crawler.php">
+		<dl>
+		{{last_name}}
+			<dt>Type</dt>
+			<dd>
+				<label><input type="radio" name="nodeType" ng-model="nodeType" value="user" ng-click="showInfo('me')">User</label>
+				<label><input type="radio" name="nodeType" ng-model="nodeType" value="page" ng-click="clear()">Page</label>
+			</dd>
+			<dt ng-show="nodeType=='page'">Page</dt>
+			<dd ng-show="nodeType=='page'">
+				<input ng-model="q" ng-change="search()" ng-model-options="{debounce: 500}"
+					placeholder="page ID or search text"
+				>
+			</dd>
+			<dt ng-show="showSelect">Select</dt>
+			<dd ng-show="showSelect">
+				<label class="page_name" ng-repeat="p in candidates">
+					<input type="radio" name="pageId" value="{{p.id}}" ng-click="showInfo(p.id);">{{p.name}}
+				</label>
+			</dd>
+		</dl>
+		<div ng-show="nodeInfo">
+			<h2>{{nodeInfo.name}}</h2>
+			<div style="float: right; width: 50%; white-space: pre-wrap; font-family: monospace;">
+				{{(conData?conData:nodeInfo)|json}}
+			</div>
+			<ul>
+				<li ng-repeat="con in connections[nodeType]">
+					<label><input type="radio" name="fieldName" value="{{con}}" ng-click="requestEdge(con)">{{con}}</label>
+				</li>
+			</ul>
+			<button ng-disabled="!conData.length" onclick="this.form.submit();">Start crawling</button>
+		</div>
+	</form>
+</body>
+</html>
