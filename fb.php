@@ -19,14 +19,14 @@
 	if(isset($_SESSION['facebook_access_token']))
 		$fb->setDefaultAccessToken($_SESSION['facebook_access_token']);
 
-	function getFBLoginUrl($scope = array(), $seperator = '&') {
+	function getFBLoginUrl($permissions = [], $seperator = '&') {
 		global $config, $fb;
 		$redirectUrl = $config['site_root']
 			. '/login-callback.php?rr='
 			. urlencode($_SERVER['REQUEST_URI'])
 		;
 		return $fb->getRedirectLoginHelper()->getLoginUrl(
-			$redirectUrl, $scope, $seperator
+			$redirectUrl, $permissions, $seperator
 		);
 	}
 ?>

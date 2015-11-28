@@ -85,10 +85,10 @@
 					}
 				});
 			}
-			$scope.requestEdge = function(fieldName) {
+			$scope.requestEdge = function(edge) {
 				$scope.message = 'Fetching data ...';
 				$scope.conData = null;
-				FB.apiwt($scope.nodeInfo.id + '/' + fieldName, function(r) {
+				FB.apiwt($scope.nodeInfo.id + '/' + edge, function(r) {
 					$scope.message = '';
 					$scope.conData = r.data;
 					$scope.$apply();
@@ -150,7 +150,7 @@
 			</div>
 			<ul>
 				<li ng-repeat="con in connections[nodeType]">
-					<label><input type="radio" name="fieldName" value="{{con}}" ng-click="requestEdge(con)">{{con}}</label>
+					<label><input type="radio" name="edge" value="{{con}}" ng-click="requestEdge(con)">{{con}}</label>
 				</li>
 			</ul>
 			<button ng-disabled="!conData.length" onclick="this.form.submit();">Start crawling</button>
