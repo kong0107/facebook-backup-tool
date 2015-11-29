@@ -6,8 +6,21 @@
 <div class="story" ng-if="post.story">{{post.story}}</div>
 <div class="message" ng-if="post.message">{{post.message}}</div>
 <div class="link_container" ng-if="post.link">
-	<a class="link" href="{{post.link}}">{{post.name}}</a>
-	<blockquote class="description">{{post.description}}</blockquote>
+	<div ng-if="!post.child_attachments">
+		<h4><a class="link" href="{{post.link}}">{{post.name}}</a></h4>
+		<a ng-if="post.full_picture" href="{{post.full_picture}}"
+		><img ng-if="post.full_picture" ng-src="{{post.full_picture}}" class="full_picture"
+		></a>
+		<img ng-if="!post.full_picture && post.picture" ng-src="{{post.picture}}" class="picture">
+		<blockquote class="description">{{post.description}}</blockquote>
+	</div>
+	<div ng-if="post.child_attachments">
+		<!-- unsure structure... see post 299951923544433_408517786021179 -->
+		<h4><a class="link" href="{{post.link}}">{{post.child_attachments[0].name}}</a></h4>
+		<a ng-repeat="att in post.child_attachments" href="{{att.link}}"
+		><img ng-src="{{att.picture}}"></a>
+		<blockquote class="description">{{post.child_attachments[0].description}}</blockquote>
+	</div>
 </div>
 <ul class="tags">
 	<li ng-repeat="tag in post.story_tags" ng-if="tag.offset && tag.name">

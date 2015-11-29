@@ -24,7 +24,6 @@ nav li {
 	margin-bottom: 1em;
 }
 
-
 article {
 	border-top: 1px solid #888;
 	margin-top: 1em;
@@ -44,10 +43,15 @@ article {
 	white-space: pre-wrap;
 }
 .link_container {
-	clear: both;
 	border-left: 2px solid #888;
 	margin: 0.5em 0 0 1em;
 	padding: 0 0.5em;
+}
+.link_container h4 {
+	margin-bottom: 0;
+}
+.full_picture {
+	width: 360px;
 }
 .description {
 	white-space: pre-wrap;
@@ -106,6 +110,22 @@ article {
 }
 .comment:nth-child(odd) .cc:nth-child(odd) {
 	background-color: #ccc;
+}
+
+.attachment {
+	margin: 0.5em 0 0 1em;
+	padding: 0 0.5em;
+}
+.attachment_image {
+	width: 64px;
+}
+.attachment_title {
+	font-weight: bold;
+}
+.attachment_description {
+	white-space: pre-wrap;
+	font-size: smaller;
+	margin: 0;
 }
 
 .rawdata {

@@ -1,0 +1,11 @@
+<!-- type[, title,][ description,] target{id, url}, url, media{image:{height, src, width}} -->
+<a href="{{attachment.target.url}}" 
+	title="origin size: {{attachment.media.image.width}}x{{attachment.media.image.height}}"
+><img class="attachment_image" ng-src="{{attachment.media.image.src}}" alt="{{attachment.title}}"
+></a>
+<span class="attachment_title" ng-if="attachment.title&&(attachment.type!='image_share')">
+	<a href="{{attachment.target.url}}" title="{{attachment.target.id}}">{{attachment.title}}</a>
+</span>
+<blockquote class="attachment_description" ng-if="attachment.description">{{attachment.description}}</blockquote>
+<div class="clear"></div>
+<details class="rawdata"><summary>JSON</summary>{{attachment|json}}</details>
