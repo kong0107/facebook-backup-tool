@@ -2,5 +2,15 @@
 	"post": [
 		"allowed_advertising_objectives",
 		"is_app_share"
+	],
+	"comment": [
+		"can_comment",
+		"can_hide",
+		"can_like",
+		"can_remove",
+		"is_hidden",
+		"is_private",
+		"object",
+		"parent"
 	]
 }

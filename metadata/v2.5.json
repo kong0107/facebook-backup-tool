@@ -1702,5 +1702,97 @@
     "connections": [
       "videos"
     ]
+  },
+  "comment": {
+    "fields": [
+      {
+        "name": "id",
+        "description": "The comment ID",
+        "type": "token with structure: comment id"
+      },
+      {
+        "name": "attachment",
+        "description": "Link or photo attached to the comment",
+        "type": "storyattachment"
+      },
+      {
+        "name": "can_comment",
+        "description": "Whether the viewer can reply to this comment",
+        "type": "bool"
+      },
+      {
+        "name": "can_hide",
+        "description": "Whether the viewer can hide this comment from everyone except the comment author and the author's friends. This can only be true for comments on Page posts",
+        "type": "bool"
+      },
+      {
+        "name": "can_like",
+        "description": "Whether the viewer can like this comment",
+        "type": "bool"
+      },
+      {
+        "name": "can_remove",
+        "description": "Whether the viewer can remove this comment",
+        "type": "bool"
+      },
+      {
+        "name": "comment_count",
+        "description": "Number of replies to this comment",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "created_time",
+        "description": "The time this comment was made",
+        "type": "datetime"
+      },
+      {
+        "name": "from",
+        "description": "The profile that made this comment",
+        "type": "user|page"
+      },
+      {
+        "name": "is_hidden",
+        "description": "Whether this comment is hidden from everyone except the comment author and the author's friends",
+        "type": "bool"
+      },
+      {
+        "name": "is_private",
+        "description": "Whether the comment is a private comment",
+        "type": "bool"
+      },
+      {
+        "name": "like_count",
+        "description": "Number of times this comment was liked",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "message",
+        "description": "The comment text",
+        "type": "string"
+      },
+      {
+        "name": "message_tags",
+        "description": "Profiles tagged in mentions in the message",
+        "type": "list<entityattextrange>"
+      },
+      {
+        "name": "object",
+        "description": "The object the comment is on"
+      },
+      {
+        "name": "parent",
+        "description": "For comment replies, the comment this is a reply to",
+        "type": "comment"
+      },
+      {
+        "name": "user_likes",
+        "description": "Whether the viewer has liked this comment",
+        "type": "bool"
+      }
+    ],
+    "connections": [
+      "comments",
+      "likes"
+    ]
   }
 }

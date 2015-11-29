@@ -36,13 +36,9 @@ article {
 	text-align: right;
 	float: right;
 	clear: both;
-	background-color: #ccc;
 	font-size: smaller;
 	padding: 0.25em;
 	margin: 0.25em;
-}
-.metadata p {
-	margin: 0;
 }
 .message {
 	white-space: pre-wrap;
@@ -70,6 +66,15 @@ article {
 	border-left: 1px solid #ccc;
 }
 
+.time_container {
+	font-size: smaller;
+	color: #888;
+}
+
+
+.story {
+	font-style: italic;
+}
 
 .comment {
 	clear: both;
@@ -77,27 +82,33 @@ article {
 	width: 600px;
 }
 .comment:nth-child(odd) {
-	background-color: #ccc;
+	background-color: #bbb;
 }
 .comment:nth-child(even) {
 	background-color: #ddd;
-}
-.comment .created_time {
-	font-size: smaller;
-	color: #888;
 }
 .comment_id {
 	float: right;
 }
 .cc {
+	clear: both;
 	margin: 0.25em 0.25em 0.25em 2em;
 	padding: 0.25em;
 }
-.comment:nth-child(odd) .cc:nth-child(odd),
 .comment:nth-child(even) .cc:nth-child(even) {
 	background-color: #ccc;
 }
-.comment:nth-child(odd) .cc:nth-child(even),
 .comment:nth-child(even) .cc:nth-child(odd) {
+	background-color: #bbb;
+}
+.comment:nth-child(odd) .cc:nth-child(even) {
 	background-color: #ddd;
+}
+.comment:nth-child(odd) .cc:nth-child(odd) {
+	background-color: #ccc;
+}
+
+.rawdata {
+	white-space: pre-wrap;
+	font-family: monospace;
 }

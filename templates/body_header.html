@@ -2,8 +2,8 @@
 <p class="page_about" ng-if="page.about" ng-bind="page.about"></p>
 <nav>
 	<ul>
-		<li ng-click="tab='about'" ng-class="tab=='about'?'focus':''">About</li>
-		<li ng-click="tab='timeline'" ng-class="tab=='timeline'?'focus':''">Timeline</li>
+		<li ng-click="$parent.tab='about'" ng-class="tab=='about'?'focus':''">About</li>
+		<li ng-click="$parent.tab='timeline'" ng-class="tab=='timeline'?'focus':''">Timeline</li>
 		<li><a href="{{page.link}}">Facebook</a></li>
 	</ul>
 </nav>

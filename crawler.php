@@ -1,21 +1,65 @@
 <?php
+	$time_start = microtime(true);
 	require_once 'fb.php';
 	require_once 'db.php';
 	$metadata = json_decode(file_get_contents('metadata/v2.5.json'), true);
 	$excludedFields = json_decode(file_get_contents('excludedFields.json'), true);
-
-	function shrinkArr($arr) {
-		foreach($arr as $k => $v) {
+	
+	/**
+	 * Get field names of a node type.
+	 */
+	function getFields($nodeType) {
+		global $metadata;
+		global $excludedFields;
+		$ef = $excludedFields[$nodeType] or $ef = [];
+		$fields = [];
+		foreach($metadata[$nodeType]['fields'] as $field) {
+			$fn = $field['name'];
+			if(!in_array($fn, $ef)) $fields[] = $fn;
+		}
+		return $fields;
+	}
+	
+	$fieldsOfComment = implode(', ', getFields('comment'));
+	
+	/**
+	 * Get all comments of a node.
+	 *
+	 * All comments and their comments are going to be parsed.
+	 * This may take minutes for posts of a famous page.
+	 */
+	function getComments($nodeId) {
+		global $fb;
+		global $fieldsOfComment;
+		$result = [];
+		$reqUrl = "/$nodeId/comments?fields=$fieldsOfComment";
+		//echo "Getting comments of $nodeId\n";
+		do {
+			$res = $fb->get($reqUrl)->getDecodedBody();
+			foreach($res['data'] as $c) {
+				//print_r($c);
+				if($c['comment_count'] !== 0) 
+					$c['comments'] = getComments($c['id']);
+				//else echo "no sub-comments.\n";
+				$result[] = $c;
+			}
+		} while($reqUrl = substr($res['paging']['next'], 31));
+		return $result;
+	}
+	
+	/**
+	 * Remove null, '' and [] in an array recursively.
+	 *
+	 * Unlike `empty`, this does NOT remove zero and false.
+	 */
+	function array_remove_empty($arr) {
+		foreach($arr as $k => &$v) {
 			if(is_array($v)) {
-				if($k == 'attachment') unset($v['url']);
-				$v = shrinkArr($v);
+				$v = array_remove_empty($v);
 				if(!count($v)) unset($arr[$k]);
-				else $arr[$k] = $v;
 				continue;
 			}
 			if(is_null($v) || $v === '') unset($arr[$k]);
-			else if(is_object($v) && get_class($v))
-				$arr[$k] = $v->format(DateTime::ISO8601);
 		}
 		return $arr;
 	}
@@ -27,7 +71,6 @@
 			switch($edge) {
 				case 'feed':
 				case 'posts':
-					$containedNode = 'post';
 					$perms = ['user_posts'];
 					break;
 				case 'albums':
@@ -57,6 +100,14 @@
 		default:
 			exit('Unknown or unsupported node type');
 	}
+	switch($edge) {
+		case 'feed':
+		case 'posts':
+			$containedNode = 'post';
+			break;
+		default:
+			exit('`$containedNode` not set');
+	}
 
 	/**
 	 * Request the permission if not granted.
@@ -82,15 +133,11 @@
 	$nodeId = ($nodeType == 'user') ? $user['id'] : $_GET['pageId'];
 
 	$col = $db->selectCollection("{$nodeType}_{$nodeId}_{$edge}");
-
-	$fields = [];
-	foreach($metadata[$containedNode]['fields'] as $field) {
-		$fn = $field['name'];
-		if(!in_array($fn, $excludedFields[$containedNode]))
-			$fields[] = $fn;
-	}
+	$fields = implode(',', getFields($containedNode));
+	$mayHaveComments = in_array('comments', $metadata[$containedNode]['connections']);
+		
 	$requestUrl = empty($_GET['request'])
-		? ("/$nodeId/$edge?fields=" . implode(',', $fields))
+		? "/$nodeId/$edge?limit=5&fields=$fields"
 		: urldecode($_GET['request'])
 	;
 ?>
@@ -101,11 +148,20 @@
 	<title>Facebook Data Crawler</title>
 </head>
 <body style="white-space: pre-wrap; font-family: monospace;">
-<h1>Facebook Data Crawler</h1>
+<h1 style="margin-top: 0;">Facebook Data Crawler</h1>
+<div id="timeDiff">&nbsp;</div>
 <?php
-	echo "Requesting <code>$requestUrl</code>\n";
+	echo date(DATE_ATOM);
+	echo "\nRequesting <code>$requestUrl</code>\n";
 	$response = $fb->get($requestUrl)->getDecodedBody();
 	foreach($response['data'] as $node) {
+		echo "Parsing {$node['id']}\n";
+		if($mayHaveComments) {	
+			$comments = getComments($node['id']);
+			if(count($comments)) $node['comments'] = $comments;
+		}
+		$node = array_remove_empty($node);
+		
 		$node['_id'] = $node['id'];
 		unset($node['id']);
 		$col->update(
@@ -113,7 +169,9 @@
 			$node,
 			array('upsert' => true)
 		);
+		echo '<div style="max-height: 20em; overflow: auto;">';
 		print_r($node);
+		echo '</div>';
 	}
 
 	$next = $response['paging']['next'];
@@ -122,8 +180,12 @@
 		$params['request'] = urlencode(substr($next, 31));
 		$requestNext = $_SERVER['PHP_SELF'] . '?' . http_build_query($params);
 		echo "<a href=\"$requestNext\">Request next page</a><br>";
-		echo "<script>setTimeout(function(){location.href = '$requestNext';}, 5000);</script>";
+		echo "<script>setTimeout(function(){location.href = '$requestNext';}, 7500);</script>";
 	}
+	else echo 'No more data. You can <a href="crawler.html">crawl another page</a>.';
+	
+	$time_end = microtime(true);
+	echo "<script>document.getElementById('timeDiff').textContent='" . ($time_end - $time_start) . "';</script>";
 ?>
 </body>
 </html>

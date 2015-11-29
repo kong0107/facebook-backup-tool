@@ -1,0 +1,22 @@
+<div class="metadata">
+	<a class="time_container" name="{{comment.id}}" href="http://facebook.com/{{comment.id}}">
+		<time class="created_time" datetime="{{comment.created_time}}">
+			{{comment.created_time|date:'yyyy-MM-dd HH:mm:ss'}}
+		</time>
+	</a>
+	<div ng-if="comment.like_count">
+		{{comment.like_count|number}} 
+		like{{comment.like_count > 1 ? 's' : ''}}
+	</div>
+</div>
+<a class="from" href="https://www.facebook.com/{{comment.from.id}}">{{comment.from.name}}</a>
+<div class="message" ng-if="comment.message">{{comment.message}}</div>
+<div class="attatchment" ng-if="comment.attachment">
+	<a href="{{comment.attachment.url}}">
+		<img ng-src="{{comment.attachment.media.image.src}}">
+	</a>
+</div>
+<div class="cc" ng-include="'templates/comment_body.html'"
+	ng-repeat="comment in comment.comments | orderBy: 'created_time'"
+></div>
+<details class="rawdata"><summary>JSON</summary>{{comment|json}}</details>

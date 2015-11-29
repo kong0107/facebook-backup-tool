@@ -4,8 +4,9 @@
 	$page_id = explode('_', $post_id)[0];
 	
 	$page = $db->page->findOne(array('_id'=> $page_id));
-	$post = $db->selectCollection("page_{$page_id}_post")->findOne(array('_id'=>$post_id));
-	$comments = iterator_to_array($db->selectCollection("page_{$page_id}_comment")->find(array('parent'=>$post_id)), false);
+	$post = $db->selectCollection("page_{$page_id}_feed")->findOne(array('_id'=>$post_id));
+	
+	//$comments = iterator_to_array($db->selectCollection("page_{$page_id}_comment")->find(array('parent'=>$post_id)), false);
 ?>
 <!DOCTYPE HTML>
 <html ng-app="myApp" ng-controller="main">
@@ -37,24 +38,6 @@
 <body>
 	<?=file_get_contents('templates/body_header.html')?>
 	<h2>Post</h2>
-	<article>
-		<?=file_get_contents('templates/post_body.html')?>
-		<p ng-if="!post.comment_count">There's no comment yet.</p>
-		<h3 ng-if="post.comment_count">{{post.comment_count}} comment{{post.comment_count > 1 ? 's' : ''}}</h3>
-		<section class="comment" ng-repeat="comment in comments | orderBy: '-created_time'">
-			<a class="comment_id" name="{{comment._id}}" ng-attr-href="{{getCommentUrl(comment._id)}}">
-				<time class="created_time" datetime="{{comment.created_time}}">{{comment.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}</time>
-			</a>
-			<a class="from" ng-attr-href="https://www.facebook.com/{{comment.from.id}}">{{comment.from.name}}</a>
-			<div class="message" ng-if="comment.message">{{comment.message}}</div>
-			<div class="cc" ng-repeat="cc in comment.comments | orderBy: '-created_time'">
-				<a class="comment_id" name="{{cc.id}}" ng-attr-href="{{getCCUrl(cc.id)}}">
-					<time class="created_time" datetime="{{cc.created_time}}">{{cc.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}</time>
-				</a>
-				<a ng-attr-href="https://www.facebook.com/{{cc.from.id}}">{{cc.from.name}}</a>
-				<div class="message" ng-if="comment.message">{{cc.message}}</div>
-			</div>
-		</section>
-	</article>
+	<article ng-include="'templates/post_body.html'"></article>
 </body>
 </html>
