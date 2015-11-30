@@ -1,6 +1,6 @@
 h1, .page_about {
 	display: inline-block;
-	margin: 0.67em;
+	margin: 0.5em;
 }
 
 nav li {
@@ -8,6 +8,7 @@ nav li {
 	display: inline-block;
 	border-left: 1px solid #ccc;
 	padding: 0.2em;
+	margin: 0.2em 0;
 }
 .focus {
 	font-weight: bold;

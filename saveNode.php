@@ -41,7 +41,7 @@
 	
 	$ret = file_put_contents(
 		"./data/{$nodeType}_{$nodeId}_info.json",
-		json_encode($data, JSON_UNESCAPED_UNICODE)
+		json_encode($data . "\n", JSON_UNESCAPED_UNICODE)
 	);
 	echo "$ret bytes were written to the file.";
 ?>

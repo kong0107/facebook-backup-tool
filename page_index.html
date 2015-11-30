@@ -6,13 +6,27 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script>
 		angular.module("myApp", []).controller("main", function($scope, $http) {
-			$scope.tab = "about";
+			$scope.tab = "timeline";
 			$http.get("data/page_299951923544433_info.json").then(
 				function(r){$scope.page = r.data;},
 				function(r){console.log(r);}
 			);
-			$http.get("data/page_299951923544433_feed.json").then(
-				function(r){$scope.posts = r.data;},
+			$http.get("data/page_299951923544433_posts.json").then(
+				function(r){
+					$scope.posts = r.data.sort(function(a, b) {
+						return new Date(b.created_time) - new Date(a.created_time);
+					});
+					
+					var ms = [];
+					var newest = new Date($scope.posts[0].created_time);
+					var oldest = new Date($scope.posts[$scope.posts.length-1].created_time);
+					for(var cur = newest;
+						cur.getFullYear() > oldest.getFullYear() || cur.getMonth() >= oldest.getMonth();
+						cur.setMonth(cur.getMonth()-1)
+					) ms.push(cur.toISOString().substr(0, 7));
+					$scope.months = ms;
+					$scope.month = $scope.posts[0].created_time.substr(0, 7);
+				},
 				function(r){console.log(r);}
 			);
 		});
@@ -31,8 +45,15 @@
 	<section id="timeline" ng-show="tab=='timeline'">
 		<h2>Timeline</h2>
 		<label>Search: <input ng-model="searchText" ng-model-options="{debounce: 250}" placeholder="search text"></label>
+		<nav ng-hide="searchText">
+			<ul>
+				<li ng-repeat="m in months" ng-click="$parent.month = m" 
+					ng-class="$parent.month==m?'focus':''"
+				>{{m}}</li>
+			</ul>
+		</nav>
 		<article ng-include="'templates/post_body.html'"
-			ng-repeat="post in posts|filter:searchText|orderBy:'-created_time'"
+			ng-repeat="post in posts|filter:(searchText?searchText:{created_time:month})"
 		></article>
 	</section>
 </body>
