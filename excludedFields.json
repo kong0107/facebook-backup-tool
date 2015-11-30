@@ -50,6 +50,9 @@
 		"object",
 		"parent"
 	],
+	"album": [
+		"can_upload"
+	],
 	"photo": [
 		"can_delete",
 		"can_tag",

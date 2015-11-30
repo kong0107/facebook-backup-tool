@@ -2,78 +2,47 @@
 	$time_start = microtime(true);
 	require_once 'fb.php';
 	require_once 'db.php';
-	$metadata = json_decode(file_get_contents('metadata/v2.5.json'), true);
-	$excludedFields = json_decode(file_get_contents('excludedFields.json'), true);
-	
-	/**
-	 * Get field names of a node type.
-	 */
-	function getFields($nodeType) {
-		global $metadata;
-		global $excludedFields;
-		$ef = $excludedFields[$nodeType] or $ef = [];
-		$fields = [];
-		foreach($metadata[$nodeType]['fields'] as $field) {
-			$fn = $field['name'];
-			if(!in_array($fn, $ef)) $fields[] = $fn;
-		}
-		return $fields;
-	}
-	
 	$fieldsOfComment = implode(',', getFields('comment'));
-	
+
 	/**
-	 * Get all comments of a node.
-	 *
-	 * All comments and their comments are going to be parsed.
-	 * This may take minutes for posts of a famous page.
+	 * A function map what shall be done to a node by its type.
 	 */
-	function getComments($nodeId) {
-		global $fb;
-		global $fieldsOfComment;
-		$result = [];
-		$reqUrl = "/$nodeId/comments?fields=$fieldsOfComment";
-		echo "Getting comments of $nodeId\n";
-		do {
-			$res = $fb->get($reqUrl)->getDecodedBody();
-			foreach($res['data'] as $c) {
-				if($c['comment_count'] !== 0) 
-					$c['comments'] = getComments($c['id']);
-				//else echo "no sub-comments.\n";
-				$result[] = $c;
+	$funcMap = array(
+		/*'post' => function($post) {
+			// Hmm.. what about delete duplicates of field `action`?
+			return $post;
+		},*/
+		'photo' => function($photo) {
+			// Field `image` seems to be superfluous, 
+			// maybe delete some of its elements?
+			$image = $photo['images'][0];
+			$info = pathinfo(parse_url($image['source'], PHP_URL_PATH));
+			$dest = __DIR__ . "/data/photos/{$photo['id']}.{$info['extension']}";
+			if(!file_exists($dest) {
+				echo "Downloading photo to <code>$dest</code>\n";
+				copy($image['source'], $dest);
+				usleep(250);
 			}
-		} while($reqUrl = substr($res['paging']['next'], 31));
-		return $result;
-	}
-	
-	/**
-	 * Remove null, '' and [] in an array recursively.
-	 *
-	 * Unlike `empty`, this does NOT remove zero and false.
-	 */
-	function array_remove_empty($arr) {
-		foreach($arr as $k => &$v) {
-			if(is_array($v)) {
-				$v = array_remove_empty($v);
-				if(!count($v)) unset($arr[$k]);
-				continue;
-			}
-			if(is_null($v) || $v === '') unset($arr[$k]);
+			return $photo;
 		}
-		return $arr;
-	}
+	);
 
 	$nodeType = $_GET['nodeType'];
 	$edge = $_GET['edge'];
 	switch($edge) {
 		case 'feed':
 		case 'posts':
+		case 'tagged':
 			$perms = ['user_posts'];
 			$containedNode = 'post';
 			break;
 		case 'albums':
+			$perms = ['user_photos'];
+			$containedNode = 'album';
+			break;
 		case 'photos':
 			$perms = ['user_photos'];
+			$containedNode = 'photo';
 			break;
 		case 'videos':
 			$perms = ['user_videos'];
@@ -82,37 +51,12 @@
 			$perms = ['user_likes'];
 			$containedNode = 'page';
 			break;
-		case 'friends':
-			$perms = ['user_friends'];
-			break;
-		case 'tagged':
-			$perms = ['user_posts', 'user_photos', 'user_videos'];
-			break;
 		default: //'admined_groups', 'groups', 'tagged'
 			exit('Unknown or unsupported edge');
 	}
 	if($nodeType == 'page') $perms = [];
+	checkLogin($perms);
 
-	/**
-	 * Request the permission if not granted.
-	 */
-	if(!isset($_SESSION['facebook_access_token'])) {
-		header('Location: ' . getFBLoginUrl($perms));
-		exit;
-	}
-	else if(count($perms)) {
-		$granted = [];
-		foreach($fb->get("/me/permissions")->getGraphEdge() as $perm) {
-			if($perm['status'] == 'granted')
-				$granted[] = $perm['permission'];
-		}
-		foreach($perms as $perm) {
-			if(!in_array($perm, $granted)) {
-				header('Location: ' . getFBLoginUrl($perms));
-				exit;
-			}
-		}
-	}
 	$user = $fb->get('/me')->getDecodedBody();
 	$nodeId = ($nodeType == 'user') ? $user['id'] : $_GET['pageId'];
 
@@ -120,7 +64,7 @@
 	$col = $db->selectCollection($colName);
 	$fields = implode(',', getFields($containedNode));
 	$mayHaveComments = in_array('comments', $metadata[$containedNode]['connections']);
-		
+
 	$requestUrl = empty($_GET['request'])
 		? "/$nodeId/$edge?limit=5&fields=$fields"
 		: urldecode($_GET['request'])
@@ -141,12 +85,15 @@
 	$response = $fb->get($requestUrl)->getDecodedBody();
 	foreach($response['data'] as $node) {
 		echo "Parsing {$node['id']}\n";
-		if($mayHaveComments) {	
+		if($mayHaveComments) {
 			$comments = getComments($node['id']);
 			if(count($comments)) $node['comments'] = $comments;
 		}
+		if($funcMap[$containedNode])
+			$node = $funcMap[$containedNode]($node);
+
 		$node = array_remove_empty($node);
-		
+
 		$node['_id'] = $node['id'];
 		unset($node['id']);
 		$col->update(
@@ -162,16 +109,17 @@
 	$next = $response['paging']['next'];
 	if($next) {
 		$params = $_GET;
-		$params['request'] = urlencode(substr($next, 31));
+		$params['request'] = substr($next, 31);
 		$requestNext = $_SERVER['PHP_SELF'] . '?' . http_build_query($params);
 		echo "<a href=\"$requestNext\">Request next page</a><br>";
-		echo "<script>setTimeout(function(){location.href = '$requestNext';}, 5000);</script>";
+		echo "<script>setTimeout(function(){location.href = '$requestNext';}, 10000);</script>";
 	}
-	else echo 'No more data. You can <a href="crawler.html">crawl another page</a>.';
-	
+	else echo 'No more data.';
+
 	$time_end = microtime(true);
 	echo "<script>document.getElementById('timeDiff').textContent='" . ($time_end - $time_start) . "';</script>";
 ?>
 <br><a href="export.php?col=<?=$colName?>">Download JSON file</a>
+<br><a href="crawler.html">crawl another page</a>
 </body>
 </html>
