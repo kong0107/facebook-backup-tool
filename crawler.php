@@ -63,50 +63,35 @@
 		return $arr;
 	}
 
+	$nodeType = $_GET['nodeType'];
 	$edge = $_GET['edge'];
-	switch($_GET['nodeType']) {
-		case 'user':
-			$nodeType = 'user';
-			switch($edge) {
-				case 'feed':
-				case 'posts':
-					$perms = ['user_posts'];
-					break;
-				case 'albums':
-				case 'photos':
-					$perms = ['user_photos'];
-					break;
-				case 'videos':
-					$perms = ['user_videos'];
-					break;
-				case 'likes':
-					$perms = ['user_likes'];
-					break;
-				case 'friends':
-					$perms = ['user_friends'];
-					break;
-				case 'tagged':
-					$perms = ['user_posts', 'user_photos', 'user_videos'];
-					break;
-				default: //'admined_groups', 'groups', 'tagged'
-					exit('Unknown or unsupported edge');
-			}
-			break;
-		case 'page':
-			$nodeType = 'page';
-			$perms = [];
-			break;
-		default:
-			exit('Unknown or unsupported node type');
-	}
 	switch($edge) {
 		case 'feed':
 		case 'posts':
+			$perms = ['user_posts'];
 			$containedNode = 'post';
 			break;
-		default:
-			exit('`$containedNode` not set');
+		case 'albums':
+		case 'photos':
+			$perms = ['user_photos'];
+			break;
+		case 'videos':
+			$perms = ['user_videos'];
+			break;
+		case 'likes':
+			$perms = ['user_likes'];
+			$containedNode = 'page';
+			break;
+		case 'friends':
+			$perms = ['user_friends'];
+			break;
+		case 'tagged':
+			$perms = ['user_posts', 'user_photos', 'user_videos'];
+			break;
+		default: //'admined_groups', 'groups', 'tagged'
+			exit('Unknown or unsupported edge');
 	}
+	if($nodeType == 'page') $perms = [];
 
 	/**
 	 * Request the permission if not granted.
@@ -131,7 +116,8 @@
 	$user = $fb->get('/me')->getDecodedBody();
 	$nodeId = ($nodeType == 'user') ? $user['id'] : $_GET['pageId'];
 
-	$col = $db->selectCollection("{$nodeType}_{$nodeId}_{$edge}");
+	$colName = "{$nodeType}_{$nodeId}_{$edge}";
+	$col = $db->selectCollection($colName);
 	$fields = implode(',', getFields($containedNode));
 	$mayHaveComments = in_array('comments', $metadata[$containedNode]['connections']);
 		
@@ -179,12 +165,13 @@
 		$params['request'] = urlencode(substr($next, 31));
 		$requestNext = $_SERVER['PHP_SELF'] . '?' . http_build_query($params);
 		echo "<a href=\"$requestNext\">Request next page</a><br>";
-		echo "<script>setTimeout(function(){location.href = '$requestNext';}, 7500);</script>";
+		echo "<script>setTimeout(function(){location.href = '$requestNext';}, 5000);</script>";
 	}
 	else echo 'No more data. You can <a href="crawler.html">crawl another page</a>.';
 	
 	$time_end = microtime(true);
 	echo "<script>document.getElementById('timeDiff').textContent='" . ($time_end - $time_start) . "';</script>";
 ?>
+<br><a href="export.php?col=<?=$colName?>">Download JSON file</a>
 </body>
 </html>

@@ -14,7 +14,18 @@
 	"page": [
 		"ad_campaign",
 		"promotion_eligible",
-		"owner_business"
+		"owner_business",
+		
+		"access_token",
+		"business",
+		
+		"can_checkin",
+		"can_post",
+		"last_used_time",
+		"has_added_app",
+		"is_permanently_closed",
+		"is_published",
+		"voip_info"
 	],
 	"post": [
 		"allowed_advertising_objectives",
@@ -38,5 +49,10 @@
 		"is_hidden",
 		"object",
 		"parent"
+	],
+	"photo": [
+		"can_delete",
+		"can_tag",
+		"icon"
 	]
 }
