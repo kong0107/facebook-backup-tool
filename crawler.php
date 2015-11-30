@@ -18,7 +18,7 @@
 			$image = $photo['images'][0];
 			$info = pathinfo(parse_url($image['source'], PHP_URL_PATH));
 			$dest = __DIR__ . "/data/photos/{$photo['id']}.{$info['extension']}";
-			if(!file_exists($dest) {
+			if(!file_exists($dest)) {
 				echo "Downloading photo to <code>$dest</code>\n";
 				copy($image['source'], $dest);
 				usleep(250);
