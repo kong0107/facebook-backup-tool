@@ -6,19 +6,15 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script>
 		angular.module("myApp", []).controller("main", function($scope, $http) {
-			$scope.tab = "timeline";
-			$scope.page = {name: 'aaa', about: 'qq'};
+			$scope.tab = "about";
+			$http.get("data/page_299951923544433_info.json").then(
+				function(r){$scope.page = r.data;},
+				function(r){console.log(r);}
+			);
 			$http.get("data/page_299951923544433_feed.json").then(
 				function(r){$scope.posts = r.data;},
 				function(r){console.log(r);}
 			);
-			
-			/*for(var i = 0; i < $scope.posts.length; ++i) {
-				$scope.posts[i].url = $scope.page.link
-					+ 'posts/'
-					+ $scope.posts[i]._id.split("_")[1]
-				;
-			}*/
 		});
 	</script>
 	<link rel="stylesheet" href="styles/style.css">
@@ -36,7 +32,7 @@
 		<h2>Timeline</h2>
 		<label>Search: <input ng-model="searchText" ng-model-options="{debounce: 250}" placeholder="search text"></label>
 		<article ng-include="'templates/post_body.html'"
-			ng-repeat="post in posts | filter: searchText | orderBy: '-created_time'"
+			ng-repeat="post in posts|filter:searchText|orderBy:'-created_time'"
 		></article>
 	</section>
 </body>

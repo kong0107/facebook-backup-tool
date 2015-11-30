@@ -75,9 +75,12 @@ article {
 	color: #888;
 }
 
-
 .story {
 	font-style: italic;
+}
+
+summary {
+	cursor: pointer;
 }
 
 .comment {

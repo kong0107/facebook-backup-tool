@@ -17,4 +17,3 @@
 <div class="cc" ng-include="'templates/comment_body.html'"
 	ng-repeat="comment in comment.comments | orderBy: 'created_time'"
 ></div>
-<details class="rawdata"><summary>JSON</summary>{{comment|json}}</details>

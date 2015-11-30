@@ -1,14 +1,39 @@
 {
+	"user": [
+		"token_for_business",
+	
+		"currency",
+		"device",
+		"payment_pricepoints",
+		"viewer_can_send_gift",
+		
+		"context",
+		"favorite_athletes",
+		"favorite_teams"
+	],
+	"page": [
+		"ad_campaign",
+		"promotion_eligible",
+		"owner_business"
+	],
 	"post": [
 		"allowed_advertising_objectives",
-		"is_app_share"
+		"is_app_share",
+		
+		"caption",
+		"icon",
+		"is_hidden",
+		"is_instagram_eligible",
+		"is_popular",
+		"is_published",
+		"is_expired",
+		"is_spherical"
 	],
 	"comment": [
 		"can_comment",
 		"can_hide",
 		"can_like",
 		"can_remove",
-		"is_hidden",
 		"is_private",
 		"object",
 		"parent"
