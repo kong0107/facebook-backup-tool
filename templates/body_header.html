@@ -1,9 +1,11 @@
-<h1 ng-bind="page.name"></h1>
-<p class="page_about" ng-if="page.about" ng-bind="page.about"></p>
+<h1 ng-bind="node.name"></h1>
+<p class="about" ng-if="node.about" ng-bind="node.about"></p>
+<p class="about" ng-if="node.bio" ng-bind="node.bio"></p>
+<blockquote class="about" ng-if="!node.about && !node.bio" ng-bind="node.quotes"></blockquote>
 <nav>
 	<ul>
 		<li ng-click="$parent.tab='about'" ng-class="tab=='about'?'focus':''">About</li>
 		<li ng-click="$parent.tab='timeline'" ng-class="tab=='timeline'?'focus':''">Timeline</li>
-		<li><a href="{{page.link}}">Facebook</a></li>
+		<li><a href="{{node.link}}">Facebook</a></li>
 	</ul>
 </nav>

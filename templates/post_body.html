@@ -1,7 +1,26 @@
 <div class="metadata">
-	<a class="time_container" name="{{post._id}}" href="http://facebook.com/{{post._id}}">
-		<time class="created_time" datetime="{{post.created_time}}">{{post.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}</time>
-	</a>
+	<ul>
+		<li><a class="time_container" name="{{post._id}}"
+			href="{{post.actions?post.actions[0].link:'http://facebook.com/'+post._id}}"
+		>
+			<time class="created_time" datetime="{{post.created_time}}">
+				{{post.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}
+			</time>
+		</a></li>
+		<li ng-repeat="a in post.actions" ng-if="a.name!='Comment'&&a.name!='Like'&&a.name!='Share'">
+			<a href="{{a.link}}">{{a.name}}</a>
+		</li>
+		<li ng-if="post.privacy" title="privacy">
+			<div ng-if="post.privacy.value=='EVERYONE'">Public</li>
+			<details ng-if="post.privacy.value!='EVERYONE'" class="privacy">
+				<summary>Private</summary>
+				<dl>
+					<dt ng-repeat-start="(k,v) in post.privacy">{{k}}</dt>
+					<dd ng-repeat-end>{{v}}</dd>
+				</dl>
+			</details>
+		</li>
+	</ul>
 </div>
 <div class="story" ng-if="post.story">{{post.story}}</div>
 <div class="message" ng-if="post.message">{{post.message}}</div>

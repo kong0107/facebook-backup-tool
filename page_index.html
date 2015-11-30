@@ -2,30 +2,64 @@
 <html ng-app="myApp" ng-controller="main">
 <head>
 	<meta charset="utf-8">
-	<title ng-bind="page.name"></title>
+	<title ng-bind="node.name"></title>
+	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script>
-		angular.module("myApp", []).controller("main", function($scope, $http) {
-			$scope.tab = "timeline";
-			$http.get("data/page_299951923544433_info.json").then(
-				function(r){$scope.page = r.data;},
+		angular.module("myApp", [])
+		.config(function($locationProvider) {
+			$locationProvider.html5Mode({
+				enabled: true,
+				requireBase: false
+			});
+		})
+		.controller("main", function($scope, $http, $location) {
+			//var node = "page_299951923544433";
+			var node = "user_10154193091691393";
+			var init = function() {
+				$scope.posts.sort(function(a, b) {
+					return new Date(b.created_time) - new Date(a.created_time);
+				});
+				var ms = [];
+				for(var i = 0; i < $scope.posts.length; ++i)
+					ms.push($scope.posts[i].created_time.substr(0, 7));
+				$scope.months = $.unique(ms);
+				
+				var ym = $location.hash();
+				if(ym == 'about') $scope.tab = 'about';
+				else {
+					$scope.tab = "timeline";
+					$scope.month = ($scope.months.indexOf(ym) == -1)
+						? $scope.months[0] : ym
+					;
+				}
+			};
+			
+			$scope.setMonth = function(ym) {
+				$scope.month = ym;
+				$location.hash(ym);
+			}
+			
+			$http.get("data/" + node + "_info.json").then(
+				function(r){$scope.node = r.data;},
 				function(r){console.log(r);}
 			);
-			$http.get("data/page_299951923544433_posts.json").then(
+			$http.get("data/" + node + "_feed_private.json").then(
 				function(r){
-					$scope.posts = r.data.sort(function(a, b) {
+					$scope.posts = r.data;
+					init();/*.sort(function(a, b) {
 						return new Date(b.created_time) - new Date(a.created_time);
 					});
 					
 					var ms = [];
-					var newest = new Date($scope.posts[0].created_time);
-					var oldest = new Date($scope.posts[$scope.posts.length-1].created_time);
-					for(var cur = newest;
-						cur.getFullYear() > oldest.getFullYear() || cur.getMonth() >= oldest.getMonth();
-						cur.setMonth(cur.getMonth()-1)
-					) ms.push(cur.toISOString().substr(0, 7));
-					$scope.months = ms;
-					$scope.month = $scope.posts[0].created_time.substr(0, 7);
+					for(var i = 0; i < $scope.posts.length; ++i)
+						ms.push($scope.posts[i].created_time.substr(0, 7));
+					$scope.months = $.unique(ms);
+					
+					var ym = $location.hash();
+					$scope.month = ($scope.months.indexOf(ym) == -1)
+						? $scope.months[0] : ym
+					;*/
 				},
 				function(r){console.log(r);}
 			);
@@ -38,7 +72,7 @@
 	<section id="about" ng-show="tab=='about'">
 		<h2>About</h2>
 		<dl>
-			<dt ng-repeat-start="(field, value) in page">{{field}}</dt>
+			<dt ng-repeat-start="(field, value) in node">{{field}}</dt>
 			<dd ng-repeat-end>{{value|json}}</dd>
 		</dl>
 	</section>
@@ -47,7 +81,7 @@
 		<label>Search: <input ng-model="searchText" ng-model-options="{debounce: 250}" placeholder="search text"></label>
 		<nav ng-hide="searchText">
 			<ul>
-				<li ng-repeat="m in months" ng-click="$parent.month = m" 
+				<li ng-repeat="m in months" ng-click="setMonth(m)" 
 					ng-class="$parent.month==m?'focus':''"
 				>{{m}}</li>
 			</ul>

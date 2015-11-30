@@ -1,6 +1,7 @@
-h1, .page_about {
+h1, .about {
 	display: inline-block;
 	margin: 0.5em;
+	white-space: pre-wrap;
 }
 
 nav li {
@@ -33,12 +34,19 @@ article {
 	clear: both;
 }
 .metadata {
-	text-align: right;
 	float: right;
 	clear: both;
 	font-size: smaller;
 	padding: 0.25em;
 	margin: 0.25em;
+}
+.metadata ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+.privacy dl {
+	margin: 0;
 }
 .message {
 	white-space: pre-wrap;

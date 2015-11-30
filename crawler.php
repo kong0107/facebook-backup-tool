@@ -20,7 +20,7 @@
 		return $fields;
 	}
 	
-	$fieldsOfComment = implode(', ', getFields('comment'));
+	$fieldsOfComment = implode(',', getFields('comment'));
 	
 	/**
 	 * Get all comments of a node.
@@ -33,11 +33,10 @@
 		global $fieldsOfComment;
 		$result = [];
 		$reqUrl = "/$nodeId/comments?fields=$fieldsOfComment";
-		//echo "Getting comments of $nodeId\n";
+		echo "Getting comments of $nodeId\n";
 		do {
 			$res = $fb->get($reqUrl)->getDecodedBody();
 			foreach($res['data'] as $c) {
-				//print_r($c);
 				if($c['comment_count'] !== 0) 
 					$c['comments'] = getComments($c['id']);
 				//else echo "no sub-comments.\n";
