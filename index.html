@@ -1,147 +1,82 @@
 <!DOCTYPE HTML>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>Backup Your Facebook Posts on Your Own Timeline</title>
-		<style type="text/css">
-			#log {
-				white-space: pre;
-				height: 8em;
-				overflow: auto;
-				resize: vertical;
-				background-color: #ccc;
-			}
-			em {
-				font-weight: bold;
-			}
-			#result {
-				width: 100%;
-				height: 10em;
-				resize: vertical;
-			}
-		</style>
-		<script type="text/javascript" src="js/Node.insertAfter.js"></script>
-		<script type="text/javascript">
-			var button;
-
-			window.onload = function() {
-				button = document.querySelector('button');
-				button.onclick = function() {
-					button.disabled = 'disabled';
-					log('Checking permission ...');
-					FB.requestPermission(
-						'user_posts',
-						function() {
-							main();
-							button.textContent = 'Requesting data from Facebook ...';
-							document.querySelector('#result').textContent = '[\n]';
-						},
-						function() {
-							log('User cannelled login or did not permit access to `user_posts`');
-							button.disabled = '';
-						}
-					);
-				};
-			};
-
-			function log(str) {
-				var l = document.querySelector('#log');
-				l.textContent = (new Date).toLocaleTimeString() + "\t" + str + "\n" + l.textContent;
-			}
-
-			var iteration = 0;
-			var iMax = 5;//Infinity;
-			var path = '/me/posts?fields=id,type,message,message_tags,story,story_tags,with_tags,created_time,updated_time,application,parent_id,place,link,object_id,name,description,privacy';
-			function main() {
-				log('#' + (++iteration) + ', requesting ' + path);
-				var result = document.querySelector('#result');
-				var startTime = Date.now();
-				FB.api(path, function(r) {
-					log('Gets response in ' + (Date.now() - startTime) + ' milliseconds.');
-					if(r.error) {
-						console.log(r);
-						log(JSON.stringify(r.error));
-						button.textContent = 'Error';
-						return;
-					}
-					if(!r.data || !r.data.length) {
-						console.log(r);
-						log('No more data. Finish.');
-						button.textContent = 'Finished. You can copy the JSON now.';
-						return;
-					}
-
-
-					var str = result.textContent.slice(0, -1);
-					for(var i = 0; i < r.data.length; ++i) {
-						/// Parse data
-						var post = r.data[i];
-						/*if(post.privacy.description != 'Public') continue;
-						delete post.privacy;
-						if(post.story_tags) delete post.story_tags['0'];*/
-
-						/// Add to shown text
-						if(str.length > 2) str += ',\n';
-						str += JSON.stringify(post);
-					}
-					str += ']';
-					result.textContent = str;
-					log('Data size: ' + (str.length + 1));
-
-
-					if(!r.paging || !r.paging.next) {
-						console.log(r);
-						log('No more data. Finish.');
-						button.textContent = 'Finished. You can copy the JSON now.';
-						return;
-					}
-
-					if(iteration == iMax) {
-						log('(debug usage) Reached iteration limit ' + iMax);
-						button.textContent = 'Finished. You can copy the JSON now.';
-						console.log(JSON.parse(result.textContent));
-						return;
-					}
-
-					path = r.paging.next;
-					setTimeout(main, 1000);
+<html ng-app="myApp" ng-controller="main">
+<head>
+	<meta charset="utf-8">
+	<title ng-bind="node.name"></title>
+	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+	<script>
+		angular.module("myApp", [])
+		.config(function($locationProvider) {
+			$locationProvider.html5Mode({
+				enabled: true,
+				requireBase: false
+			});
+		})
+		.controller("main", function($scope, $http, $location) {
+			//var node = "page_299951923544433";
+			var node = "user_10154193091691393";
+			var init = function() {
+				$scope.posts.sort(function(a, b) {
+					return new Date(b.created_time) - new Date(a.created_time);
 				});
-			}
-		</script>
-	</head>
-	<body>
-		<script type="text/javascript">
-			window.fbAsyncInit = function() {
-				FB.init({
-					version    : 'v2.4',
-					appId      : '1598824630378971',
-					xfbml      : false,
-					status     : true
-				});
+				var ms = [];
+				for(var i = 0; i < $scope.posts.length; ++i)
+					ms.push($scope.posts[i].created_time.substr(0, 7));
+				$scope.months = $.unique(ms);
+				
+				var ym = $location.hash();
+				if(ym == 'about') $scope.tab = 'about';
+				else {
+					$scope.tab = "timeline";
+					$scope.month = ($scope.months.indexOf(ym) == -1)
+						? $scope.months[0] : ym
+					;
+				}
 			};
-
-			(function(d, s, id){
-				var js, fjs = d.getElementsByTagName(s)[0];
-				if (d.getElementById(id)) {return;}
-				js = d.createElement(s); js.id = id;
-				js.src = "//connect.facebook.net/zh_TW/sdk.js";
-				fjs.parentNode.insertBefore(js, fjs);
-			}(document, 'script', 'facebook-jssdk'));
-		</script>
-		<script type="text/javascript" src="js/sdk-extend.js"></script>
-		<h1>Backup Your Facebook Posts on Your Own Timeline</h1>
-		<h2>Notes</h2>
-		<ol>
-			<li>This tool only output a JSON string. You may need some programming background to understand how to work on the output.</li>
-			<li>You have to log into Facebook and authenticate this application to continue.</li>
-			<li>The process may run over 10 minutes and cost much memory of your computer. Be patient and don't be surprised if the browser crushes. Mobile devices are usually not suitable for this.</li>
-			<li>There will be no file downloading after all backup actions done. You have to copy and paste the result to a plain text file by yoursef.</li>
-			<li>Private posts are also in the output. You shall check there's no sensitive information before sharing the output.</li>
-		</ol>
-		<h2>Take Action</h2>
-		<button>Backup!</button>
-		<div id="log"></div>
-		<h2>Result</h2>
-		<textarea id="result"></textarea>
-	</body>
+			
+			$scope.setMonth = function(ym) {
+				$scope.month = ym;
+				$location.hash(ym);
+			}
+			
+			$http.get("data/" + node + "_info.json").then(
+				function(r){$scope.node = r.data;},
+				function(r){console.log(r);}
+			);
+			$http.get("data/" + node + "_feed_public.json").then(
+				function(r){
+					$scope.posts = r.data;
+					init();
+				},
+				function(r){console.log(r);}
+			);
+		});
+	</script>
+	<link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+	<div ng-include="'templates/body_header.html'"></div>
+	<section id="about" ng-show="tab=='about'">
+		<h2>About</h2>
+		<dl>
+			<dt ng-repeat-start="(field, value) in node">{{field}}</dt>
+			<dd ng-repeat-end>{{value|json}}</dd>
+		</dl>
+	</section>
+	<section id="timeline" ng-show="tab=='timeline'">
+		<h2>Timeline</h2>
+		<label>Search: <input ng-model="searchText" ng-model-options="{debounce: 250}" placeholder="search text"></label>
+		<nav ng-hide="searchText">
+			<ul>
+				<li ng-repeat="m in months" ng-click="setMonth(m)" 
+					ng-class="$parent.month==m?'focus':''"
+				>{{m}}</li>
+			</ul>
+		</nav>
+		<article ng-include="'templates/post_body.html'"
+			ng-repeat="post in posts|filter:(searchText?searchText:{created_time:month})"
+		></article>
+	</section>
+</body>
 </html>

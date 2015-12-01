@@ -117,7 +117,7 @@
 	<meta charset="utf-8">
 	<title>Facebook Data Crawler</title>
 </head>
-<body style="white-space: pre-wrap; font-family: monospace;">
+<body style="white-space: pre-wrap; font-family: monospace; margin-top: 0;">
 <h1 style="margin-top: 0;">Facebook Data Crawler</h1>
 <div id="timeDiff">&nbsp;</div>
 <div id="waitMsg">Waits <?=number_format($waitTime)?> milliseconds for each request bundle.</div>
@@ -206,7 +206,10 @@
 					var f = p.$('form').get(0);
 					var edges = f.edge;
 					var scope = p.angular.element(p.$("[ng-controller='main']")).scope();
-					var submit = function(){ f.submit(); };
+					var submit = function(){ 
+						f.submit(); 
+						p.$("#message").text("Form submitted. Crawling the edge ...");
+					};
 
 					if(edges.value != "photosInAlbum") {
 						for(var i = 0; i < edges.length - 1; ++i) {
