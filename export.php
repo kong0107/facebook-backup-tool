@@ -1,5 +1,5 @@
 <?php
-	require_once 'db.php';
+	require_once 'db.inc.php';
 	$r = iterator_to_array(
 		$db->selectCollection($_GET['col'])->find()
 		->sort(array('created_time'=>-1))

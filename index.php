@@ -1,5 +1,5 @@
 <?php
-	require_once 'db.php';
+	require_once 'db.inc.php';
 	$page_id = '481065478629613';
 	$page_id = isset($_GET['id']) ? $_GET['id'] : '299951923544433';
 	$page = $db->page->findOne(array('_id'=> $page_id));

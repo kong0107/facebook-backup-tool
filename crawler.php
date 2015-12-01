@@ -1,7 +1,7 @@
 <?php
 	$time_start = microtime(true);
-	require_once 'fb.php';
-	require_once 'db.php';
+	require_once 'fb.inc.php';
+	require_once 'db.inc.php';
 	$fieldsOfComment = implode(',', getFields('comment'));
 
 	/**

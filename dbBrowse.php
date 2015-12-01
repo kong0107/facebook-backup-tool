@@ -9,7 +9,7 @@
 		exit("Use localhost to link to this page.");
 	}
 	
-	require_once 'db.php';
+	require_once 'db.inc.php';
 
 	$dbs = array();
 	foreach($dbCon->listDBs()['databases'] as $dbArr)

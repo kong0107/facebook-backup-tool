@@ -1,5 +1,5 @@
 <?php
-	require_once 'db.php';
+	require_once 'db.inc.php';
 	$post_id = isset($_GET['id']) ? $_GET['id'] : '299951923544433_401095500096741';
 	$page_id = explode('_', $post_id)[0];
 	

@@ -1,5 +1,5 @@
 <?php
-	require 'fb.php';
+	require 'fb.inc.php';
 	try {
 		$accessToken = $fb->getRedirectLoginHelper()->getAccessToken();
 	} catch(Facebook\Exceptions\FacebookResponseException $e) {

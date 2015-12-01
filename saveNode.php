@@ -1,6 +1,6 @@
 <?php
 	$nodeId = $_GET['nodeId'] or exit('`nodeId` required');
-	require_once 'fb.php';
+	require_once 'fb.inc.php';
 
 	try {
 		$res = $fb->get("/$nodeId?metadata=1")->getDecodedBody();

@@ -25,8 +25,8 @@
 					else FB.login(main, {scope: ''});
 				});
 			};
-			$.getScript("js/sdk-extend.js");
-			
+			$.getScript("js/fbsdk-extend.js");
+
 			var nodes = {
 				user: 'me',
 				page: '20531316728',
@@ -42,7 +42,7 @@
 				doc: '1640602369524316',
 				event: '1546566615579825'
 			};
-			
+
 			var main = function() {
 				$scope.message = "Fetching metadata ...";
 				$scope.$apply();
