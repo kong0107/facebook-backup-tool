@@ -23,19 +23,19 @@
 		.controller("main", function($scope) {
 			$scope.connections = {
 				user: [
-					'feed', 'posts', 'albums', 'photos', 'videos',
-					'admined_groups', 'groups', 'likes', 'tagged'
+					'albums', 'likes', //'feed', 'admined_groups', 'groups',
+					'posts', 'photos', 'videos', 'tagged'
 				],
 				page: [
-					'albums', 'events', 'feed', 'milestones',
-					'photos', 'posts', 'videos'
+					'albums', 'events', //'feed',
+					'posts', 'photos', 'videos'
 				],
 				group: [
-					"albums", "events", "docs", "feed",
-					"files", "members", "videos"
+					"albums", "events", "feed",
+					"members", "docs", "videos"//, "files"
 				],
 				event: [
-					"feed", "posts", "comments", "photos", "videos"
+					"posts", "photos", "videos", "comments", "feed"
 				]
 			};
 
@@ -64,6 +64,7 @@
 			$scope.showInfo = function(node_id) {
 				$scope.message = 'Fetching data ...';
 				$scope.nodeInfo = undefined;
+				$scope.conData = null;
 				FB.api(node_id + '?metadata=1', function(r) {
 					if(r.error) {
 						$scope.message = 'No such node.';
@@ -129,12 +130,13 @@
 			$scope.getAlbums = function(nodeId) {
 				$scope.message = "Fetching data ...";
 				FB.apiwt(nodeId + "/albums", function(r) {
-					$scope.message = '';
 					$scope.albums = r.data;
-					$scope.$apply();
+					if(!r.data.length) $scope.message = '';
+					$scope.getAlbumInfo(r.data[0].id);
 				});
 			};
 			$scope.getAlbumInfo = function(nodeId) {
+				$scope.albumId = nodeId;
 				$scope.message = "Fetching data ...";
 				$scope.conData = null;
 				FB.apiwt(nodeId + "/photos", function(r) {
@@ -166,28 +168,47 @@
 		});
 	</script>
 	<style>
+		ul { list-style-type: none; }
 		#message {
 			position: fixed;
-			left: 0;
-			bottom: 0;
+			top: 0;
+			right: 0;
 			margin: 0.2em;
+			padding: 0.2em;
+			background-color: #fff;
 		}
-		.page_name {
+		.cand_name {
 			display: inline-block;
 			border: 1px solid #ccc;
 			margin: 0.25em;
 			padding: 0.25em;
 		}
-		ul {list-style-type: none;}
+		.info {
+			float: right;
+			width: 50%;
+			height: 20em;
+			white-space: pre-wrap;
+			font-family:
+			monospace;
+			overflow: scroll;
+		}
+		.edgeSelector {
+			min-height: 20em;
+		}
+		iframe {
+			width: 98%;
+			height: 40em;
+			border: solid #888;
+			border-width: 2px 0 0 0;
+		}
 	</style>
 </head>
 <body ng-app="myApp" ng-controller="main">
 	<h1>Facebook Data Crawler</h1>
 	<p id="message">{{message}}</p>
 	<h2>Choose what to crawl</h2>
-	<form method="get" action="crawler.php">
+	<form method="get" action="crawler.php" target="iframe">
 		<dl>
-		{{last_name}}
 			<dt>Type</dt>
 			<dd>
 				<label><input type="radio" name="nodeType" ng-model="nodeType" value="user" ng-click="clear(); showInfo('me')">User</label>
@@ -203,20 +224,19 @@
 			</dd>
 			<dt ng-show="showSelect">Select</dt>
 			<dd ng-show="showSelect">
-				<label class="page_name" ng-repeat="cand in candidates">
+				<label class="cand_name" ng-repeat="cand in candidates">
 					<input type="radio" name="nodeId" value="{{cand.id}}"
 						ng-click="showInfo(cand.id);" ng-model="nodeId"
 					>{{cand.name}}
 				</label>
 			</dd>
 		</dl>
-		<div ng-show="conData||nodeInfo"
-			style="float: right; width: 50%; white-space: pre-wrap; font-family: monospace;"
+		<div ng-show="conData||nodeInfo" class="info"
 		>{{(conData?conData:nodeInfo)|json}}
 		</div>
 		<h2>{{nodeInfo.name}}</h2>
-		<div ng-show="nodeInfo">
-			<ul>
+		<div class="edgeSelector">
+			<ul ng-show="nodeInfo">
 				<li ng-repeat="con in connections[nodeType]">
 					<label>
 						<input type="radio" name="edge" ng-value="con"
@@ -234,15 +254,18 @@
 						<li ng-repeat="album in albums">
 							<label>
 								<input type="radio" name="album" value="{{album.id}}"
-									ng-click="getAlbumInfo(album.id)"
+									ng-click="getAlbumInfo(album.id)" ng-model="albumId"
 								>{{album.name}}
 							</label>
 						</li>
 					</ul>
 				</li>
 			</ul>
-			<button ng-disabled="!conData.length" onclick="this.form.submit();">Start crawling</button>
+			<button ng-show="nodeInfo" ng-disabled="!conData.length"
+				onclick="this.form.submit();"
+			>Start crawling</button>
 		</div>
 	</form>
+	<iframe name="iframe" src="about:blank"></iframe>
 </body>
 </html>

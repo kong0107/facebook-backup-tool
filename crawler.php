@@ -13,12 +13,12 @@
 			return $post;
 		},*/
 		'photo' => function($photo) {
-			// Field `image` seems to be superfluous, 
+			// Field `image` seems to be superfluous,
 			// maybe delete some of its elements?
-			global $nodeId;
+			global $nodeType, $nodeId;
 			$image = $photo['images'][0];
 			$info = pathinfo(parse_url($image['source'], PHP_URL_PATH));
-			$dir = __DIR__ . "/data/photos/$nodeId/";
+			$dir = __DIR__ . "/data/photos/{$nodeType}_{$nodeId}_photos/";
 			$dest = "$dir{$photo['id']}.{$info['extension']}";
 			if(!file_exists($dest)) {
 				echo "Downloading photo to <code>$dest</code>\n";
@@ -34,7 +34,7 @@
 			return $video;
 		}*/
 	);
-	
+
 	/**
 	 * Modify $_GET for photos in album.
 	 *
@@ -78,15 +78,20 @@
 			$containedNode = 'doc';
 			break;
 		case 'comments':
+			$perms = ['user_events'];
 			$containedNode = 'comment';
 			break;
-		default: //'admined_groups', 'groups', 'tagged'
+		case 'events':
+			$perms = ['user_events'];
+			$containedNode = 'event';
+			break;
+		default: //'admined_groups', 'groups'
 			exit('Unknown or unsupported edge');
 	}
 	if($nodeType == 'page') $perms = [];
 	else if($nodeType == 'group') $perms = ['user_managed_groups'];
 	else if($nodeType == 'event') $perms = ['user_events'];
-	
+
 	checkLogin($perms);
 
 	$user = $fb->get('/me')->getDecodedBody();
@@ -101,6 +106,10 @@
 		? "/$nodeId/$edge?limit=5&fields=$fields"
 		: urldecode($_GET['request'])
 	;
+
+	$waitTime = 2500;
+	if($containedNode == 'photo') $waitTime *= 2;
+	if($mayHaveComments) $waitTime *= 2;
 ?>
 <!DOCTYPE html>
 <html>
@@ -111,9 +120,35 @@
 <body style="white-space: pre-wrap; font-family: monospace;">
 <h1 style="margin-top: 0;">Facebook Data Crawler</h1>
 <div id="timeDiff">&nbsp;</div>
+<div id="waitMsg">Waits <?=number_format($waitTime)?> milliseconds for each request bundle.</div>
 <?php
-	echo date(DATE_ATOM);
-	echo "\nRequesting <code>$requestUrl</code>\n";
+	echo 'Starts at ' . date('Y-m-d H:i:s') . "\n";
+	/**
+	 * Save node info to a JSON file and into DB.
+	 */
+	if(empty($_GET['request'])) {
+		echo "Requesting node info ...\n";
+		$ru = "/$nodeId?fields=" . implode(',', getFields($nodeType));
+		$nodeInfo = array_remove_empty($fb->get($ru)->getDecodedBody());
+
+		$dir = __DIR__ . '/data/json/';
+		if(!is_dir($dir)) mkdir($dir, 0777, true);
+		$dest = __DIR__ . "/data/json/{$nodeType}_{$nodeId}_info.json";
+		$bytes = file_put_contents($dest,
+			json_encode($nodeInfo, JSON_UNESCAPED_UNICODE) . "\n"
+		);
+		echo "Save node info into <code>$dest</code>\n";
+
+		$nodeInfo['_id'] = $nodeId;
+		unset($nodeInfo['id']);
+		$db->selectCollection($nodeType)->update(
+			array('_id' => $nodeId),
+			$nodeInfo,
+			array('upsert' => true)
+		);
+	}
+
+	echo "Requesting <code>$requestUrl</code>\n";
 	try {
 		$response = $fb->get($requestUrl)->getDecodedBody();
 	} catch(Facebook\Exceptions\FacebookResponseException $e) {
@@ -139,7 +174,7 @@
 			$node,
 			array('upsert' => true)
 		);
-		echo '<div style="max-height: 20em; overflow: auto;">';
+		echo '<div style="max-height: 20em; overflow: auto; border: 1px solid #ccc;">';
 		echo htmlspecialchars(print_r($node, true));
 		echo '</div>';
 	}
@@ -149,13 +184,68 @@
 		$params = $_GET;
 		$params['request'] = substr($next, 31);
 		$requestNext = $_SERVER['PHP_SELF'] . '?' . http_build_query($params);
-		echo "<a href=\"$requestNext\">Request next page</a><br>";
-		echo "<script>setTimeout(function(){location.href = '$requestNext';}, 10000);</script>";
+		echo "<a href=\"$requestNext\">Request next page</a>\n";
+		echo "<script>setTimeout(function(){location.href = '$requestNext';}, $waitTime);</script>";
 	}
-	else echo 'No more data.';
+	else {
+		echo "No more data.\n";
+		$data = iterator_to_array(
+			$db->selectCollection($colName)->find()
+			->sort(array('created_time'=>-1))
+		, false);
+		$dest = __DIR__ . "/data/json/{$nodeType}_{$nodeId}_{$edge}.json";
+		$bytes = file_put_contents($dest,
+			json_encode($data, JSON_UNESCAPED_UNICODE) . "\n"
+		);
+		?>
+			<br>Saved all nodes in edge (totally <?=number_format($bytes)?> bytes) into <code><?=$dest?></code>
+			<script>
+				document.getElementById("waitMsg").textContent="Finished crawling this edge.";
+				if(window.parent != window) {
+					var p = window.parent;
+					var f = p.$('form').get(0);
+					var edges = f.edge;
+					var scope = p.angular.element(p.$("[ng-controller='main']")).scope();
+					var submit = function(){ f.submit(); };
 
+					if(edges.value != "photosInAlbum") {
+						for(var i = 0; i < edges.length - 1; ++i) {
+							if(edges[i].value == edges.value) {
+								edges.value = edges[i + 1].value;
+								break;
+							}
+						}
+						if(edges.value != "photosInAlbum")
+							scope.requestEdge(edges.value);
+						else scope.getAlbums(scope.nodeId);
+						setTimeout(submit, 5000);
+					}
+					else {
+						var albums = f.album;
+						if(albums.value == albums[albums.length - 1].value) {
+							alert('Finished every album.');
+						}
+						else {
+							for(var i = 0; i < albums.length - 1; ++i) {
+								if(albums[i].value == albums.value) {
+									albums.value = albums[i + 1].value;
+									break;
+								}
+							}
+							scope.getAlbumInfo(albums.value);
+							setTimeout(submit, 5000);
+						}
+					}
+					p.$("#message").text("Finished crawling edge <?=$colName?>.");
+				}
+			</script>
+		<?php
+	}
 	$time_end = microtime(true);
-	echo "<script>document.getElementById('timeDiff').textContent='" . ($time_end - $time_start) . "';</script>";
+	echo '<script>document.getElementById("timeDiff").textContent="'
+		. number_format($time_end - $time_start, 3)
+		. ' seconds were spent on this page.";</script>'
+	;
 ?>
 <br><a href="export.php?col=<?=$colName?>">Download JSON file</a>
 <br><a href="crawler.html">crawl another page</a>
