@@ -15,17 +15,39 @@
 		'photo' => function($photo) {
 			// Field `image` seems to be superfluous, 
 			// maybe delete some of its elements?
+			global $nodeId;
 			$image = $photo['images'][0];
 			$info = pathinfo(parse_url($image['source'], PHP_URL_PATH));
-			$dest = __DIR__ . "/data/photos/{$photo['id']}.{$info['extension']}";
+			$dir = __DIR__ . "/data/photos/$nodeId/";
+			$dest = "$dir{$photo['id']}.{$info['extension']}";
 			if(!file_exists($dest)) {
 				echo "Downloading photo to <code>$dest</code>\n";
+				if(!is_dir($dir)) mkdir($dir, 0777, true);
 				copy($image['source'], $dest);
 				usleep(250);
 			}
 			return $photo;
-		}
+		}/*,
+		'video' => function($video) {
+			// well.. `format` shall be shrunk.
+			// and.. what about download the file by `source` field?
+			return $video;
+		}*/
 	);
+	
+	/**
+	 * Modify $_GET for photos in album.
+	 *
+	 * Not a good solution, but I'm lazy.
+	 */
+	if($_GET['album']) {
+		$params = array(
+			'nodeType' => 'album',
+			'nodeId' => $_GET['album'],
+			'edge' => 'photos'
+		);
+		$_GET = $params;
+	}
 
 	$nodeType = $_GET['nodeType'];
 	$edge = $_GET['edge'];
@@ -46,23 +68,33 @@
 			break;
 		case 'videos':
 			$perms = ['user_videos'];
+			$containedNode = 'video';
 			break;
 		case 'likes':
 			$perms = ['user_likes'];
 			$containedNode = 'page';
 			break;
+		case 'docs':
+			$containedNode = 'doc';
+			break;
+		case 'comments':
+			$containedNode = 'comment';
+			break;
 		default: //'admined_groups', 'groups', 'tagged'
 			exit('Unknown or unsupported edge');
 	}
 	if($nodeType == 'page') $perms = [];
+	else if($nodeType == 'group') $perms = ['user_managed_groups'];
+	else if($nodeType == 'event') $perms = ['user_events'];
+	
 	checkLogin($perms);
 
 	$user = $fb->get('/me')->getDecodedBody();
-	$nodeId = ($nodeType == 'user') ? $user['id'] : $_GET['pageId'];
+	$nodeId = ($nodeType == 'user') ? $user['id'] : $_GET['nodeId'];
 
 	$colName = "{$nodeType}_{$nodeId}_{$edge}";
 	$col = $db->selectCollection($colName);
-	$fields = implode(',', getFields($containedNode));
+	$fields = implode(',', getFields($containedNode, $nodeType != 'group'));
 	$mayHaveComments = in_array('comments', $metadata[$containedNode]['connections']);
 
 	$requestUrl = empty($_GET['request'])
@@ -82,7 +114,13 @@
 <?php
 	echo date(DATE_ATOM);
 	echo "\nRequesting <code>$requestUrl</code>\n";
-	$response = $fb->get($requestUrl)->getDecodedBody();
+	try {
+		$response = $fb->get($requestUrl)->getDecodedBody();
+	} catch(Facebook\Exceptions\FacebookResponseException $e) {
+		exit('Graph returned an error: ' . $e->getMessage());
+	} catch(Facebook\Exceptions\FacebookSDKException $e) {
+		exit('Facebook SDK returned an error: ' . $e->getMessage());
+	}
 	foreach($response['data'] as $node) {
 		echo "Parsing {$node['id']}\n";
 		if($mayHaveComments) {
@@ -102,7 +140,7 @@
 			array('upsert' => true)
 		);
 		echo '<div style="max-height: 20em; overflow: auto;">';
-		print_r($node);
+		echo htmlspecialchars(print_r($node, true));
 		echo '</div>';
 	}
 

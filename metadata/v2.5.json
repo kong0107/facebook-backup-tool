@@ -1794,5 +1794,279 @@
       "comments",
       "likes"
     ]
+  },
+  "group": {
+    "fields": [
+      {
+        "name": "id",
+        "description": "The Group ID",
+        "type": "numeric string"
+      },
+      {
+        "name": "cover",
+        "description": "The cover photo of the Group",
+        "type": "coverphoto"
+      },
+      {
+        "name": "description",
+        "description": "A brief description of the Group",
+        "type": "string"
+      },
+      {
+        "name": "email",
+        "description": "The email address to upload content to the Group. Only current members of the Group can use this",
+        "type": "string"
+      },
+      {
+        "name": "icon",
+        "description": "The URL for the Group's icon",
+        "type": "string"
+      },
+      {
+        "name": "link",
+        "description": "The Group's website",
+        "type": "string"
+      },
+      {
+        "name": "name",
+        "description": "The name of the Group",
+        "type": "string"
+      },
+      {
+        "name": "member_request_count",
+        "description": "Number of people asking to join the group.",
+        "type": "unsigned int32"
+      },
+      {
+        "name": "owner",
+        "description": "The profile that created this Group",
+        "type": "user|page"
+      },
+      {
+        "name": "parent",
+        "description": "The parent Group of this Group, if it exists",
+        "type": "group|page|application"
+      },
+      {
+        "name": "privacy",
+        "description": "The privacy setting of the Group",
+        "type": "string"
+      },
+      {
+        "name": "updated_time",
+        "description": "The last time the Group was updated (this includes changes in the Group's properties and changes in posts and comments if user can see them)",
+        "type": "datetime"
+      },
+      {
+        "name": "venue",
+        "description": "The location for the Group",
+        "type": "location"
+      }
+    ],
+    "connections": [
+      "albums",
+      "events",
+      "docs",
+      "feed",
+      "files",
+      "members",
+      "picture",
+      "videos"
+    ]
+  },
+  "doc": {
+    "fields": [
+      {
+        "name": "id",
+        "description": "The document ID",
+        "type": "numeric string"
+      },
+      {
+        "name": "can_delete",
+        "description": "Boolean, can document be deleted by viewer",
+        "type": "bool"
+      },
+      {
+        "name": "can_edit",
+        "description": "Boolean, can document be edited by viewer",
+        "type": "bool"
+      },
+      {
+        "name": "created_time",
+        "description": "Timestamp of when the document was created",
+        "type": "datetime"
+      },
+      {
+        "name": "from",
+        "description": "Author of the document",
+        "type": "user"
+      },
+      {
+        "name": "icon",
+        "description": "Image file for document icon",
+        "type": "string"
+      },
+      {
+        "name": "link",
+        "description": "URL for the document",
+        "type": "string"
+      },
+      {
+        "name": "message",
+        "description": "Content of the document",
+        "type": "string"
+      },
+      {
+        "name": "revision",
+        "description": "Current revision ID",
+        "type": "id"
+      },
+      {
+        "name": "subject",
+        "description": "Title of the document",
+        "type": "string"
+      },
+      {
+        "name": "updated_time",
+        "description": "Last updated timestamp",
+        "type": "datetime"
+      }
+    ],
+    "connections": [
+      "revisions"
+    ]
+  },
+  "event": {
+    "fields": [
+      {
+        "name": "id",
+        "description": "The event ID",
+        "type": "numeric string"
+      },
+      {
+        "name": "category",
+        "description": "The category of the event",
+        "type": "enum"
+      },
+      {
+        "name": "cover",
+        "description": "Cover picture",
+        "type": "coverphoto"
+      },
+      {
+        "name": "description",
+        "description": "Long-form description",
+        "type": "string"
+      },
+      {
+        "name": "type",
+        "description": "The type of the event",
+        "type": "enum"
+      },
+      {
+        "name": "end_time",
+        "description": "End time, if one has been set",
+        "type": "string"
+      },
+      {
+        "name": "is_viewer_admin",
+        "description": "Whether the viewer is admin or not",
+        "type": "bool"
+      },
+      {
+        "name": "is_page_owned",
+        "description": "Whether the event is created by page or not",
+        "type": "bool"
+      },
+      {
+        "name": "can_guests_invite",
+        "description": "Can guests invite friends",
+        "type": "bool"
+      },
+      {
+        "name": "guest_list_enabled",
+        "description": "Can see guest list",
+        "type": "bool"
+      },
+      {
+        "name": "name",
+        "description": "Event name",
+        "type": "string"
+      },
+      {
+        "name": "owner",
+        "description": "The profile that created the event"
+      },
+      {
+        "name": "parent_group",
+        "description": "The group the event belongs to",
+        "type": "group"
+      },
+      {
+        "name": "place",
+        "description": "Event Place information",
+        "type": "place"
+      },
+      {
+        "name": "start_time",
+        "description": "Start time",
+        "type": "string"
+      },
+      {
+        "name": "ticket_uri",
+        "description": "The link users can visit to buy a ticket to this event",
+        "type": "string"
+      },
+      {
+        "name": "timezone",
+        "description": "Timezone",
+        "type": "enum"
+      },
+      {
+        "name": "updated_time",
+        "description": "Last update time",
+        "type": "datetime"
+      },
+      {
+        "name": "attending_count",
+        "description": "Number of people attending the event",
+        "type": "int32"
+      },
+      {
+        "name": "declined_count",
+        "description": "Number of people who declined the event",
+        "type": "int32"
+      },
+      {
+        "name": "maybe_count",
+        "description": "Number of people who maybe going to the event",
+        "type": "int32"
+      },
+      {
+        "name": "noreply_count",
+        "description": "Number of people who did not reply to the event",
+        "type": "int32"
+      },
+      {
+        "name": "interested_count",
+        "description": "Number of people interested in the event",
+        "type": "int32"
+      }
+    ],
+    "connections": [
+      "admins",
+      "attending",
+      "interested",
+      "declined",
+      "maybe",
+      "noreply",
+      "roles",
+      "feed",
+      "posts",
+      "comments",
+      "photos",
+      "picture",
+      "videos"
+    ]
   }
 }

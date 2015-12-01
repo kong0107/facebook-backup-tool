@@ -27,13 +27,21 @@
 					'admined_groups', 'groups', 'likes', 'tagged'
 				],
 				page: [
-					'albums', 'events', 'feed', 'milestones', 'photos', 'posts', 'videos'
+					'albums', 'events', 'feed', 'milestones',
+					'photos', 'posts', 'videos'
+				],
+				group: [
+					"albums", "events", "docs", "feed",
+					"files", "members", "videos"
+				],
+				event: [
+					"feed", "posts", "comments", "photos", "videos"
 				]
-
 			};
 
 			$scope.search = function() {
 				var q = $scope.q.trim();
+				$scope.cnadidates = [];
 				if(!q.length) return;
 				if($.isNumeric(q)) {
 					$scope.showSelect = false;
@@ -42,7 +50,7 @@
 				else {
 					$scope.message = 'Searching page ...';
 					$scope.candidates = [];
-					FB.apiwt("search?type=page&q=" + q, function(r) {
+					FB.apiwt("search?type=" + $scope.nodeType + "&q=" + q, function(r) {
 						if(r.data) {
 							$scope.message = '';
 							$scope.candidates = r.data;
@@ -67,9 +75,26 @@
 					}
 					else {	/// found a page node
 						var excludedFields = [
-							'token_for_business', ///< errors for user
-							'ad_campaign', 'promotion_eligible', 'owner_business',	/// errors for page
-							'context', 'currency', 'education', 'favorite_athletes', 'favorite_teams', 'languages', 'payment_pricepoints'
+							"token_for_business",
+							"currency",
+							"device",
+							"payment_pricepoints",
+							"viewer_can_send_gift",
+							"context",
+							"favorite_athletes",
+							"favorite_teams",
+							"ad_campaign",
+							"promotion_eligible",
+							"owner_business",
+							"access_token",
+							"business",
+							"can_checkin",
+							"can_post",
+							"last_used_time",
+							"has_added_app",
+							"is_permanently_closed",
+							"is_published",
+							"voip_info"
 						];
 						var ru = [];
 						for(var i = 0; i < r.metadata.fields.length; ++i) {
@@ -80,6 +105,12 @@
 						FB.apiwt(ru, function(r) {
 							$scope.message = '';
 							$scope.nodeInfo = r;
+							console.log(r);
+							if(!$scope.candidates.length) {
+								$scope.candidates.push(r);
+								$scope.nodeId = r.id;
+								$scope.showSelect = true;
+							}
 							$scope.$apply();
 						});
 					}
@@ -93,14 +124,45 @@
 					$scope.conData = r.data;
 					$scope.$apply();
 				});
+			};
+
+			$scope.getAlbums = function(nodeId) {
+				$scope.message = "Fetching data ...";
+				FB.apiwt(nodeId + "/albums", function(r) {
+					$scope.message = '';
+					$scope.albums = r.data;
+					$scope.$apply();
+				});
+			};
+			$scope.getAlbumInfo = function(nodeId) {
+				$scope.message = "Fetching data ...";
+				$scope.conData = null;
+				FB.apiwt(nodeId + "/photos", function(r) {
+					$scope.message = "";
+					$scope.conData = r.data;
+					$scope.$apply();
+				});
 			}
+
+			$scope.getGroups = function() {
+				$scope.clear();
+				FB.apiwt("me/groups", function(r) {
+					$scope.message = "";
+					$scope.candidates = r.data;
+					$scope.showSelect = true;
+					$scope.$apply();
+				});
+			}
+
 			$scope.clear = function() {
 				$scope.message = '';
 				$scope.q = '';
 				$scope.showSelect = false;
 				$scope.nodeInfo = undefined;
+				$scope.candidates = [];
+				$scope.albums = [];
 				$scope.conData = null;
-			}
+			};
 		});
 	</script>
 	<style>
@@ -116,6 +178,7 @@
 			margin: 0.25em;
 			padding: 0.25em;
 		}
+		ul {list-style-type: none;}
 	</style>
 </head>
 <body ng-app="myApp" ng-controller="main">
@@ -127,30 +190,55 @@
 		{{last_name}}
 			<dt>Type</dt>
 			<dd>
-				<label><input type="radio" name="nodeType" ng-model="nodeType" value="user" ng-click="showInfo('me')">User</label>
+				<label><input type="radio" name="nodeType" ng-model="nodeType" value="user" ng-click="clear(); showInfo('me')">User</label>
 				<label><input type="radio" name="nodeType" ng-model="nodeType" value="page" ng-click="clear()">Page</label>
+				<label><input type="radio" name="nodeType" ng-model="nodeType" value="group" ng-click="getGroups()">Group</label>
+				<label><input type="radio" name="nodeType" ng-model="nodeType" value="event" ng-click="clear()">Event</label>
 			</dd>
-			<dt ng-show="nodeType=='page'">Page</dt>
-			<dd ng-show="nodeType=='page'">
+			<dt ng-show="nodeType=='page'||nodeType=='event'">{{nodeType}}</dt>
+			<dd ng-show="nodeType=='page'||nodeType=='event'">
 				<input ng-model="q" ng-change="search()" ng-model-options="{debounce: 500}"
 					placeholder="page ID or search text"
 				>
 			</dd>
 			<dt ng-show="showSelect">Select</dt>
 			<dd ng-show="showSelect">
-				<label class="page_name" ng-repeat="p in candidates">
-					<input type="radio" name="pageId" value="{{p.id}}" ng-click="showInfo(p.id);">{{p.name}}
+				<label class="page_name" ng-repeat="cand in candidates">
+					<input type="radio" name="nodeId" value="{{cand.id}}"
+						ng-click="showInfo(cand.id);" ng-model="nodeId"
+					>{{cand.name}}
 				</label>
 			</dd>
 		</dl>
+		<div ng-show="conData||nodeInfo"
+			style="float: right; width: 50%; white-space: pre-wrap; font-family: monospace;"
+		>{{(conData?conData:nodeInfo)|json}}
+		</div>
+		<h2>{{nodeInfo.name}}</h2>
 		<div ng-show="nodeInfo">
-			<h2>{{nodeInfo.name}}</h2>
-			<div style="float: right; width: 50%; white-space: pre-wrap; font-family: monospace;">
-				{{(conData?conData:nodeInfo)|json}}
-			</div>
 			<ul>
 				<li ng-repeat="con in connections[nodeType]">
-					<label><input type="radio" name="edge" value="{{con}}" ng-click="requestEdge(con)">{{con}}</label>
+					<label>
+						<input type="radio" name="edge" ng-value="con"
+							ng-click="$parent.albums=[]; requestEdge(con)"
+						>{{con}}
+					</label>
+				</li>
+				<li ng-hide="nodeType=='event'">
+					<label>
+						<input type="radio" name="edge" ng-value="'photosInAlbum'"
+							ng-click="getAlbums(nodeInfo.id)"
+						>photos in album
+					</label>
+					<ul>
+						<li ng-repeat="album in albums">
+							<label>
+								<input type="radio" name="album" value="{{album.id}}"
+									ng-click="getAlbumInfo(album.id)"
+								>{{album.name}}
+							</label>
+						</li>
+					</ul>
 				</li>
 			</ul>
 			<button ng-disabled="!conData.length" onclick="this.form.submit();">Start crawling</button>

@@ -44,22 +44,10 @@
 				function(r){$scope.node = r.data;},
 				function(r){console.log(r);}
 			);
-			$http.get("data/" + node + "_feed_private.json").then(
+			$http.get("data/" + node + "_feed_public.json").then(
 				function(r){
 					$scope.posts = r.data;
-					init();/*.sort(function(a, b) {
-						return new Date(b.created_time) - new Date(a.created_time);
-					});
-					
-					var ms = [];
-					for(var i = 0; i < $scope.posts.length; ++i)
-						ms.push($scope.posts[i].created_time.substr(0, 7));
-					$scope.months = $.unique(ms);
-					
-					var ym = $location.hash();
-					$scope.month = ($scope.months.indexOf(ym) == -1)
-						? $scope.months[0] : ym
-					;*/
+					init();
 				},
 				function(r){console.log(r);}
 			);

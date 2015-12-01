@@ -67,12 +67,13 @@
 	</head>
 	<body ng-app="myApp" ng-controller="main">
 		<h1>MongoDB Browser</h1>
-		{{dbs[0].name}}
 		<form method="get" onChange="this.submit();">
 			<div>
 				Select database:<br>
 				<label ng-repeat="db in dbs">
-					<input name="db" type="radio" value="{{db}}" ng-checked="db=='<?=$_GET['db']?>'" onclick="this.form.submit();">{{db}}
+					<input name="db" type="radio" value="{{db}}" 
+						ng-checked="db=='<?=$_GET['db']?>'" onclick="this.form.submit();"
+					>{{db}}
 				</label>
 			</div>
 			<div ng-if="db">
