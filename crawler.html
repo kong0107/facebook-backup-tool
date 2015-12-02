@@ -12,6 +12,10 @@
 				xfbml      : false,
 				status     : true
 			});
+			FB.getLoginStatus(function(response) {
+				if(response.status == 'connected') main();
+				else FB.login(main, {scope: 'user_posts,user_photos'});
+			});
 		};
 	</script>
 	<script src="js/fbsdk-extend.js"></script>

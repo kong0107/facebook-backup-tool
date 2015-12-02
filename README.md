@@ -10,28 +10,8 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 # Warning
 This is unfinished.
 
-# Algorithm
-1. Decide to use `/user/feed` or `/user/posts`. The former would show posts that this person was tagged in. [ref](https://developers.facebook.com/docs/graph-api/reference/v2.5/user/feed)
-2. Request the first page.
-
-```javascript
-@see https://blog.jcoglan.com/2010/08/30/the-potentially-asynchronous-loop/
-var path = 'me/posts';
-var a = function() {
-  if(!path) return;
-  FB.apiwt(path, function(r) {
-    path = r.paging.previous;
-    r.data.asyncEach(
-      function(post, resume) {
-        ajax.post('createPost.php', post, resume);
-        post.comments.asyncEach(function(comment, r2) {
-          ajax.post('createComment.php', comment, r2);
-        });
-      },
-      a ///< To support this argument, modify `asyncEach` to have a callback function executed when the iteration ends.
-    );
-  });
-};
-
-a();
-```
+# Usage
+1. Install and start web server, PHP, and MongoDB server locally.
+2. Browse `crawl.html`, select what to crawl, submit the form, and wait.
+3. Modify JavaScript in `index.html` to the id and type of what you crawled.
+4. Browse `index.html` through web server to see the results.
