@@ -28,7 +28,7 @@
 			$scope.connections = {
 				user: [
 					'albums', 'likes', //'feed', 'admined_groups', 'groups',
-					'posts', 'photos', 'videos', 'tagged'
+					'posts', 'photos', 'tagged'//, 'videos'
 				],
 				page: [
 					'albums', 'events', //'feed',
@@ -36,10 +36,10 @@
 				],
 				group: [
 					"albums", "events", "feed",
-					"members", "docs", "videos"//, "files"
+					"members", "docs"//, "videos", "files"
 				],
 				event: [
-					"posts", "photos", "videos", "comments", "feed"
+					"posts", "photos", "comments", "feed"//, "videos"
 				]
 			};
 
@@ -265,8 +265,7 @@
 					</ul>
 				</li>
 			</ul>
-			<button ng-show="nodeInfo" ng-disabled="!conData.length"
-				onclick="this.form.submit();"
+			<button ng-show="nodeInfo" onclick="this.form.submit();"
 			>Start crawling</button>
 		</div>
 	</form>

@@ -28,9 +28,8 @@ dd {
 	clear: right;
 	margin-left: 8em;
 }
-
-h4 {
-	margin-bottom: 0;
+h2,h3,h4,h5,h6 {
+	margin: 0.67em 0 0.25em 0;
 }
 
 article {
@@ -156,7 +155,7 @@ summary {
 .photo {
 	display: table-cell;
 }
-.photo_name {
+.photo_side {
 	display: table-cell; 
 	vertical-align: top;
 	padding: 0 1em;

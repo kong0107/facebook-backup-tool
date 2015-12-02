@@ -20,7 +20,7 @@
 </div>
 <a class="photo" href="data/photos/album_{{node.album.id}}_photos/{{node._id}}.jpg"
 ><img ng-src="{{node.picture}}"></a>
-<p class="photo_name description">{{node.name}}</p>
+<p class="photo_side description">{{node.name}}</p>
 <div class="photo" ng-include="'templates/photo.html'"
 	ng-repeat="photo in ret.photosInAlbum[node._id]"
 ></div>

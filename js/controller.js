@@ -13,14 +13,14 @@ angular.module("myApp", [])
 		var notFound = function(r) {
 			//console.log(r.status + " " + r.statusText + " on " + r.config.url);
 		}
-		var tabs = [//"info",
+		var tabs = $window.tabs || [//"info",
 			"albums", "likes", "events",
 			"feed", "posts", "photos", "videos", "tagged",
 			"members", "docs", "comments"
 		];
 		var ret = {
 			tabs: tabs,
-			tab: "info",
+			tab: $window.tab || "info",
 			months: {},
 			month: {},
 			search: {},
@@ -92,6 +92,7 @@ angular.module("myApp", [])
 		 */
 		ret.templates = [
 			"header",
+			"page",
 			"post",
 			"album",
 			"comment",

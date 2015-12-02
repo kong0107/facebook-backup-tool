@@ -1,3 +1,10 @@
 <a href="{{ret.createLink(place.id)}}">{{place.name}}</a>
-(<a href="https://www.google.com/maps?q={{place.location.street}},+{{place.location.city}},+{{place.location.country}}">{{place.location.street}}, {{place.location.city}}, {{place.location.country}}</a>)
-
+<span ng-if="place.location.street">(<a href="https://www.google.com/maps?q={{
+	place.location.street
+	+ (place.location.city ? (',+' + place.location.city) : '')
+	+ (place.location.country ? (',+' + place.location.country) : '')
+}}">{{
+	place.location.street
+	+ (place.location.city ? (',+' + place.location.city) : '')
+	+ (place.location.country ? (',+' + place.location.country) : '')
+}}</a>)</span>

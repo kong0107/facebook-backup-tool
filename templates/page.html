@@ -1,0 +1,15 @@
+<a class="photo" href="{{node.link}}"><img ng-src="{{node.picture.data.url}}"></a>
+<div class="photo_side">
+	<h3 class="photo_name">{{node.name}}</h3>
+	{{node.category}}
+</div>
+<p>{{node.likes|number}} people like this.</p>
+<div ng-if="node.about" class="description"><h4>About</h4>{{node.about}}</div>
+<div ng-if="node.description" class="description"><h4>Description</h4>{{node.description_html}}</div>
+
+<dl>
+	<dt>ID</dt><dd>{{node._id}}</dd>
+	<dt>Website</dt><dd><a href="{{node.website}}">{{node.website}}</a></dd>
+	<dt>Personal Interests</dt><dd>{{node.personal_interests}}</dd>
+</dl>
+<details class="rawdata"><summary>JSON</summary>{{node|json}}</details>

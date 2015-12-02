@@ -7,70 +7,141 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script src="//connect.facebook.net/en_US/sdk.js"></script>
 	<script>
-		angular.module("myApp", []).controller("main", function($scope) {
-			$scope.metadata = {};
-			$scope.message = "Loading files ...";
-			window.fbAsyncInit = function() {
-				FB.init({
-					version    : 'v2.5',
-					appId      : '1598824630378971',
-					xfbml      : false,
-					status     : true
-				});
-				/***
-				  * Check permission: https://developers.facebook.com/docs/facebook-login/permissions/v2.4#reference
-				  */
-				FB.getLoginStatus(function(response) {
-					if(response.status == 'connected') main();
-					else FB.login(main, {scope: ''});
-				});
-			};
-			$.getScript("js/fbsdk-extend.js");
-
-			var nodes = {
-				user: 'me',
-				page: '20531316728',
-				album: '494827881728',
-				event: '884140984960637',
-				page_milestone: '10152580066656729', ///< weird...
-				photo: '10154189880711729',
-				post: '20531316728_10154207315386729',
-				video: '10154207315386729',
-				videolist: '1630970700485728',
-				comment: '10154189880711729_10154198511261729',
-				group: '1640597839524769',
-				doc: '1640602369524316',
-				event: '1546566615579825'
-			};
-
-			var main = function() {
-				$scope.message = "Fetching metadata ...";
-				$scope.$apply();
-				var params = { batch : [] };
-				for(var type in nodes) {
-					var op = { method: "GET" };
-					op.relative_url = nodes[type] + "?metadata=1";
-					params.batch.push(op);
-				}
-				FB.api("/", "POST", params, function(r) {
-					for(var i = 0; i < r.length; ++i) {
-						var n = JSON.parse(r[i].body).metadata;
-						var md = {fields: n.fields, connections: []};
-						for(var j in n.connections)
-							md.connections.push(j);
-						$scope.metadata[n.type] = md;
-					}
-					$scope.message = "Done. Copy the following text and save as a JSON file."
-					$scope.$apply();
-				});
-			};
+angular.module("myApp", []).controller("main",
+function($scope, $http, $window) {
+	$scope.metadata = {};
+	$scope.message = "Loading files ...";
+	window.fbAsyncInit = function() {
+		FB.init({
+			version    : 'v2.5',
+			appId      : '1598824630378971',
+			xfbml      : false,
+			status     : true
 		});
+	};
+	$.getScript("js/fbsdk-extend.js");
+	$http.get("metadata/v2.5.json").then(function(r) {
+		$scope.metadata = r.data;
+		$scope.message = " ";
+	}, function(r) { $scope.requestMD(); });
+
+
+	$scope.requestMD = function() {
+		var nodes = {
+			user: 'me',
+			page: '20531316728',
+			album: '494827881728',
+			event: '884140984960637',
+			page_milestone: '10152580066656729', ///< weird...
+			photo: '10154189880711729',
+			post: '20531316728_10154207315386729',
+			video: '10154207315386729',
+			videolist: '1630970700485728',
+			comment: '10154189880711729_10154198511261729',
+			group: '1640597839524769',
+			doc: '1640602369524316',
+			event: '1546566615579825'
+		};
+		var main = function() {
+			$scope.message = "Fetching metadata ...";
+			var params = { batch : [] };
+			for(var type in nodes) {
+				var op = { method: "GET" };
+				op.relative_url = nodes[type] + "?metadata=1";
+				params.batch.push(op);
+			}
+			FB.api("/", "POST", params, function(r) {
+				for(var i = 0; i < r.length; ++i) {
+					var n = JSON.parse(r[i].body).metadata;
+					var md = {fields: n.fields, connections: []};
+					for(var j in n.connections)
+						md.connections.push(j);
+					$scope.metadata[n.type] = md;
+				}
+				$scope.message = "Done. Copy the following text and save as a JSON file."
+				$scope.$apply();
+			});
+		};
+		FB.getLoginStatus(function(response) {
+			if(response.status == 'connected') main();
+			else FB.login(main, {scope: ''});
+		});
+	};
+
+	$scope.type = { name: "user" };
+});
 	</script>
-	<style></style>
+	<style>
+		details {
+			white-space: pre-wrap;
+			font-family: monospace;
+		}
+		li {
+			display: inline-block;
+		}
+		nav li {
+			margin: 0.2em;
+			padding: 0.25em;
+			border: 1px solid #ccc;
+			cursor: pointer;
+			transition: all 1s;
+		}
+		nav li:hover {
+			background-color: #ff0;
+		}
+		.focus {
+			font-weight: bold;
+		}
+	</style>
 </head>
 <body ng-controller="main">
 	<h1>Node Metadata of Facebook Graph API</h1>
+	<button ng-click="requestMD()">Ask for current version</button>
 	<p ng-bind="message"></p>
-	<pre ng-bind="metadata|json"></pre>
+	<details><summary>JSON</summary>{{metadata|json}}</details>
+	<nav>
+		<ul>
+			<li ng-repeat="(t,info) in metadata"
+				ng-click="type.name=t;type.info=info"
+				ng-class="(type.name==t)?'focus':''"
+			>{{t}}</li>
+		</ul>
+	</nav>
+	<section ng-repeat="(t,info) in metadata" ng-show="type.name==t">
+		<h2>{{t}}</h2>
+		<h3>Connections</h3>
+		<ul>
+			<li ng-repeat="c in info.connections"
+			>{{c}}<span ng-if="!$last">,</span
+			></li>
+		</ul>
+		<h3>Fields</h3>
+		<ul>
+			<li ng-repeat="f in info.fields"
+			>{{f.name}}<span ng-if="!$last">,</span
+			></li>
+		</ul>
+		<table ng-if="info.fields" border="1">
+			<!--colgroup>
+				<col style="width: 6em; text-align: right;">
+				<col style="width: 8em;">
+				<col>
+			</colgroup-->
+			<thead>
+				<tr>
+					<th scope="col">name</th>
+					<th scope="col">type</th>
+					<th scope="col">description</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="f in info.fields">
+					<th scope="row">{{f.name}}</th>
+					<td>{{f.type}}</td>
+					<td>{{f.description}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</section>
 </body>
 </html>
