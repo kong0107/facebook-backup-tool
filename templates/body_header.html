@@ -4,8 +4,11 @@
 <blockquote class="about" ng-if="!node.about && !node.bio" ng-bind="node.quotes"></blockquote>
 <nav>
 	<ul>
-		<li ng-click="$parent.tab='about'" ng-class="tab=='about'?'focus':''">About</li>
-		<li ng-click="$parent.tab='timeline'" ng-class="tab=='timeline'?'focus':''">Timeline</li>
-		<li><a href="{{node.link}}">Facebook</a></li>
+		<li ng-click="ret.tab='info'" ng-class="(ret.tab=='info')?'focus':''"
+		>Info</li>
+		<li ng-repeat="t in tabs" ng-if="ret[t].length"
+			ng-click="ret.tab=t" ng-class="(ret.tab==t)?'focus':''"
+		>{{t|capitalize}} <span class="count">({{ret[t].length}})</span></li>
+		<li><a href="{{node.link||ret.createLink(node.id)}}">Facebook</a></li>
 	</ul>
 </nav>

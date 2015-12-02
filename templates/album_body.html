@@ -1,0 +1,44 @@
+<div class="metadata">
+	<ul>
+		<li>
+			<a class="time_container" name="{{node._id}}" href="{{node.link}}">
+				<time ng-if="node.backdated_time" datetime="{{node.backdated_time}}"
+					title="backdated_time" class="backdated_time"
+				>{{node.backdated_time|date:'yyyy-MM-dd HH:mm:ss'}}
+				</time>
+				<time ng-if="!node.backdated_time"  datetime="{{node.created_time}}"
+					title="created_time" class="created_time"
+				>{{node.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}
+				</time>
+			</a>
+		</li>
+		<li title="privacy" class="privacy">Viewable to {{node.privacy}}</li>
+		<li>Type: {{node.type}}</li>
+		<li ng-if="node.event">{{node.event|json}}</li>
+	</ul>
+</div>
+<h3>{{node.name}}</h3>
+<p ng-if="node.place">
+	Place:
+	<a title="{{node.place.location.street}}"
+		href="{{ret.createLink(node.place.id)}}"
+	>{{node.place.name}}</a>
+</p>
+<p class="description">{{node.description}}</p>
+<details>
+	<summary ng-click="ret.getPhotosInAlbum(node._id)">
+		{{node.count|number}} photos
+	</summary>
+	<div class="photo" ng-include="'templates/photo_body.html'"
+		ng-repeat="node in ret.photosInAlbum[node._id]"
+	></div>
+</details>
+<details ng-if="node.comments">
+	<summary title="newest: {{node.updated_time|date:'yyyy-MM-dd HH:mm:ss'}}">
+		{{node.comments.length|number}} comment(s)
+	</summary>
+	<section class="comment" ng-include="'templates/comment_body.html'"
+		ng-repeat="comment in node.comments | orderBy: 'created_time'"
+	></section>
+</details>
+<!--details class="rawdata"><summary>JSON</summary>{{node|json}}</details-->

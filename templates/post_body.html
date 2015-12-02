@@ -1,63 +1,65 @@
 <div class="metadata">
 	<ul>
-		<li><a class="time_container" name="{{post._id}}"
-			href="{{post.actions?post.actions[0].link:'http://facebook.com/'+post._id}}"
-		>
-			<time class="created_time" datetime="{{post.created_time}}">
-				{{post.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}
-			</time>
-		</a></li>
-		<li ng-repeat="a in post.actions" ng-if="a.name!='Comment'&&a.name!='Like'&&a.name!='Share'">
+		<li>
+			<a class="time_container" name="{{node._id}}"
+				href="{{node.actions?node.actions[0].link:ret.createLink(node._id)}}"
+			>
+				<time class="created_time" datetime="{{node.created_time}}">
+					{{node.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}
+				</time>
+			</a>
+		</li>
+		<li ng-repeat="a in node.actions" ng-if="a.name!='Comment'&&a.name!='Like'&&a.name!='Share'">
 			<a href="{{a.link}}">{{a.name}}</a>
 		</li>
-		<li ng-if="post.privacy" title="privacy">
-			<div ng-if="post.privacy.value=='EVERYONE'">Public</li>
-			<details ng-if="post.privacy.value!='EVERYONE'" class="privacy">
+		<li ng-if="node.privacy" title="Privacy">
+			<div ng-if="node.privacy.value=='EVERYONE'">Public</li>
+			<details ng-if="node.privacy.value!='EVERYONE'" class="privacy">
 				<summary>Private</summary>
 				<dl>
-					<dt ng-repeat-start="(k,v) in post.privacy">{{k}}</dt>
+					<dt ng-repeat-start="(k,v) in node.privacy">{{k}}</dt>
 					<dd ng-repeat-end>{{v}}</dd>
 				</dl>
 			</details>
 		</li>
 	</ul>
 </div>
-<div class="story" ng-if="post.story">{{post.story}}</div>
-<div class="message" ng-if="post.message">{{post.message}}</div>
-<div class="link_container" ng-if="post.link">
-	<div ng-if="!post.child_attachments">
-		<h4><a class="link" href="{{post.link}}">{{post.name}}</a></h4>
-		<a ng-if="post.full_picture" href="{{post.full_picture}}"
-		><img ng-if="post.full_picture" ng-src="{{post.full_picture}}" class="full_picture"
+<div class="story" ng-if="node.story">{{node.story}}</div>
+<div class="message" ng-if="node.message">{{node.message}}</div>
+<div class="link_container" ng-if="node.link">
+	<div ng-if="!node.child_attachments">
+		<h4><a class="link" href="{{node.link}}">{{node.name}}</a></h4>
+		<a ng-if="node.full_picture" href="{{node.full_picture}}"
+		><img ng-if="node.full_picture" ng-src="{{node.full_picture}}" class="full_picture"
 		></a>
-		<img ng-if="!post.full_picture && post.picture" ng-src="{{post.picture}}" class="picture">
-		<blockquote class="description">{{post.description}}</blockquote>
+		<img ng-if="!node.full_picture && node.picture" ng-src="{{node.picture}}" class="picture">
+		<blockquote class="description">{{node.description}}</blockquote>
 	</div>
-	<div ng-if="post.child_attachments">
-		<!-- unsure structure... see post 299951923544433_408517786021179 -->
-		<h4><a class="link" href="{{post.link}}">{{post.child_attachments[0].name}}</a></h4>
-		<a ng-repeat="att in post.child_attachments" href="{{att.link}}"
+	<div ng-if="node.child_attachments">
+		<!-- unsure structure... see node 299951923544433_408517786021179 -->
+		<h4><a class="link" href="{{node.link}}">{{node.child_attachments[0].name}}</a></h4>
+		<a ng-repeat="att in node.child_attachments" href="{{att.link}}"
 		><img ng-src="{{att.picture}}"></a>
-		<blockquote class="description">{{post.child_attachments[0].description}}</blockquote>
+		<blockquote class="description">{{node.child_attachments[0].description}}</blockquote>
 	</div>
 </div>
 <ul class="tags">
-	<li ng-repeat="tag in post.story_tags" ng-if="tag.offset && tag.name">
+	<li ng-repeat="tag in node.story_tags" ng-if="tag.offset && tag.name">
 		<a href="{{'https://www.facebook.com/'+tag.id}}">{{tag.name}}</a>
 	</li>
-	<li ng-repeat="tag in post.message_tags" ng-if="tag.name">
+	<li ng-repeat="tag in node.message_tags" ng-if="tag.name">
 		<a href="{{'https://www.facebook.com/'+tag.id}}">{{tag.name}}</a>
 	</li>
-	<li ng-repeat="tag in post.with_tags">
+	<li ng-repeat="tag in node.with_tags">
 		<a href="{{'https://www.facebook.com/'+tag.id}}">{{tag.name}}</a>
 	</li>
 </ul>
-<details ng-if="post.comments">
-	<summary title="newest: {{post.updated_time|date:'yyyy-MM-dd HH:mm:ss'}}">
-		{{post.comments.length|number}} comment(s)
+<details ng-if="node.comments">
+	<summary title="newest: {{node.updated_time|date:'yyyy-MM-dd HH:mm:ss'}}">
+		{{node.comments.length|number}} comment(s)
 	</summary>
 	<section class="comment" ng-include="'templates/comment_body.html'"
-		ng-repeat="comment in post.comments | orderBy: 'created_time'"
+		ng-repeat="comment in node.comments | orderBy: 'created_time'"
 	></section>
 </details>
-<!--details class="rawdata"><summary>JSON</summary>{{post|json}}</details-->
+<!--details class="rawdata"><summary>JSON</summary>{{node|json}}</details-->

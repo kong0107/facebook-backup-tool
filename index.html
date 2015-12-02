@@ -2,81 +2,66 @@
 <html ng-app="myApp" ng-controller="main">
 <head>
 	<meta charset="utf-8">
-	<title ng-bind="node.name"></title>
+	<title ng-bind="ret.info.name">Backup Facebook</title>
 	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
-	<script>
-		angular.module("myApp", [])
-		.config(function($locationProvider) {
-			$locationProvider.html5Mode({
-				enabled: true,
-				requireBase: false
-			});
-		})
-		.controller("main", function($scope, $http, $location) {
-			//var node = "page_299951923544433";
-			var node = "user_10154193091691393";
-			var init = function() {
-				$scope.posts.sort(function(a, b) {
-					return new Date(b.created_time) - new Date(a.created_time);
-				});
-				var ms = [];
-				for(var i = 0; i < $scope.posts.length; ++i)
-					ms.push($scope.posts[i].created_time.substr(0, 7));
-				$scope.months = $.unique(ms);
-				
-				var ym = $location.hash();
-				if(ym == 'about') $scope.tab = 'about';
-				else {
-					$scope.tab = "timeline";
-					$scope.month = ($scope.months.indexOf(ym) == -1)
-						? $scope.months[0] : ym
-					;
-				}
-			};
-			
-			$scope.setMonth = function(ym) {
-				$scope.month = ym;
-				$location.hash(ym);
-			}
-			
-			$http.get("data/" + node + "_info.json").then(
-				function(r){$scope.node = r.data;},
-				function(r){console.log(r);}
-			);
-			$http.get("data/" + node + "_feed_public.json").then(
-				function(r){
-					$scope.posts = r.data;
-					init();
-				},
-				function(r){console.log(r);}
-			);
-		});
-	</script>
+	<script src="js/controller.js"></script>
 	<link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
-	<div ng-include="'templates/body_header.html'"></div>
-	<section id="about" ng-show="tab=='about'">
-		<h2>About</h2>
+	<div ng-include="'templates/body_header.html'"
+		onload="node=ret.info; tabs=ret.tabs;"
+	></div>
+	<nav ng-if="true" title="debug">
+		<ul>
+			<li ng-repeat="t in ret.templates">
+				<a target="_blank" href="templates/{{t}}.html">{{t}}</a>
+			</li>
+		</ul>
+	</nav>
+	<section id="info" ng-if="ret.tab=='info'">
+		<h2>Info</h2>
+		<img ng-src="{{ret.info.picture.data.url}}" onerror="this.style.display='none';">
 		<dl>
-			<dt ng-repeat-start="(field, value) in node">{{field}}</dt>
-			<dd ng-repeat-end>{{value|json}}</dd>
+			<dt>ID</dt><dd>{{ret.info.id}}</dd>
+			<dt>Engagement</dt><dd>{{ret.info.engagement.count|number}}</dd>
+			<dt>Category</dt><dd>{{ret.info.category}}</dd>
+			<dt>Website</dt><dd><a href="{{ret.info.website}}">{{ret.info.website}}</a></dd>
+			<dt>Personal Interests</dt><dd>{{ret.info.personal_interests}}</dd>
 		</dl>
+		<details class="rawdata"><summary>JSON</summary>{{ret.info|json}}</details>
 	</section>
-	<section id="timeline" ng-show="tab=='timeline'">
-		<h2>Timeline</h2>
-		<label>Search: <input ng-model="searchText" ng-model-options="{debounce: 250}" placeholder="search text"></label>
-		<nav ng-hide="searchText">
-			<ul>
-				<li ng-repeat="m in months" ng-click="setMonth(m)" 
-					ng-class="$parent.month==m?'focus':''"
-				>{{m}}</li>
-			</ul>
-		</nav>
-		<article ng-include="'templates/post_body.html'"
-			ng-repeat="post in posts|filter:(searchText?searchText:{created_time:month})"
+	<section ng-repeat="t in ret.tabs" ng-show="t==ret.tab" id="{{t}}">
+		<h2>{{t|capitalize}}</h2>
+		<div ng-if="t=='feed'||t=='posts'||t=='comments'">
+			<label>
+				Search:
+				<input ng-model="ret.search[t]"
+					ng-model-options="{debounce: 250}" placeholder="search text"
+				>
+			</label>
+			<p ng-show="ret.search[t]">matched {{filtered.length}} {{t}}</p>
+			<nav ng-hide="ret.search[t]">
+				<ul>
+					<li ng-repeat="m in ret.months[t]"
+						ng-click="ret.month[t] = m"
+						ng-class="(ret.month[t] == m)?'focus':''"
+					>{{m}}</li>
+				</ul>
+			</nav>
+		</div>
+		<article ng-if="t=='posts'||t=='feed'||t=='comments'"
+			ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))"
+			ng-include="'templates/post_body.html'"
 		></article>
+		
+		<article ng-if="t=='albums'" ng-repeat="node in ret[t]" ng-include="'templates/album_body.html'"
+		></article>
+		<article ng-if="t=='photos'" ng-repeat="node in ret[t]" ng-include="'templates/photo_body.html'"
+		></article>
+		<!--article ng-repeat="node in ret[t]">
+			<details class="rawdata"><summary>JSON</summary>{{node|json}}</details>
+		</article-->
 	</section>
 </body>
 </html>

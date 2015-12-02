@@ -19,6 +19,7 @@
 		"access_token",
 		"business",
 		
+		"context",
 		"can_checkin",
 		"can_post",
 		"last_used_time",
