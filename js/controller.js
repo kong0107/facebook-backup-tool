@@ -19,12 +19,46 @@ angular.module("myApp", [])
 			"members", "docs", "comments"
 		];
 		var ret = {
+			id: id,
+			type: type,
 			tabs: tabs,
 			tab: $window.tab || "info",
 			months: {},
 			month: {},
 			search: {},
-			photosInAlbum: {}
+			photosInAlbum: {},
+			unknownFields: {
+				"page": [
+					"affiliation","app_id","artists_we_like","attire","awards",
+					"band_interests","band_members","best_page","bio","birthday","booking_agent","built","business",
+					"category_list","company_overview","contact_address","country_page_likes",
+					//"cover",
+					"culinary_team","current_location",
+					"directed_by","display_subtext","emails",
+					"features","food_styles","founded",
+					"general_info","general_manager","genre",
+					"global_brand_root_id","has_added_app",
+					"hometown","hours","impressum","influences",
+					"location","mission","mpg","name_with_location_descriptor","network",
+					"offer_eligible","parent_page","parking","payment_options","personal_info","personal_interests","pharma_safety_info","phone","plot_outline","press_contact","price_range","produced_by","products","promotion_eligible","promotion_ineligible_reason","public_transit","record_label","release_date","restaurant_services","restaurant_specialties","schedule","screenplay_by","season","starring","start_info","store_location_descriptor","store_number","studio","talking_about_count","engagement","single_line_address","place_type","unread_message_count","unread_notif_count","unseen_message_count","username","voip_info","website","were_here_count","written_by","featured_video","owner_business","last_used_time","asset_score","checkins","likes","members"
+					
+		/*"ad_campaign",
+		"promotion_eligible",
+		"owner_business",
+		
+		"access_token",
+		"business",
+		
+		"context",
+		"can_checkin",
+		"can_post",
+		"leadgen_tos_accepted",
+		"last_used_time",
+		"new_like_count",
+		"is_published",
+		"voip_info"*/
+				]
+			}
 		};
 
 		/**

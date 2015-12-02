@@ -3,6 +3,9 @@ h1, .about {
 	margin: 0.5em;
 	white-space: pre-wrap;
 }
+.about {
+	font-size: smaller;
+}
 
 nav li {
 	cursor: pointer;

@@ -1,6 +1,6 @@
 <a class="photo" href="{{node.link}}"><img ng-src="{{node.picture.data.url}}"></a>
 <div class="photo_side">
-	<h3 class="photo_name">{{node.name}}</h3>
+	<h3 class="photo_name"><a href="{{node.link}}">{{node.name}}</a></h3>
 	{{node.category}}
 </div>
 <p>{{node.likes|number}} people like this.</p>
