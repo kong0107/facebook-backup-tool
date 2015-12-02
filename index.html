@@ -5,6 +5,10 @@
 	<title ng-bind="ret.info.name">Backup Facebook</title>
 	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+	<script>
+		var id = "299951923544433";
+		var type = "page";
+	</script>
 	<script src="js/controller.js"></script>
 	<link rel="stylesheet" href="styles/style.css">
 </head>
@@ -12,13 +16,13 @@
 	<div ng-include="'templates/header.html'"
 		onload="node=ret.info; tabs=ret.tabs;"
 	></div>
-	<nav ng-if="true" title="debug">
+	<!--nav ng-if="true" title="debug">
 		<ul>
 			<li ng-repeat="t in ret.templates">
 				<a target="_blank" href="templates/{{t}}.html">{{t}}</a>
 			</li>
 		</ul>
-	</nav>
+	</nav-->
 	<section id="info" ng-if="ret.tab=='info'">
 		<h2>Info</h2>
 		<img ng-src="{{ret.info.picture.data.url}}" onerror="this.style.display='none';">
@@ -29,7 +33,7 @@
 			<dt>Website</dt><dd><a href="{{ret.info.website}}">{{ret.info.website}}</a></dd>
 			<dt>Personal Interests</dt><dd>{{ret.info.personal_interests}}</dd>
 		</dl>
-		<details class="rawdata"><summary>JSON</summary>{{ret.info|json}}</details>
+		<!--details class="rawdata"><summary>JSON</summary>{{ret.info|json}}</details-->
 	</section>
 	<section ng-repeat="t in ret.tabs" ng-show="t==ret.tab" id="{{t}}">
 		<h2>{{t|capitalize}}</h2>
@@ -54,7 +58,6 @@
 			ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))"
 			ng-include="'templates/post.html'"
 		></article>
-		
 		<article ng-if="t=='albums'" class="albumContainer"
 			ng-repeat="node in ret.albums" ng-include="'templates/album.html'"
 		></article>

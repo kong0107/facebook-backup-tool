@@ -5,9 +5,11 @@ angular.module("myApp", [])
 		requireBase: false
 	});
 })
-.controller("main", function($scope, $http, $location) {
+.controller("main", function($scope, $http, $location, $window) {
 	$scope.ret = function() {
 		/// Initialization
+		var id = $window.id;
+		var type = $window.type;
 		var notFound = function(r) {
 			//console.log(r.status + " " + r.statusText + " on " + r.config.url);
 		}
@@ -44,10 +46,9 @@ angular.module("myApp", [])
 		 * Get info and edges.
 		 */
 		for(var i = 0; i < tabs.length; ++i) ret[tabs[i]] = [];
-		$http.get("data/json/main.json").then(function(r) {
-			var id = r.data.id;
-			var type = r.data.type;
-			ret.info = r.data.info;
+		$http.get("data/json/" + type + "_" + id +"_info.json")
+		.then(function(r) {
+			ret.info = r.data;
 			for(var i = 0; i < tabs.length; ++i) {
 				(function() {
 					var tab = tabs[i];
