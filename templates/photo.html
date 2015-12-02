@@ -18,10 +18,10 @@
 		<li ng-if="node.event">{{node.event|json}}</li>
 	</ul>
 </div>
-<a href="data/photos/album_{{node.album.id}}_photos/{{node._id}}.jpg"
-><img id="{{node._id}}" ng-src="{{node.picture}}"></a>
-<p class="description">{{node.name}}</p>
-<div class="photo" ng-include="'templates/photo_body.html'"
+<a class="photo" href="data/photos/album_{{node.album.id}}_photos/{{node._id}}.jpg"
+><img ng-src="{{node.picture}}"></a>
+<p class="photo_name description">{{node.name}}</p>
+<div class="photo" ng-include="'templates/photo.html'"
 	ng-repeat="photo in ret.photosInAlbum[node._id]"
 ></div>
 <ul class="tags">
@@ -30,10 +30,8 @@
 	</li>
 </ul>
 <div ng-if="node.place">
-	<h4 style="display: inline-block;">Place</h4>
-	<a title="{{node.place.location.street}}"
-		href="{{ret.createLink(node.place.id)}}"
-	>{{node.place.name}}</a>
+	<h4 class="inlineBlock">Place</h4>
+	<span ng-include="'templates/place.html'" onload="place=node.place"></span>
 </div>
 <nav>
 	<h4>Different sizes</h4>
@@ -43,11 +41,11 @@
 		</li>
 	</ul>
 </nav>
-<details ng-if="node.comments">
+<details ng-if="node.comments" class="comments">
 	<summary title="newest: {{node.updated_time|date:'yyyy-MM-dd HH:mm:ss'}}">
 		{{node.comments.length|number}} comment(s)
 	</summary>
-	<section class="comment" ng-include="'templates/comment_body.html'"
+	<section class="comment" ng-include="'templates/comment.html'"
 		ng-repeat="comment in node.comments | orderBy: 'created_time'"
 	></section>
 </details>

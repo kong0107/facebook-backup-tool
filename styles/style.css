@@ -20,16 +20,17 @@ nav li {
 	text-decoration: none;
 	color: #888;
 }
-#about dt {
+dt {
 	clear: both;
 	float: left;
 }
-#about dd {
+dd {
 	clear: right;
-	margin-left: 16em;
-	white-space: pre-wrap;
-	font-family: monospace;
-	margin-bottom: 1em;
+	margin-left: 8em;
+}
+
+h4 {
+	margin-bottom: 0;
 }
 
 article {
@@ -46,12 +47,12 @@ article {
 	padding: 0.25em;
 	margin: 0.25em;
 }
-.metadata ul {
+ul {
 	margin: 0;
 	padding: 0;
 	list-style-type: none;
 }
-.privacy dl {
+dl {
 	margin: 0;
 }
 .message {
@@ -146,10 +147,23 @@ summary {
 	margin: 0;
 }
 
-.photo {
+.photoContainer {
+	clear: both;
 	margin: 1em;
 	border-left: 2px solid #888;
 	padding: 1em;
+}
+.photo {
+	display: table-cell;
+}
+.photo_name {
+	display: table-cell; 
+	vertical-align: top;
+	padding: 0 1em;
+}
+
+.comments {
+	margin-top: 1em;
 }
 
 .rawdata {
@@ -157,6 +171,6 @@ summary {
 	font-family: monospace;
 }
 
-.unknown {
-	/*display: none;*/
+.inlineBlock {
+	display: inline-block;
 }

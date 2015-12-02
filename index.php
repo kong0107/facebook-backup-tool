@@ -28,7 +28,7 @@
 	<link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
-	<?=file_get_contents('templates/body_header.html')?>
+	<?=file_get_contents('templates/header.html')?>
 	<section id="about" ng-show="tab=='about'">
 		<h2>About</h2>
 		<div ng-if="page.cover">
@@ -51,7 +51,7 @@
 		<h2>Timeline</h2>
 		<label>Search: <input ng-model="searchText" ng-model-options="{debounce: 250}" placeholder="search text"></label>
 		<article ng-repeat="post in posts | filter: searchText | orderBy: '-created_time'">
-			<?=file_get_contents('templates/post_body.html')?>
+			<?=file_get_contents('templates/post.html')?>
 		</article>
 	</section>
 </body>

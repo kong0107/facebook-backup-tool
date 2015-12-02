@@ -36,8 +36,8 @@
 	<link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
-	<?=file_get_contents('templates/body_header.html')?>
+	<?=file_get_contents('templates/header.html')?>
 	<h2>Post</h2>
-	<article ng-include="'templates/post_body.html'"></article>
+	<article ng-include="'templates/post.html'"></article>
 </body>
 </html>

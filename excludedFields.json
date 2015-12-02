@@ -58,5 +58,8 @@
 		"can_delete",
 		"can_tag",
 		"icon"
+	],
+	"event": [
+		"is_viewer_admin"
 	]
 }

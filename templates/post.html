@@ -9,6 +9,9 @@
 				</time>
 			</a>
 		</li>
+		<li ng-if="node.parent_id">
+			<a href="{{ret.createLink(node.parent_id,'posts')}}">Parent Post</a>
+		</li>
 		<li ng-repeat="a in node.actions" ng-if="a.name!='Comment'&&a.name!='Like'&&a.name!='Share'">
 			<a href="{{a.link}}">{{a.name}}</a>
 		</li>
@@ -58,7 +61,7 @@
 	<summary title="newest: {{node.updated_time|date:'yyyy-MM-dd HH:mm:ss'}}">
 		{{node.comments.length|number}} comment(s)
 	</summary>
-	<section class="comment" ng-include="'templates/comment_body.html'"
+	<section class="comment" ng-include="'templates/comment.html'"
 		ng-repeat="comment in node.comments | orderBy: 'created_time'"
 	></section>
 </details>

@@ -9,7 +9,7 @@
 	<link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
-	<div ng-include="'templates/body_header.html'"
+	<div ng-include="'templates/header.html'"
 		onload="node=ret.info; tabs=ret.tabs;"
 	></div>
 	<nav ng-if="true" title="debug">
@@ -52,16 +52,17 @@
 		</div>
 		<article ng-if="t=='posts'||t=='feed'||t=='comments'"
 			ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))"
-			ng-include="'templates/post_body.html'"
+			ng-include="'templates/post.html'"
 		></article>
 		
-		<article ng-if="t=='albums'" ng-repeat="node in ret[t]" ng-include="'templates/album_body.html'"
+		<article ng-if="t=='albums'" class="albumContainer"
+			ng-repeat="node in ret.albums" ng-include="'templates/album.html'"
 		></article>
-		<article ng-if="t=='photos'" ng-repeat="node in ret[t]" ng-include="'templates/photo_body.html'"
+		<article ng-if="t=='photos'" class="photoContainer"
+			ng-repeat="node in ret.photos" ng-include="'templates/photo.html'"
 		></article>
-		<!--article ng-repeat="node in ret[t]">
-			<details class="rawdata"><summary>JSON</summary>{{node|json}}</details>
-		</article-->
+		<article ng-if="t=='events'" ng-repeat="node in ret.events" ng-include="'templates/event.html'"
+		></article>
 	</section>
 </body>
 </html>

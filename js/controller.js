@@ -18,7 +18,7 @@ angular.module("myApp", [])
 		];
 		var ret = {
 			tabs: tabs,
-			tab: "albums",
+			tab: "info",
 			months: {},
 			month: {},
 			search: {},
@@ -90,12 +90,14 @@ angular.module("myApp", [])
 		 * Just for debug
 		 */
 		ret.templates = [
-			"body_header",
-			"post_body",
-			"album_body",
-			"comment_body",
-			"photo_body",
-			"attachment_body"
+			"header",
+			"post",
+			"album",
+			"comment",
+			"photo",
+			"attachment",
+			"event",
+			"place"
 		];
 
 		return ret;

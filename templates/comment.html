@@ -12,8 +12,8 @@
 <a class="from" href="https://www.facebook.com/{{comment.from.id}}">{{comment.from.name}}</a>
 <div class="message" ng-if="comment.message">{{comment.message}}</div>
 <div class="attachment" ng-if="comment.attachment" 
-	ng-include="'templates/attachment_body.html'" onload="attachment=comment.attachment"
+	ng-include="'templates/attachment.html'" onload="attachment=comment.attachment"
 ></div>
-<div class="cc" ng-include="'templates/comment_body.html'"
+<div class="cc" ng-include="'templates/comment.html'"
 	ng-repeat="comment in comment.comments | orderBy: 'created_time'"
 ></div>

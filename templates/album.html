@@ -1,3 +1,4 @@
+<h3>{{node.name}}</h3>
 <div class="metadata">
 	<ul>
 		<li>
@@ -17,19 +18,16 @@
 		<li ng-if="node.event">{{node.event|json}}</li>
 	</ul>
 </div>
-<h3>{{node.name}}</h3>
 <p ng-if="node.place">
 	Place:
-	<a title="{{node.place.location.street}}"
-		href="{{ret.createLink(node.place.id)}}"
-	>{{node.place.name}}</a>
+	<span ng-include="'templates/place.html'" onload="place=node.place"></span>
 </p>
 <p class="description">{{node.description}}</p>
 <details>
 	<summary ng-click="ret.getPhotosInAlbum(node._id)">
 		{{node.count|number}} photos
 	</summary>
-	<div class="photo" ng-include="'templates/photo_body.html'"
+	<div class="photoContainer" ng-include="'templates/photo.html'"
 		ng-repeat="node in ret.photosInAlbum[node._id]"
 	></div>
 </details>
@@ -37,7 +35,7 @@
 	<summary title="newest: {{node.updated_time|date:'yyyy-MM-dd HH:mm:ss'}}">
 		{{node.comments.length|number}} comment(s)
 	</summary>
-	<section class="comment" ng-include="'templates/comment_body.html'"
+	<section class="comment" ng-include="'templates/comment.html'"
 		ng-repeat="comment in node.comments | orderBy: 'created_time'"
 	></section>
 </details>
