@@ -50,7 +50,7 @@
 		</time>
 	</dd>
 	<dt>Place</dt>
-	<dd ng-include="'templates/place.html'" onload="place=node.place"></dd>
+	<dd><address ng-include="'templates/place.html'" onload="place=node.place"></address></dd>
 </dl>
 <details ng-if="node.description" class="description"
 ><summary>Description</summary>{{node.description}}

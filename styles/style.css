@@ -1,18 +1,115 @@
-h1, .about {
-	display: inline-block;
-	margin: 0.5em;
-	white-space: pre-wrap;
+/**
+ * General for all sites.
+ */
+.table,
+.dlWrapper {
+	display: table;
 }
-.about {
-	font-size: smaller;
+.table > header,
+.table > footer,
+.dlWrapper > header,
+.dlWrapper > footer {
+	display: table-caption;
+}
+.tableRow,
+.dlWrapper > dl {
+	display: table-row;
+}
+.tableCell,
+.dlWrapper > dl > dt,
+.dlWrapper > dl > dd {
+	display: table-cell;
+}
+.rawdata {
+	white-space: pre-wrap;
+	font-family: monospace;
+}
+.inlineBlock {
+	display: inline-block;
+}
+ul, ol, dl {
+	margin: 0;
+	padding: 0;
+}
+ul {
+	list-style-type: none;
+}
+nav > ul > li {
+	display: inline-block;
+}
+summary {
+	cursor: pointer;
 }
 
+/**
+ * General for this site.
+ */
+p {
+	margin: 0.2em 0;
+}
+dt {
+	padding: 0.2em;
+	font-weight: bold;
+}
+dd {
+	padding: 0.2em;
+}
+
+/**
+ * Main parts
+ */
+html, body {
+	margin:0;
+	padding:0;
+	height:100%;
+}
+#wrapper {
+	min-height:100%;
+	position:relative;
+}
+#wrapper > header {
+	padding: .5em;
+}
+#wrapper > section {
+	padding: 0 .5em 4em .5em;
+}
+#wrapper > footer {
+	width:100%;
+	position:absolute;
+	bottom:0;
+	left:0;
+	background:#ccc;
+	border-top:1px solid #888;
+	text-align: center;
+}
+
+/**
+ * Header
+ */
+h1 {
+	display: inline-block;
+	margin: .3em;
+}
+h2,h3,h4,h5,h6 {
+	margin: .5em 0 .25em 0;
+	white-space: pre;
+}
+.about {
+	display: inline-block;
+	white-space: pre-wrap;
+	font-size: smaller;
+}
 nav li {
 	cursor: pointer;
 	display: inline-block;
 	border-left: 1px solid #ccc;
-	padding: 0.2em;
-	margin: 0.2em 0;
+	padding: .2em;
+	margin: .2em 0;
+	transition: all 1s;
+}
+nav li:hover {
+	background-color: #ff0;
+	color: #000;
 }
 .focus {
 	font-weight: bold;
@@ -23,22 +120,14 @@ nav li {
 	text-decoration: none;
 	color: #888;
 }
-dt {
-	clear: both;
-	float: left;
-}
-dd {
-	clear: right;
-	margin-left: 8em;
-}
-h2,h3,h4,h5,h6 {
-	margin: 0.67em 0 0.25em 0;
-}
 
+/**
+ * Content
+ */
 article {
 	border-top: 1px solid #888;
 	margin-top: 1em;
-	padding-top: 0.5em;
+	padding-top: .5em;
 	line-height: 125%;
 	clear: both;
 }
@@ -46,26 +135,18 @@ article {
 	float: right;
 	clear: both;
 	font-size: smaller;
-	padding: 0.25em;
-	margin: 0.25em;
-}
-ul {
-	margin: 0;
-	padding: 0;
-	list-style-type: none;
-}
-dl {
-	margin: 0;
+	padding: .25em;
+	margin: .25em;
 }
 .message {
 	white-space: pre-wrap;
 }
 .link_container {
 	border-left: 2px solid #888;
-	margin: 0.5em 0 0 1em;
-	padding: 0 0.5em;
+	margin: .5em 0 0 1em;
+	padding: 0 .5em;
 }
-.link_container h4 {
+.link_container > h4 {
 	margin-bottom: 0;
 }
 .full_picture {
@@ -77,14 +158,14 @@ dl {
 	margin: 0;
 }
 .tags {
-	margin: 0.5em 0 0 0;
+	margin: .5em 0 0 0;
 	padding: 0;
 	list-style-type: none;
 }
 .tags li {
 	display: inline-block;
-	margin: 0.2em;
-	padding: 0.2em;
+	margin: .2em;
+	padding: .2em;
 	border-left: 1px solid #ccc;
 }
 
@@ -93,17 +174,22 @@ dl {
 	color: #888;
 }
 
+/**
+ * Posts
+ */
 .story {
 	font-style: italic;
 }
 
-summary {
-	cursor: pointer;
+/**
+ * Comments
+ */
+.comments {
+	margin-top: 1em;
 }
-
 .comment {
 	clear: both;
-	padding: 0.5em;
+	padding: .5em;
 	width: 600px;
 }
 .comment:nth-child(odd) {
@@ -117,8 +203,8 @@ summary {
 }
 .cc {
 	clear: both;
-	margin: 0.25em 0.25em 0.25em 2em;
-	padding: 0.25em;
+	margin: .25em .25em .25em 2em;
+	padding: .25em;
 }
 .comment:nth-child(even) .cc:nth-child(even) {
 	background-color: #ccc;
@@ -133,9 +219,12 @@ summary {
 	background-color: #ccc;
 }
 
+/**
+ * Attachment (of comment only?)
+ */
 .attachment {
-	margin: 0.5em 0 0 1em;
-	padding: 0 0.5em;
+	margin: .5em 0 0 1em;
+	padding: 0 .5em;
 }
 .attachment_image {
 	width: 64px;
@@ -149,6 +238,9 @@ summary {
 	margin: 0;
 }
 
+/**
+ * Photo
+ */
 .photoContainer {
 	clear: both;
 	margin: 1em;
@@ -159,20 +251,13 @@ summary {
 	display: table-cell;
 }
 .photo_side {
-	display: table-cell; 
+	display: table-cell;
 	vertical-align: top;
 	padding: 0 1em;
 }
 
-.comments {
-	margin-top: 1em;
-}
-
-.rawdata {
-	white-space: pre-wrap;
-	font-family: monospace;
-}
-
-.inlineBlock {
-	display: inline-block;
+/**
+ * Page
+ */
+.pageContainer {
 }

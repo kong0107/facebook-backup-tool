@@ -12,57 +12,62 @@
 	</script>
 	<script src="js/controller.js"></script>
 	<link rel="stylesheet" href="styles/style.css">
+	<base target="_blank">
 </head>
 <body>
-	<div ng-include="'templates/header.html'"
-		onload="node=ret.info; tabs=ret.tabs;"
-	></div>
-	<nav ng-if="true" title="debug">
-		<ul>
-			<li ng-repeat="t in ret.templates">
-				<a target="_blank" href="templates/{{t}}.html">{{t}}</a>
-			</li>
-		</ul>
-	</nav>
-	<section id="info" ng-if="ret.tab=='info'">
-		<h2>Info</h2>
-		<div ng-include="'templates/'+ret.type+'.html'" onload="node=ret.info;node._id=ret.id"></div>
-	</section>
-	<section ng-repeat="t in ret.tabs" ng-show="t==ret.tab" id="{{t}}">
-		<h2>{{t|capitalize}}</h2>
-		<div ng-if="t=='feed'||t=='posts'||t=='comments'">
-			<label>
-				Search:
-				<input ng-model="ret.search[t]"
-					ng-model-options="{debounce: 250}" placeholder="search text"
-				>
-			</label>
-			<p ng-show="ret.search[t]">matched {{filtered.length}} {{t}}</p>
-			<nav ng-hide="ret.search[t]">
-				<ul>
-					<li ng-repeat="m in ret.months[t]"
-						ng-click="ret.month[t] = m"
-						ng-class="(ret.month[t] == m)?'focus':''"
-					>{{m}}</li>
-				</ul>
-			</nav>
-		</div>
-		<article ng-if="t=='posts'||t=='feed'||t=='comments'"
-			ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))"
-			ng-include="'templates/post.html'"
-		></article>
-		<article ng-if="t=='albums'" class="albumContainer"
-			ng-repeat="node in ret.albums" ng-include="'templates/album.html'"
-		></article>
-		<article ng-if="t=='photos'" class="photoContainer"
-			ng-repeat="node in ret.photos" ng-include="'templates/photo.html'"
-		></article>
-		<article ng-if="t=='events'" ng-repeat="node in ret.events" ng-include="'templates/event.html'"
-		></article>
-		<article ng-if="t=='likes'" ng-repeat="node in ret.likes" ng-include="'templates/page.html'"
-		></article>
-	</section>
-	<footer>
-	</footer>
+	<div id="wrapper">
+		<header ng-include="'templates/header.html'"
+			onload="node=ret.info; tabs=ret.tabs;"
+		></header>
+		<!--nav ng-if="true" title="debug">
+			<ul>
+				<li ng-repeat="t in ret.templates">
+					<a target="_blank" href="templates/{{t}}.html">{{t}}</a>
+				</li>
+			</ul>
+		</nav-->
+		<section id="info" ng-if="ret.tab=='info'">
+			<h2>Info</h2>
+			<div ng-include="'templates/'+ret.type+'.html'" onload="node=ret.info;node._id=ret.id"></div>
+		</section>
+		<section ng-repeat="t in ret.tabs" ng-show="t==ret.tab" id="{{t}}">
+			<h2>{{t|capitalize}}</h2>
+			<div ng-if="t=='feed'||t=='posts'||t=='comments'||t=='likes'">
+				<label>
+					Search:
+					<input ng-model="ret.search[t]"
+						ng-model-options="{debounce: 250}" placeholder="search text"
+					>
+				</label>
+				<p ng-show="ret.search[t]">matched {{filtered.length}} {{t}}</p>
+			</div>
+			<div ng-if="t=='feed'||t=='posts'||t=='comments'">
+				<nav ng-hide="ret.search[t]">
+					<ul>
+						<li ng-repeat="m in ret.months[t]"
+							ng-click="ret.month[t] = m"
+							ng-class="(ret.month[t] == m)?'focus':''"
+						>{{m}}</li>
+					</ul>
+				</nav>
+			</div>
+			<article ng-if="t=='posts'||t=='feed'||t=='comments'"
+				ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))"
+				ng-include="'templates/post.html'"
+			></article>
+			<article ng-if="t=='albums'" class="albumContainer"
+				ng-repeat="node in ret.albums" ng-include="'templates/album.html'"
+			></article>
+			<article ng-if="t=='photos'" class="photoContainer"
+				ng-repeat="node in ret.photos" ng-include="'templates/photo.html'"
+			></article>
+			<article ng-if="t=='events'" ng-repeat="node in ret.events" ng-include="'templates/event.html'"
+			></article>
+			<article ng-if="t=='likes'" ng-repeat="node in filtered=(ret.likes|filter:ret.search[t])"
+				ng-include="'templates/page.html'" onload="node.id=node._id" class="pageContainer"
+			></article>
+		</section>
+		<footer>This is the footer of the page.</footer>
+	</div>
 </body>
 </html>

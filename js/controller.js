@@ -27,37 +27,47 @@ angular.module("myApp", [])
 			month: {},
 			search: {},
 			photosInAlbum: {},
-			unknownFields: {
-				"page": [
-					"affiliation","app_id","artists_we_like","attire","awards",
-					"band_interests","band_members","best_page","bio","birthday","booking_agent","built","business",
-					"category_list","company_overview","contact_address","country_page_likes",
-					//"cover",
-					"culinary_team","current_location",
-					"directed_by","display_subtext","emails",
-					"features","food_styles","founded",
-					"general_info","general_manager","genre",
-					"global_brand_root_id","has_added_app",
-					"hometown","hours","impressum","influences",
-					"location","mission","mpg","name_with_location_descriptor","network",
-					"offer_eligible","parent_page","parking","payment_options","personal_info","personal_interests","pharma_safety_info","phone","plot_outline","press_contact","price_range","produced_by","products","promotion_eligible","promotion_ineligible_reason","public_transit","record_label","release_date","restaurant_services","restaurant_specialties","schedule","screenplay_by","season","starring","start_info","store_location_descriptor","store_number","studio","talking_about_count","engagement","single_line_address","place_type","unread_message_count","unread_notif_count","unseen_message_count","username","voip_info","website","were_here_count","written_by","featured_video","owner_business","last_used_time","asset_score","checkins","likes","members"
-					
-		/*"ad_campaign",
-		"promotion_eligible",
-		"owner_business",
-		
-		"access_token",
-		"business",
-		
-		"context",
-		"can_checkin",
-		"can_post",
-		"leadgen_tos_accepted",
-		"last_used_time",
-		"new_like_count",
-		"is_published",
-		"voip_info"*/
-				]
+			showDetails: {},
+			displaySet: {
+				page: {
+					block: [
+						"about", "awards", "bio", "company_overview",
+						"description", "impressum", "mission",
+						"personal_info", "products", "personal_interests",
+						"public_transit", "plot_outline", "produced_by",
+						"starring", "culinary_team", "record_label", "general_info"
+					],
+					inline: [
+						"id", "attire", "network", "affiliation", "phone",
+						"birthday", "single_line_address", "display_subtext", "checkins",
+						"hometown", "directed_by", "genre", "screenplay_by", "studio",
+						"global_brand_root_id", "price_range", "band_members", "asset_score"
+					],
+					list: [
+						"emails"
+					],
+					complicated: [
+						"parking",
+						"hours", "payment_options", "restaurant_services", "restaurant_specialties"
+					],
+					complicatedList: [
+						"category_list"
+					],
+					unknown: [
+						"app_id","artists_we_like","attire",
+						"band_interests","booking_agent","built","business",
+						"contact_address","country_page_likes",
+						"culinary_team","current_location",
+						"features","food_styles",
+						"general_manager",
+						"has_added_app","hometown","influences",
+						"mpg","name_with_location_descriptor","offer_eligible",
+						"parent_page","pharma_safety_info",
+						"press_contact","schedule","season",
+						"store_location_descriptor","store_number","studio",
+						"voip_info","written_by","asset_score","checkins","members"
+					]
+				}
 			}
 		};
 
@@ -105,11 +115,11 @@ angular.module("myApp", [])
 		ret.createLink = function(id, type) {
 			if(typeof id == "number") id += "";
 			else if(typeof id != "string") id = "";
-			else if(typeof type != "undefined") 
+			else if(typeof type != "undefined")
 				id = id.replace("_", "/" + type + "/");
 			return "https://www.facebook.com/" + id;
 		};
-		
+
 		/**
 		 * Get photos in a album.
 		 */
@@ -120,7 +130,7 @@ angular.module("myApp", [])
 				ret.photosInAlbum[id] = r.data;
 			}, notFound);
 		}
-		
+
 		/**
 		 * Just for debug
 		 */

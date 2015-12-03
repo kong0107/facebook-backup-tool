@@ -127,8 +127,8 @@
 	 * Save node info to a JSON file and into DB.
 	 */
 	if(empty($_GET['request'])) {
-		echo "Requesting node info ...\n";
 		$ru = "/$nodeId?fields=" . implode(',', getFields($nodeType));
+		echo "Requesting node info: $ru\n";
 		$nodeInfo = array_remove_empty($fb->get($ru)->getDecodedBody());
 
 		$dir = __DIR__ . '/data/json/';
