@@ -12,14 +12,9 @@
 				xfbml      : false,
 				status     : true
 			});
-			FB.getLoginStatus(function(response) {
-				if(response.status == 'connected') main();
-				else FB.login(main, {scope: 'user_posts,user_photos'});
-			});
 		};
 	</script>
 	<script src="js/fbsdk-extend.js"></script>
-	<script src="js/foo.js"></script>
 	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script>

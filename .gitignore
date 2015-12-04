@@ -2,7 +2,7 @@ vendor/
 data/
 journal/
 _tmp/
-config.php
+config.inc.php
 *.0
 *.ns
 *.lock

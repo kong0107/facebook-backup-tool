@@ -6,7 +6,7 @@
 			session_start();
 		case PHP_SESSION_ACTIVE: // sessions are enabled, and one exists.
 	}
-	require_once __DIR__ . '/config.php';
+	require_once __DIR__ . '/config.inc.php';
 	require_once __DIR__ . '/vendor/autoload.php';
 
 	try {
