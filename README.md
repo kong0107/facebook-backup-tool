@@ -15,10 +15,28 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 # Usage
 1. Install and start web server, PHP, and MongoDB server locally.
 2. Create your own App at [Facebook Developer](https://developers.facebook.com/).
-3. Edit `config.sample.php` and save as `config.inc.php`; edit `appId` in `crawl.html`.
+3. Edit `config.sample.php` and save as `config.inc.php`; edit `js/fbsdk-config.js`.
 4. Browse `crawl.html`, select what to crawl, submit the form, and wait.
 5. Modify JavaScript in `index.html` to the id and type of what you crawled.
 6. Browse `index.html` through web server to see the results.
 
 # Disclaimer
 I don't gurantee anything.
+
+# Directory Structure
+* dt: developer tool, only for development.
+* templates: HTML templates for AngularJS.
+* metadata: JSON files about structure of Facbook Graph API nodes.
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -4,14 +4,10 @@
 	<meta charset="utf-8">
 	<title>Facebook Data Crawler</title>
 	<script src="//connect.facebook.net/en_US/sdk.js"></script>
+	<script src="js/fbsdk-config.js"></script>
 	<script>
 		window.fbAsyncInit = function() {
-			FB.init({
-				version    : 'v2.5',
-				appId      : '1598824630378971',
-				xfbml      : false,
-				status     : true
-			});
+			FB.init(FBConfig);
 		};
 	</script>
 	<script src="js/fbsdk-extend.js"></script>
@@ -105,7 +101,6 @@
 						FB.apiwt(ru, function(r) {
 							$scope.message = '';
 							$scope.nodeInfo = r;
-							console.log(r);
 							if(!$scope.candidates.length) {
 								$scope.candidates.push(r);
 								$scope.nodeId = r.id;
