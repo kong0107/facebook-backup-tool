@@ -24,19 +24,10 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 I don't gurantee anything.
 
 # Directory Structure
-* dt: developer tool, only for development.
-* templates: HTML templates for AngularJS.
-* metadata: JSON files about structure of Facbook Graph API nodes.
-
-
-
-
-
-
-
-
-
-
-
-
-
+* `templates`: HTML templates for AngularJS.
+* `metadata`: JSON files about structure of Facebook Graph API nodes.
+* `dt`: developer tool, only for development.
+** `browser.html`: Log in Facebook and then browse it by client-side JavaScript. (No server needed)
+** `dbBrowse.php`: Browse MongoDB database on localhost.
+** `metadata.html`: Gets what's in folder `metadata`.
+** `template.html`: a template for new page.
