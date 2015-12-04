@@ -8,10 +8,17 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 6. All posts are listed in one page. This means the file is very large. And since the page has no hashes in its HTML, it would be inconvenient to share a specified post even you upload the file to some web server.
 
 # Warning
-This is unfinished.
+1. This is unfinished.
+2. Private posts and photos are crawled, too. You shall check if the contents of crawled data is suitable to publish.
+3. If the target you wanna backup may have many comments (user replies) in its posts, skip function `getComment` in `crawl.php`.
 
 # Usage
 1. Install and start web server, PHP, and MongoDB server locally.
-2. Browse `crawl.html`, select what to crawl, submit the form, and wait.
-3. Modify JavaScript in `index.html` to the id and type of what you crawled.
-4. Browse `index.html` through web server to see the results.
+2. Create your own App at [Facebook Developer](https://developers.facebook.com/).
+3. Edit `config.sample.php` and save as `config.php`; edit `appId` in `crawl.html`.
+4. Browse `crawl.html`, select what to crawl, submit the form, and wait.
+5. Modify JavaScript in `index.html` to the id and type of what you crawled.
+6. Browse `index.html` through web server to see the results.
+
+# Disclaimer
+I don't gurantee anything.

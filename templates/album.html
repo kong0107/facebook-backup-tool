@@ -27,6 +27,7 @@
 	<summary ng-click="ret.getPhotosInAlbum(node._id)">
 		{{node.count|number}} photos
 	</summary>
+	<div ng-if="!ret.photosInAlbum[node._id]">Loading ...</div>
 	<div class="photoContainer" ng-include="'templates/photo.html'"
 		ng-repeat="node in ret.photosInAlbum[node._id]"
 	></div>
