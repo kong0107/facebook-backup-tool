@@ -26,8 +26,10 @@ I don't gurantee anything.
 # Directory Structure
 * `templates`: HTML templates for AngularJS.
 * `metadata`: JSON files about structure of Facebook Graph API nodes.
+* `js`:
+  * `fbsdk-extend.js`: functions based on [Facebook SDK for JavaScript](https://developers.facebook.com/docs/javascript).
 * `dt`: developer tool, only for development.
-** `browser.html`: Log in Facebook and then browse it by client-side JavaScript. (No server needed)
-** `dbBrowse.php`: Browse MongoDB database on localhost.
-** `metadata.html`: Gets what's in folder `metadata`.
-** `template.html`: a template for new page.
+  * `browser.html`: Log in Facebook and then browse it by client-side JavaScript. (No server needed)
+  * `dbBrowse.php`: Browse MongoDB database on localhost.
+  * `metadata.html`: Gets what's in folder `metadata`.
+  * `template.html`: a template for new page.
