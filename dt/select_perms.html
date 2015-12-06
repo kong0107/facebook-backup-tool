@@ -1,0 +1,128 @@
+<!DOCTYPE HTML>
+<html ng-app="myApp">
+<head>
+	<meta charset="utf-8">
+	<title>Select Permissions</title>
+	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+	<script src="//connect.facebook.net/en_US/sdk.js"></script>
+	<script src="../js/fbsdk-config.js"></script>
+	<script>
+angular.module("myApp", []).controller("main", function($scope, $http, $window) {
+	$scope.status = {
+		listLoaded: false,
+		FBLoggedIn: null,
+		permsChanged: false
+	}
+	var grantedPerms = [];
+
+	/**
+	 * Get all possible permissions.
+	 *
+	 * @see https://developers.facebook.com/docs/facebook-login/permissions
+	 */
+	$scope.perms = [];
+	$scope.perm = {};
+	$http.get("../metadata/permissions_v2.5.json")
+	.then(function(r) {
+		for(var i = 0; i < r.data.length; ++i)
+			if(r.data[i] != "user_actions:{app_namespace}") {
+				$scope.perms.push(r.data[i]);
+				if(typeof $scope.perm[r.data[i]] == "undefined")
+					$scope.perm[r.data[i]] = false;
+			}
+		$scope.status.listLoaded = true;
+		console.log("Permission list:", $scope.perms);
+	}, function(r) {
+		console.log(r);
+		$scope.message = "Error while loading permission list.";
+	});
+
+	$window.fbAsyncInit = function() {
+		FB.init(FBConfig);
+		FB.getLoginStatus(checkResStatus);
+	};
+	$.getScript("../js/fbsdk-extend.js");
+
+	$scope.FBLogin = function() {
+		FB.login(checkResStatus);
+	};
+
+	$scope.updatePerms = function() {
+		var toRequest = [];
+		for(var p in $scope.perm) {
+			var g = $scope.perm[p];
+			if(grantedPerms.indexOf(p) == -1) {
+				if(g) toRequest.push(p);
+			}
+			else if(!g) FB.revokePermission(p);
+		}
+		if(toRequest.length) {
+			FB.requestPermission(toRequest, loadGrantedPerms, loadGrantedPerms);
+		}
+		else setTimeout(loadGrantedPerms, 250);
+		$scope.status.permsChanged = false;
+	};
+
+	var checkResStatus = function(response) {
+		if(response.status == "connected") {
+			$scope.status.FBLoggedIn = true;
+			loadGrantedPerms();
+		}
+		else {
+			$scope.status.FBLoggedIn = false;
+			grantedPerms = [];
+			$scope.$apply();
+		}
+	}
+	var loadGrantedPerms = function() {
+		FB.getGrantedPermissions(function(arr) {
+			grantedPerms = arr;
+			console.log("Granted permissions:", grantedPerms);
+			for(var i = 0; i < arr.length; ++i)
+				$scope.perm[arr[i]] = true;
+			$scope.$apply();
+		});
+	};
+});
+	</script>
+	<style>
+		.perms > li {
+			display: inline-block;
+			border: 1px solid #ccc;
+			margin: 0.2em;
+			padding: 0.2em;
+			transition: all 1s;
+		}
+		.perms > li > label {
+			cursor: pointer;
+		}
+		.checked {
+			background-color: #ff0;
+			border-color: #888;
+		}
+		.perms > li:hover {
+			background-color: #8f8;
+		}
+	</style>
+</head>
+<body ng-controller="main">
+	<h1>Select Permissions</h1>
+	<div ng-bind="message"></div>
+	<button ng-if="status.FBLoggedIn==false" ng-click="FBLogin()">Facebook Login</button>
+	<form ng-show="status.FBLoggedIn && status.listLoaded">
+		<p>Select <a href="https://developers.facebook.com/docs/facebook-login/permissions">permissions</a> you want to grant to the App.</p>
+		<ul class="perms">
+			<li ng-repeat="p in perms" ng-class="perm[p]?'checked':''">
+				<label>
+					<input type="checkbox" ng-model="perm[p]"
+						ng-click="status.permsChanged=true"
+					>{{p}}
+				</label>
+			</li>
+		</ul>
+		<button ng-disabled="!status.permsChanged" ng-click="updatePerms()"
+		>Update Permissions</button>
+	</form>
+</body>
+</html>

@@ -18,7 +18,7 @@ window.fbAsyncInit = function(){
 		 */
 		FB.apiwt = function() {
 			for(var i = 1; (i < arguments.length) && (typeof arguments[i] != 'function'); ++i);
-			if(i == arguments.length) throw new Error('no callback function');
+			if(i == arguments.length) arguments[i] = function() {};
 			var func = arguments[i];
 			arguments[i] = function() {
 				var orig = func;
