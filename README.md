@@ -23,6 +23,12 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 # Disclaimer
 I don't gurantee anything.
 
+# Application
+(Contents of this paragraph are NOT what this app can do, but what you can do by the data you crawl by this app.)
+With post/photo data of the target node and their comments downloaded, you can:
+1. Search if you or somebody said something on your timeline/page/group/event.
+2. Check how often a user interacts with you. Listing all frequencies of all users is also possible.
+
 # Directory Structure
 * `templates`: HTML templates for AngularJS.
 * `metadata`: JSON files about structure of Facebook Graph API nodes.

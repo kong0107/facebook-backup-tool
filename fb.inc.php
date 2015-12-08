@@ -1,4 +1,6 @@
 <?php
+	require_once __DIR__ . '/config.inc.php';
+	
 	switch(session_status()) {
 		case PHP_SESSION_DISABLED: // sessions are disabled.
 			exit('Error: sessions disabled');
@@ -6,7 +8,6 @@
 			session_start();
 		case PHP_SESSION_ACTIVE: // sessions are enabled, and one exists.
 	}
-	require_once __DIR__ . '/config.inc.php';
 	require_once __DIR__ . '/vendor/autoload.php';
 
 	try {
@@ -74,6 +75,7 @@
 		$ef = $excludedFields[$nodeType] or $ef = [];
 		$fields = [];
 		//print_r($metadata);
+		if(!is_array($metadata[$nodeType]['fields'])) return [];
 		foreach($metadata[$nodeType]['fields'] as $field) {
 			$fn = $field['name'];
 			if(!in_array($fn, $ef)) $fields[] = $fn;
@@ -101,27 +103,9 @@
 			foreach($res['data'] as $c) {
 				if($c['comment_count'] !== 0)
 					$c['comments'] = getComments($c['id']);
-				//else echo "no sub-comments.\n";
 				$result[] = $c;
 			}
 		} while($reqUrl = substr($res['paging']['next'], 31));
 		return $result;
-	}
-
-	/**
-	 * Remove null, '' and [] in an array recursively.
-	 *
-	 * Unlike `empty`, this does NOT remove zero and false.
-	 */
-	function array_remove_empty($arr) {
-		foreach($arr as $k => &$v) {
-			if(is_array($v)) {
-				$v = array_remove_empty($v);
-				if(!count($v)) unset($arr[$k]);
-				continue;
-			}
-			if(is_null($v) || $v === '') unset($arr[$k]);
-		}
-		return $arr;
 	}
 ?>
