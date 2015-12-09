@@ -10,31 +10,41 @@
 			$scope.timerId = 0;
 			$scope.interval = 3;
 			$scope.lastExecute = "Unknown";
+			$scope.path = "crawler_dfs.php";
 			
 			$scope.request = function() {
 				$scope.lastExecute = (new Date).toISOString();
-				$http.get("crawler_dfs.php").then(function(r){
+				$http.get($scope.path).then(function(r){
 					$scope.data = r.data;
 					if($scope.timerId) $scope.timerId = window.setTimeout($scope.request, $scope.interval * 1000);
 				}, function(r){ 
 					$scope.data = JSON.stringify(r, undefined, 4);
-					if($scope.timerId) $scope.timerId = window.setTimeout($scope.request, $scope.interval * 1000);
+					if($scope.timerId) $scope.timerId = window.setTimeout($scope.request, $scope.interval * 5000);
 				});
 			}
 			$scope.keepRequest = function() {
 				$scope.request();
 				$scope.timerId = -1;
-			}
+			};
 			$scope.stop = function() {
 				if($scope.timerId > 0) window.clearInterval($scope.timerId);
 				$scope.timerId = 0;
-			}
+			};			
+			$scope.push = function() {
+				$scope.stop();
+				var tmp = $scope.path;
+				$scope.path = "crawler_dfs.php?type=page&path=359985940825230";
+				$scope.request();
+				$scope.path = tmp;
+			};
 		});
 	</script>
 	<style></style>
 </head>
 <body ng-controller="main">
 	<h1 style="margin: 0;">Facebook Data Crawler</h1>
+	<button ng-click="push()">Push</button>
+	<br>
 	<button ng-click="request()" ng-disabled="timerId">Request once</button>
 	<br>
 	<button ng-click="keepRequest()" ng-disabled="timerId">Keep request</button>

@@ -39,3 +39,21 @@ With post/photo data of the target node and their comments downloaded, you can:
   * `dbBrowse.php`: Browse MongoDB database on localhost.
   * `metadata.html`: Gets what's in folder `metadata`.
   * `template.html`: a template for new page.
+
+# Algorithm
+## Crawler: DFS / Stack
+0. Push what to request to the stack.
+1. Pop an element from the stack.
+2. Request the data and save it to the database.
+3. If it's a node, then push its edges to the stack.
+4. If it's an edge and there's next page, then push the next page.
+5. If it's an edge whose nodes may have comments, then push `comments` edge of all nodes (in the current page) to the stack.
+6. If the stack is not empty, then go to step 1.
+7. Finish crawling.
+
+# Concerns
+* What kind of database structure to use? Especially, save comments to a collection/table separate from their targets, or as an array element field to their targets? 
+** You shall concern copyright and privacy issues.
+** If using MongoDB, note that positional `$` operator does NOT support nested array. See [MongoDB Manual](https://docs.mongodb.org/manual/reference/operator/update/positional/).
+* Where to save media files?
+* Which fields to request? Save them all or forget about some after process? (For example, as this is used for backup usage, it's a contradiction to save the URL of a media since we've already downloaded the file in case that the file is delete from Facebook.)
