@@ -33,7 +33,7 @@
 	<h4 class="inlineBlock">Place</h4>
 	<address ng-include="'templates/place.html'" onload="place=node.place"></address>
 </div>
-<details ng-if="node.comments" class="comments">
+<details ng-if="node.comments.length" class="comments">
 	<summary title="newest: {{node.updated_time|date:'yyyy-MM-dd HH:mm:ss'}}">
 		{{node.comments.length|number}} comment(s)
 	</summary>
