@@ -115,6 +115,7 @@ angular.module("myApp", [])
 					else {
 						console.log("All edges are loaded.");
 						arrangeComments();
+						arrangePhotos();
 					}
 				}, notFound);
 			};
@@ -124,6 +125,7 @@ angular.module("myApp", [])
 		/**
 		 * Put comments to where each should be.
 		 *
+		 * This should be called before `arrangePhotos`.
 		 * Maintain only those without `fbbk_parent` for event node.
 		 */
 		var arrangeComments = function() {
@@ -150,6 +152,25 @@ angular.module("myApp", [])
 					ret.comments.push(all[i]);
 			}
 		}
+		
+		/**
+		 * Put photos to the albums they should be in.
+		 *
+		 * This should be called after `arrangeComments`.
+		 */
+		var arrangePhotos = function() {
+			if(!ret.photos || !ret.photos.length) return;
+			console.log("Arranging photos");
+			for(var i = 0; i < ret.albums.length; ++i) {
+				var album = ret.albums[i];
+				album.photos = $filter('filter')(
+					ret.photos,
+					{album: {id: album._id}},
+					function(a, b) {return a==b;}
+				);
+			}
+			console.log(ret.albums);
+		}
 
 		/**
 		 * Create a link to Facebook by ID of the node.
@@ -160,15 +181,6 @@ angular.module("myApp", [])
 			else if(typeof type != "undefined")
 				id = id.replace("_", "/" + type + "/");
 			return "https://www.facebook.com/" + id;
-		};
-
-		/**
-		 * Get photos in a album.
-		 */
-		ret.getPhotosInAlbum = function(id) {
-			ret.photosInAlbum[id] = $filter('filter')(
-				ret.photos, {album: {id: id}}
-			);
 		};
 
 		/**

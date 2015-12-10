@@ -24,15 +24,14 @@
 </p>
 <p class="description">{{node.description}}</p>
 <details>
-	<summary ng-click="ret.getPhotosInAlbum(node._id)">
-		{{node.count|number}} photos
+	<summary>
+		{{node.photos.length|number}} photos
 	</summary>
-	<div ng-if="!ret.photosInAlbum[node._id]">Loading ...</div>
 	<div class="photoContainer" ng-include="'templates/photo.html'"
-		ng-repeat="node in ret.photosInAlbum[node._id]"
+		ng-repeat="node in node.photos"
 	></div>
 </details>
-<details ng-if="node.comments">
+<details ng-if="node.comments.length">
 	<summary title="newest: {{node.updated_time|date:'yyyy-MM-dd HH:mm:ss'}}">
 		{{node.comments.length|number}} comment(s)
 	</summary>

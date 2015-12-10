@@ -9,7 +9,7 @@
 	 * Handling the initial data.
 	 */
 	if($_GET['path'] && $_GET['type']) {
-		push($_GET['path'], $_GET['type'], 
+		push($_GET['path'], $_GET['type'],
 			$_GET['ancestors'] ? $_GET['ancestors'] : []
 		);
 		//header('Location: ' . $config['server_root'] . $_SERVER['SCRIPT_NAME']);
@@ -48,6 +48,12 @@
 		)
 	);
 
+	$maxExeTime = 4; //ini_get('max_execution_time') / 2;
+	$sleepTime = 1e+5;
+	printf("Time limit: %.2f seconds.\n", $maxExeTime);
+	printf("Sleep time setting: %d milliseconds.\n", $sleepTime / 1000);
+	printf("Already %.2f seconds passed.\n\n", microtime(true) - $config['startTime']);
+
 	/**
 	 * Main algorithm.
 	 *
@@ -66,7 +72,10 @@
 		$ancestors = is_array($req['ancestors']) ? $req['ancestors'] : [];
 
 		echo "Requesting $path\n";
-		$res = $fb->get($path)->getDecodedBody();
+		$s = microtime(true);
+		$res = $fb->get($path);
+		printf("Got response after %d milliseconds.\n", (microtime(true) - $s) * 1000);
+		$res = $res->getDecodedBody();
 		if(array_key_exists('data', $res)) {
 			echo "Processing edge data ...\n";
 			if($next = $res['paging']['next']) {
@@ -101,7 +110,10 @@
 				push("/{$res['id']}{$edge['subpath']}", $edge['type'], $ancestors);
 		}
 
-		break;
+		$elapsedTime = microtime(true) - $config['startTime'];
+		printf("%.2f seconds have passed.\n\n", $elapsedTime);
+		if($elapsedTime >= $maxExeTime) break;
+		usleep($sleepTime);
 	}
 
 	/**
@@ -154,7 +166,10 @@
 			;
 			if(!file_exists($dest)) {
 				if(!is_dir($dir)) mkdir($dir, 0777, true);
-				copy($source, $dest);
+				if(copy($source, $dest))
+					echo "Successfully downloaded photo to $dest\n";
+				else echo "Failed downloading $source to $dest\n";
+				usleep(1000);
 			}
 			unset($doc['images']);
 		}
@@ -166,9 +181,11 @@
 			array_remove_empty($doc),
 			array('upsert' => true)
 		);
+		echo "Updated $type with id {$doc['_id']}\n";
 		return $ret;
 	}
 
-	printf("There are %d elements in the stack.\n\n\n\n", count($_SESSION['stack']));
-	print_r($_SESSION['stack']);
+	printf("\n\n--------\nThere are %d elements in the stack.\n", count($_SESSION['stack']));
+	foreach($_SESSION['stack'] as $ele) echo urldecode($ele['path']) . "\n";
+	//print_r($_SESSION['stack']);
 ?>
