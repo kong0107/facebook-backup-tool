@@ -18,7 +18,7 @@
 		<li ng-if="node.event">{{node.event|json}}</li>
 	</ul>
 </div>
-<a class="photo" href="data/photos/album_{{node.album.id}}_photos/{{node._id}}.jpg"
+<a class="photo" href="data/photos/album_{{node.album.id}}/{{node._id}}.jpg"
 ><img ng-src="{{node.picture}}"></a>
 <p class="photo_side description">{{node.name}}</p>
 <div class="photo" ng-include="'templates/photo.html'"

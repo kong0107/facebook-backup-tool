@@ -130,7 +130,6 @@ angular.module("myApp", [])
 		 */
 		var arrangeComments = function() {
 			if(!ret.comments || !ret.comments.length) return;
-			console.log("Arranging comments");//, ret.comments);
 			for(var i = 0; i < tabs.length; ++i) {
 				for(var j = 0; j < ret[tabs[i]].length; ++j) {
 					var node = ret[tabs[i]][j];
@@ -141,16 +140,16 @@ angular.module("myApp", [])
 					);
 				}
 			}
-			if(type != "event") {
-				delete ret.comments;
-				return;
+			if(type == "event") {
+				var all = ret.comments;
+				ret.comments = [];
+				for(var i = 0; i < all.length; ++i) {
+					if(!all[i].fbbk_parent)
+						ret.comments.push(all[i]);
+				}
 			}
-			var all = ret.comments;
-			ret.comments = [];
-			for(var i = 0; i < all.length; ++i) {
-				if(!all[i].fbbk_parent)
-					ret.comments.push(all[i]);
-			}
+			else delete ret.comments;
+			console.log("Comments arranged.");
 		}
 		
 		/**
@@ -160,16 +159,22 @@ angular.module("myApp", [])
 		 */
 		var arrangePhotos = function() {
 			if(!ret.photos || !ret.photos.length) return;
-			console.log("Arranging photos");
-			for(var i = 0; i < ret.albums.length; ++i) {
-				var album = ret.albums[i];
-				album.photos = $filter('filter')(
-					ret.photos,
-					{album: {id: album._id}},
-					function(a, b) {return a==b;}
-				);
+			for(var j = 0; j < ret.albums.length; ++j)
+				ret.albums[j].photos = [];
+			var tagged = [];
+			for(var i = 0; i < ret.photos.length; ++i) {
+				var photo = ret.photos[i];
+				for(var j = 0; j < ret.albums.length; ++j) {
+					var album = ret.albums[j];
+					if(photo.album && photo.album.id == album._id) {
+						album.photos.push(photo);
+						break;
+					}
+				}
+				if(j == ret.albums.length) tagged.push(photo);
 			}
-			console.log(ret.albums);
+			ret.photos = tagged;
+			console.log("Photos arranged.");
 		}
 
 		/**

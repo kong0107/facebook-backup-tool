@@ -66,7 +66,7 @@
 	 *    then push `comments` edges of each node to the stack.
 	 * 6. If the stack is not empty, then go to step 1.
 	 */
-	while($req = array_pop($_SESSION['stack'])) {
+	while($req = end($_SESSION['stack'])) {
 		$path = $req['path'];
 		$type = $req['type'];
 		$ancestors = is_array($req['ancestors']) ? $req['ancestors'] : [];
@@ -109,6 +109,7 @@
 			foreach($edgeInfo[$type] as $edge)
 				push("/{$res['id']}{$edge['subpath']}", $edge['type'], $ancestors);
 		}
+		array_pop($_SESSION['stack']);
 
 		$elapsedTime = microtime(true) - $config['startTime'];
 		printf("%.2f seconds have passed.\n\n", $elapsedTime);
