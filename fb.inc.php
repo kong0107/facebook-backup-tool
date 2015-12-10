@@ -1,6 +1,6 @@
 <?php
 	require_once __DIR__ . '/config.inc.php';
-	
+
 	switch(session_status()) {
 		case PHP_SESSION_DISABLED: // sessions are disabled.
 			exit('Error: sessions disabled');
@@ -23,17 +23,29 @@
 	/**
 	 * Get a FB login URL which redirects back to the current page.
 	 *
-	 * Due to the mechanism of the FB API, call this twice would 
+	 * Due to the mechanism of the FB API, call this twice would
 	 * not get the same result.
 	 */
-	function getFBLoginUrl($permissions = [], $seperator = '&') {
+	function getFBLoginUrl($permissions = [], $separator = '&') {
 		global $config, $fb;
 		$redirectUrl = $config['site_root']
 			. '/login-callback.php?rr='
 			. urlencode($_SERVER['REQUEST_URI'])
 		;
 		return $fb->getRedirectLoginHelper()->getLoginUrl(
-			$redirectUrl, $permissions, $seperator
+			$redirectUrl, $permissions, $separator
+		);
+	}
+	function getFBLogoutUrl($next = '', $separator = '&') {
+		global $config, $fb;
+		if(!$_SESSION['facebook_access_token'])
+			return $_SERVER['REQUEST_URI'];
+		$next = $config['site_root']
+			. '/logout-callback.php?rr='
+			. urlencode($next ? $next : $_SERVER['REQUEST_URI'])
+		;
+		return $fb->getRedirectLoginHelper()->getLogoutUrl(
+			$_SESSION['facebook_access_token'], $next, $separator
 		);
 	}
 
@@ -80,7 +92,7 @@
 			$fn = $field['name'];
 			if(!in_array($fn, $ef)) $fields[] = $fn;
 		}
-		if($includePicture 
+		if($includePicture
 			&& in_array('picture', $metadata[$nodeType]['connections'])
 		) $fields[] = 'picture';
 		return $fields;

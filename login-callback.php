@@ -14,7 +14,7 @@
 		$_SESSION['facebook_access_token'] = (string) $accessToken;
 		$redirectUrl = $_GET['rr']
 			? ($config['server_root'] . urldecode($_GET['rr']))
-			: ($config['site_root'] . '/login.php')
+			: $config['site_root']
 		;		
 		header('Location: ' . $redirectUrl);
 	}
