@@ -1,23 +1,26 @@
 <?php
 	require_once 'fb.inc.php';
 	require_once 'db.inc.php';
-
 	if(!isset($_SESSION['stack'])) $_SESSION['stack'] = [];
 	if(!is_array($_SESSION['stack'])) exit('Error: stack shall be an array');
 
 	/**
 	 * Handling the initial data.
 	 */
-	if($_GET['path'] && $_GET['type']) {
+	/*if($_GET['path'] && $_GET['type']) {
 		push($_GET['path'], $_GET['type'],
 			$_GET['ancestors'] ? $_GET['ancestors'] : []
 		);
 		//header('Location: ' . $config['server_root'] . $_SERVER['SCRIPT_NAME']);
+	}*/
+	if(is_array($_GET['stack'])) {
+		foreach($_GET['stack'] as $ele)
+			push($ele['path'], $ele['type'], $ele['ancestors']);
+		exit("Finished pushing from HTTP get method.");
 	}
-
 	if(!count($_SESSION['stack'])) exit('Notice: stack is empty');
 
-	$edgeInfo = array(
+	/*$edgeInfo = array(
 		'user' => array(
 			['type' => 'album', 'subpath' => '/albums'],
 			['type' => 'page', 'subpath' => '/likes'],
@@ -46,7 +49,7 @@
 			['type' => 'user', 'subpath' => '/members'],
 			['type' => 'doc', 'subpath' => '/docs']
 		)
-	);
+	);*/
 
 	$maxExeTime = 4; //ini_get('max_execution_time') / 2;
 	$sleepTime = 1e+5;
@@ -103,11 +106,11 @@
 		else {
 			echo "Processing node data ...\n";
 			save($res, $type, $ancestors);
-			$ancestors[] = array(
+			/*$ancestors[] = array(
 				'type' => $type, 'id' => $res['id']
 			);
 			foreach($edgeInfo[$type] as $edge)
-				push("/{$res['id']}{$edge['subpath']}", $edge['type'], $ancestors);
+				push("/{$res['id']}{$edge['subpath']}", $edge['type'], $ancestors);*/
 		}
 		array_pop($_SESSION['stack']);
 

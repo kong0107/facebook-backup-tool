@@ -23,36 +23,55 @@
 			var main = function(userID) {
 //--------
 if(!userID) return {};
-var model = {};
 
+/**
+ * Initialization.
+ *
+ * Load user info and adminned groups.
+ */
 var userInfo = {};
-FB.apiwt(userID + "?fields=id,name,groups", function(r) {
+FB.apiwt(userID + "?fields=id,name,groups{id,name,description}", function(r) {
 	r.groups = r.groups.data;
 	userInfo = r;
 });
 
-model.nodeList = [];
 
+/**
+ * Define binding data and functions.
+ *
+ * Return `model` to be `$scope.model`. Thus programmers can
+ * use same names here and in HTML.
+ */
+var model = {};
+
+/**
+ * Edges available for each type of node.
+ *
+ * @see https://developers.facebook.com/docs/graph-api/reference
+ */
 model.edgeLists = {
 	user: [
-		{path: "/albums", desc: "Albums and photos inside"},
-		{path: "/posts", desc: "Posts published by the user"},
-		{path: "/likes", desc: "Liked pages"},
-		//{path: "/events", desc: "See https://developers.facebook.com/docs/graph-api/reference/user/events/"},
-		{path: "/photos?type=tagged", desc: "Photos the user has been tagged in"},
-		{path: "/tagged", desc: "Posts the user was tagged in"}
+		{path: "/albums", type: "album", desc: "Albums and photos inside"},
+		{path: "/posts", type: "post", desc: "Posts published by the user"},
+		{path: "/likes", type: "page", desc: "Liked pages"},
+		//{path: "/events", type: "event", desc: "There are different types of events."},
+		{path: "/photos?type=tagged", type: "photo", desc: "Photos the user has been tagged in"},
+		{path: "/tagged", type: "post", desc: "Posts the user was tagged in"}
 	],
 	page: [
-		{path: "/albums", desc: "Albums and photos inside"},
-		{path: "/events", desc: "Events the page created"},
-		{path: "/posts", desc: "Posts published by the page"},
-		{path: "/photos?type=tagged", desc: "Photos the page is tagged in"},
-		{path: "/videos?type=uploaded", desc: "Videos the page uploaded"}
-	]/*,
-	group: [
-		"albums", "events", "feed",
-		"members", "docs"//, "videos", "files"
+		{path: "/albums", type: "album", desc: "Albums and photos inside"},
+		{path: "/events", type: "event", desc: "Events the page created"},
+		{path: "/posts", type: "post", desc: "Posts published by the page"},
+		{path: "/photos?type=tagged", type: "photo", desc: "Photos the page is tagged in"},
+		{path: "/videos?type=uploaded", type: "video", desc: "Videos the page uploaded"}
 	],
+	group: [
+		{path: "/albums", type: "album", desc: "Albums"},
+		{path: "/events", type: "event", desc: "Events within the last two weeks"},
+		{path: "/feed", type: "post", desc: "Posts including status updates and links"},
+		{path: "/members", type: "user", desc: "Members"},
+		{path: "/docs", type: "doc", desc: "Documents"}
+	]/*,
 	event: [
 		"posts", "photos", "comments", "feed"//, "videos"
 	]*/
@@ -63,10 +82,15 @@ model.typeSelected = function(nodeType) {
 	model.q = "";
 	model.nodeId = "";
 	model.nodeInfo = null;
-	model.edgeChecked = {};
-	if(nodeType == "user") {
+	model.edgeChecked = [];
+	switch(nodeType) {
+	case "user":
 		model.nodeList.push(userInfo);
 		model.nodeId = userID;
+		break;
+	case "group":
+		model.nodeList = userInfo.groups;
+		break;
 	}
 };
 
@@ -96,26 +120,73 @@ model.search = function() {
 };
 
 model.nodeSelected = function() {
-	if(model.nodeType == "page") {
+	switch(model.nodeType) {
+	case "page":
 		FB.apiwt(model.nodeId + "?fields=id,name,category,about,description,likes,link,picture", function(r) {
 			model.nodeInfo = r;
 			$scope.$apply();
 		});
+		break;
+	case "group":
+		for(var i = 0; i < userInfo.groups.length; ++i) {
+			if(userInfo.groups[i].id == model.nodeId) {
+				model.nodeInfo = userInfo.groups[i];
+				break;
+			}
+		}
+		break;
 	}
 };
 
 model.isButtonDisabled = function() {
 	if(!model.nodeId) return true;
 	var hasCheckedEdge = false;
-	for(var i in model.edgeChecked) {
-		if(!model.edgeChecked[i]) continue;
-		hasCheckedEdge = true;
+	for(var i = 0; i < model.edgeChecked.length; ++i) {
+		if(model.edgeChecked[i]) {
+			hasCheckedEdge = true;
+			break;
+		}
 	}
 	return !hasCheckedEdge;
 };
 
 model.start = function() {
+	var nid = model.nodeId;
+	var nType = model.nodeType;
+	var edgeList = model.edgeLists[nType];
+	/*var ancestors = [{type: nType, id: nid}];
+	var ret = [{path: "/" + nid, type: nType}];
+	for(var i = 0; i < edgeList.length; ++i) {
+		if(model.edgeChecked[i]) {
+			ret.push({
+				path: "/" + nid + edgeList[i].path,
+				type: edgeList[i].type,
+				ancestors: ancestors
+			});
+		}
+	}
+	console.log(ret);*/
+	//window.open("http://kong-guting.zapto.org/test.php?json=" + JSON.stringify(ret));
+
+	var qs = "?stack[0][path]=/" + nid + "&stack[0][type]=" + nType;
+	var counter = 1;
+	for(var i = 0; i < edgeList.length; ++i) {
+		if(model.edgeChecked[i]) {
+			var prefix = "&stack[" + counter + "]";
+			qs += prefix + "[path]=/" + nid + edgeList[i].path
+				+ prefix + "[type]=" + edgeList[i].type
+				+ prefix + "[ancestors][0][type]=" + nType
+				+ prefix + "[ancestors][0][id]=" + nid
+			;
+			++counter;
+		}
+	}
+	console.log(qs);
+	window.open("http://kong-guting.zapto.org/facebook-backup/crawler_dfs.php" + qs);
 	window.alert("This page is not finished yet.");
+	//
+	// OK let's do what's in `crawler_dfs.html`
+	//
 };
 
 return model;
@@ -123,10 +194,18 @@ return model;
 			};
 		});
 	</script>
-	<link rel="stylesheet" href="styles/style.css">
+	<!--link rel="stylesheet" href="styles/style.css"-->
+	<style>
+		h1, h2, h3, p { margin: 0.2em; 0; }
+		ul { list-style-type: none; }
+		label { transition: all 1s; }
+		label:hover { background-color: yellow; }
+		.inlineBlock { display: inline-block; }
+		li.inlineBlock { margin; 0.2em; padding: 0.2em; }
+	</style>
 </head>
 <body ng-controller="main">
-	<h1>Download data from Facebook</h1>
+	<h1>Backup from Facebook</h1>
 	<?php
 		if(!$_SESSION['facebook_access_token']) {
 			printf('<a href="%s">Login with Facebook</a>', getFBLoginUrl());
@@ -141,7 +220,7 @@ return model;
 			<ul>
 				<li ng-repeat="(node, edges) in model.edgeLists" class="inlineBlock">
 					<label>
-						<input type="radio" 
+						<input type="radio"
 							ng-model="model.nodeType" ng-value="node"
 							ng-click="model.typeSelected(node)"
 						>{{node}}
@@ -150,14 +229,14 @@ return model;
 			</ul>
 		</section>
 		<section ng-show="model.nodeType=='page'">
-			<h2>Search for a page to crawl</h2>
-			<input ng-model="model.q" 
-				ng-change="model.search()" 
-				ng-model-options="{debounce: 500}" 
+			<h2>Search for a page</h2>
+			<input ng-model="model.q"
+				ng-change="model.search()"
+				ng-model-options="{debounce: 500}"
 				placeholder="page ID or search text"
 			>
 		</section>
-		<section ng-show="model.nodeType=='page' && model.nodeList.length">
+		<section ng-show="model.nodeList.length">
 			<h2>Choose which {{model.nodeType}} to crawl</h2>
 			<ul>
 				<li ng-repeat="node in model.nodeList" class="inlineBlock">
@@ -171,25 +250,28 @@ return model;
 		</section>
 		<section ng-show="model.nodeInfo" style="border: 1px solid #ccc; padding: 0.2em; margin: 0.2em;">
 			<header style="display: table;">
-				<img ng-src="{{model.nodeInfo.picture.data.url}}" style="display: table-cell; padding: 0.1em; margin: 0.1em;">
+				<img ng-if="model.nodeInfo.picture"
+					ng-src="{{model.nodeInfo.picture.data.url}}"
+					style="display: table-cell; padding: 0.1em; margin: 0.1em;"
+				>
 				<div style="display: table-cell; vertical-align: top;">
-					<h3><a target="_blank" href="{{model.nodeInfo.link}}">{{model.nodeInfo.name}}</a></h3>
+					<h3><a target="_blank" href="{{model.nodeInfo.link}}" style="text-decoration: none;">{{model.nodeInfo.name}}</a></h3>
 					<span>{{model.nodeInfo.category}}</span>
 				</div>
 			</header>
-			<p>{{model.nodeInfo.likes|number}} likes</p>
-			<div style="white-space: pre-wrap;">{{(
+			<p ng-if="model.nodeInfo.likes">{{model.nodeInfo.likes|number}} likes</p>
+			<div style="white-space: pre-wrap; max-height: 8em; overflow: auto; border-top: 1px dashed #ccc;">{{(
 				model.nodeInfo.description
 				? model.nodeInfo.description
 				: model.nodeInfo.about
-			)|limitTo:100}}</div>
+			)}}</div>
 		</section>
 		<section ng-show="model.nodeId">
 			<h2>Choose which edges to crawl</h2>
 			<ul>
 				<li ng-repeat="edgeInfo in model.edgeLists[model.nodeType]">
 					<label>
-						<input type="checkbox" ng-model="model.edgeChecked[edgeInfo.path]"
+						<input type="checkbox" ng-model="model.edgeChecked[$index]"
 						>{{edgeInfo.desc}}
 						<code>({{edgeInfo.path}})</code>
 					</label>
