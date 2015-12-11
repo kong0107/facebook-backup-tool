@@ -11,7 +11,7 @@
 	<script src="//connect.facebook.net/zh_TW/sdk.js" id="facebook-jssdk"></script>
 	<script src="js/fbsdk-config.js"></script>
 	<script>
-		angular.module("myApp", []).controller("main", function($scope) {
+		angular.module("myApp", []).controller("main", function($scope, $http) {
 			window.fbAsyncInit = function() {
 				FB.init(FBConfig);
 				FB.getLoginStatus(function(r) {
@@ -43,6 +43,34 @@ FB.apiwt(userID + "?fields=id,name,groups{id,name,description}", function(r) {
  * use same names here and in HTML.
  */
 var model = {};
+
+/**
+ * Seconds to wait after each success return.
+ */
+model.interval = 3;
+
+<?php
+	/**
+	 * Different settings depending on whether stack is empty.
+	 *
+	 * Show "Do you wanna continue crawling or clear the stack" message
+	 * and the corresponding button.
+	 */
+	if(count($_SESSION['stack'])) {
+		echo 'model.showClearButton = true;';
+		printf('model.stackCount = %d;', count($_SESSION['stack']));
+		echo 'model.status = "crawling";';
+	}
+	else echo 'model.status = "setting";';
+?>
+
+/**
+ * ID returned by `window.setTimeout`.
+ *
+ * Used for recursive call of `model.request`. Assigned to -1
+ * if there's no timer but we want one later.
+ */
+model.timerId = null;
 
 /**
  * Edges available for each type of node.
@@ -77,6 +105,11 @@ model.edgeLists = {
 	]*/
 };
 
+/**
+ * Step 1: Choose the type of node you wanna crawl.
+ *
+ * Some initialization is here.
+ */
 model.typeSelected = function(nodeType) {
 	model.nodeList = [];
 	model.q = "";
@@ -94,6 +127,11 @@ model.typeSelected = function(nodeType) {
 	}
 };
 
+/**
+ * Step 2: Search for what you want.
+ *
+ * May be omitted if `nodeType` is "user".
+ */
 model.search = function() {
 	model.nodeList = [];
 	model.nodeId = "";
@@ -119,6 +157,11 @@ model.search = function() {
 	}
 };
 
+/**
+ * Step 3: Choose the node you want to crawl.
+ *
+ * Once selected, show edges for user to check.
+ */
 model.nodeSelected = function() {
 	switch(model.nodeType) {
 	case "page":
@@ -138,6 +181,11 @@ model.nodeSelected = function() {
 	}
 };
 
+/**
+ * Check if "Start crawl" should be available.
+ *
+ * Available only if there are more than one edge checked.
+ */
 model.isButtonDisabled = function() {
 	if(!model.nodeId) return true;
 	var hasCheckedEdge = false;
@@ -150,24 +198,13 @@ model.isButtonDisabled = function() {
 	return !hasCheckedEdge;
 };
 
+/**
+ * Start crawling.
+ */
 model.start = function() {
 	var nid = model.nodeId;
 	var nType = model.nodeType;
 	var edgeList = model.edgeLists[nType];
-	/*var ancestors = [{type: nType, id: nid}];
-	var ret = [{path: "/" + nid, type: nType}];
-	for(var i = 0; i < edgeList.length; ++i) {
-		if(model.edgeChecked[i]) {
-			ret.push({
-				path: "/" + nid + edgeList[i].path,
-				type: edgeList[i].type,
-				ancestors: ancestors
-			});
-		}
-	}
-	console.log(ret);*/
-	//window.open("http://kong-guting.zapto.org/test.php?json=" + JSON.stringify(ret));
-
 	var qs = "?stack[0][path]=/" + nid + "&stack[0][type]=" + nType;
 	var counter = 1;
 	for(var i = 0; i < edgeList.length; ++i) {
@@ -181,12 +218,64 @@ model.start = function() {
 			++counter;
 		}
 	}
-	console.log(qs);
-	window.open("http://kong-guting.zapto.org/facebook-backup/crawler_dfs.php" + qs);
-	window.alert("This page is not finished yet.");
-	//
-	// OK let's do what's in `crawler_dfs.html`
-	//
+	model.timerId = -1;
+	model.request(qs);
+};
+
+/**
+ * Actual function for requesting.
+ * 
+ * Recursive by `setTimeout`.
+ */
+model.request = function(qs) {
+	if(typeof qs != "string") qs = "";
+	model.showClearButton = false;
+	model.status = "crawling";
+	model.lastExecute = (new Date).toISOString();
+	$http.get("crawler_dfs.php" + qs).then(function(r) {
+		model.message = r.data.message;
+		model.stackCount = r.data.stackCount;
+		if(r.data.status == "success") {
+			console.log(r.data.stack);
+			if(model.timerId) 
+				model.timerId = setTimeout(model.request, model.interval * 1000);
+		}
+		else {
+			model.stop();
+			model.status = "finished";
+		}
+	}, function(r) {
+		model.message = JSON.stringify(r, undefined, 4);
+	});
+};
+
+/**
+ * Set re-request automatically.
+ */
+model.continue = function() {
+	model.timerId = -1;
+	model.request();
+};
+
+/**
+ * Stop re-request.
+ *
+ * This does NOT stop what was sent already.
+ */
+model.stop = function() {
+	if(model.timerId > 0) window.clearTimeout(model.timerId);
+	model.timerId = 0;
+};
+
+/**
+ * Send "clear" message to the server to clear the stack.
+ */
+model.clearStack = function() {
+	$http.get("crawler_dfs.php?clear=1").then(function(r) {
+		model.status = "setting";
+	}, function(r) {
+		model.message = JSON.stringify(r, undefined, 4);
+	});
 };
 
 return model;
@@ -194,7 +283,6 @@ return model;
 			};
 		});
 	</script>
-	<!--link rel="stylesheet" href="styles/style.css"-->
 	<style>
 		h1, h2, h3, p { margin: 0.2em; 0; }
 		ul { list-style-type: none; }
@@ -202,6 +290,10 @@ return model;
 		label:hover { background-color: yellow; }
 		.inlineBlock { display: inline-block; }
 		li.inlineBlock { margin; 0.2em; padding: 0.2em; }
+		.pre {
+			white-space: pre-wrap;
+			font-family: monospace;
+		}
 	</style>
 </head>
 <body ng-controller="main">
@@ -214,7 +306,7 @@ return model;
 		}
 	?>
 	<div ng-if="!model">Loading ...</div>
-	<form ng-show="model">
+	<form ng-show="model && model.status=='setting'">
 		<section>
 			<h2>Choose what kind of node to crawl</h2>
 			<ul>
@@ -280,7 +372,22 @@ return model;
 		</section>
 		<button ng-disabled="model.isButtonDisabled()" ng-click="model.start()">Start crawl</button>
 	</form>
-	<details style="white-space: pre-wrap; font-family: monospace;"
-	><summary>Debug</summary>{{model|json}}</details>
+	<div ng-show="model && model.status!='setting'">
+		<div ng-if="model.showClearButton">
+			There are still {{model.stackCount}} elements in the stack.
+			You may continue or clear the stack for a new crawling.
+			<br>
+			<button ng-click="model.clearStack()">Clear Stack</button>
+		</div>
+		<button ng-click="model.continue()"
+			ng-disabled="model.timerId || model.status=='finished'" 
+		>Continue</button>
+		<br>
+		<button ng-click="model.stop()" ng-disabled="!model.timerId">Stop</button>
+		<p>Last execute: <time ng-bind="model.lastExecute"></time></p>
+		<button ng-click="model.status='setting'" ng-show="model.status=='finished'">Crawl something else</button>
+		<div class="pre" ng-bind="model.message"></div>
+		<!--details class="pre"><summary>Debug</summary>{{model|json}}</details-->
+	</div>
 </body>
 </html>

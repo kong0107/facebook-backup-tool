@@ -1,61 +1,51 @@
 <?php
 	require_once 'fb.inc.php';
 	require_once 'db.inc.php';
+	
+	/**
+	 * JSON output functions and variables.
+	 */
+	$output = ['message' => ''];
+	function stop($message, $status = 'error') {
+		exit(json_encode([
+			'status' => $status,
+			'message' => $message
+		]));
+	}
+	function p($str = '') {
+		global $output;
+		$output['message'] .= $str . "\n";
+	}
+	
+	/**
+	 * Basic checkings.
+	 */
 	if(!isset($_SESSION['stack'])) $_SESSION['stack'] = [];
-	if(!is_array($_SESSION['stack'])) exit('Error: stack shall be an array');
+	if(!is_array($_SESSION['stack'])) stop('Error: stack shall be an array');
 
 	/**
 	 * Handling the initial data.
 	 */
-	/*if($_GET['path'] && $_GET['type']) {
-		push($_GET['path'], $_GET['type'],
-			$_GET['ancestors'] ? $_GET['ancestors'] : []
-		);
-		//header('Location: ' . $config['server_root'] . $_SERVER['SCRIPT_NAME']);
-	}*/
 	if(is_array($_GET['stack'])) {
 		foreach($_GET['stack'] as $ele)
 			push($ele['path'], $ele['type'], $ele['ancestors']);
-		exit("Finished pushing from HTTP get method.");
+		exit(json_encode([
+			'status' => 'success',
+			'message' => 'Finished pushing from HTTP get method.',
+			'stackCount' => count($_SESSION['stack'])
+		]));
 	}
-	if(!count($_SESSION['stack'])) exit('Notice: stack is empty');
+	if($_GET['clear']) {
+		$_SESSION['stack'] = [];
+		stop('Stack cleared.', 'warning');
+	}
+	if(!count($_SESSION['stack'])) stop('Stack is empty', 'warning');
 
-	/*$edgeInfo = array(
-		'user' => array(
-			['type' => 'album', 'subpath' => '/albums'],
-			['type' => 'page', 'subpath' => '/likes'],
-			['type' => 'post', 'subpath' => '/posts'],
-			['type' => 'photo', 'subpath' => '/photos'],
-			['type' => 'post', 'subpath' => '/tagged']
-		),
-		'page' => array(
-			['type' => 'album', 'subpath' => '/albums'],
-			['type' => 'event', 'subpath' => '/events'],
-			['type' => 'video', 'subpath' => '/videos'],
-			['type' => 'post', 'subpath' => '/posts'],
-			['type' => 'post', 'subpath' => '/tagged'],
-			['type' => 'photo', 'subpath' => '/photos?type=tagged']
-		),
-		'event' => array(
-			['type' => 'post', 'subpath' => '/posts'],
-			['type' => 'photo', 'subpath' => '/photos'],
-			['type' => 'comment', 'subpath' => '/comments'],
-			['type' => 'post', 'subpath' => '/feed']
-		),
-		'group' => array(
-			['type' => 'album', 'subpath' => '/albums'],
-			['type' => 'event', 'subpath' => '/events'],
-			['type' => 'post', 'subpath' => '/feed'],
-			['type' => 'user', 'subpath' => '/members'],
-			['type' => 'doc', 'subpath' => '/docs']
-		)
-	);*/
-
-	$maxExeTime = 4; //ini_get('max_execution_time') / 2;
+	$maxExeTime = 2; //ini_get('max_execution_time') / 2;
 	$sleepTime = 1e+5;
-	printf("Time limit: %.2f seconds.\n", $maxExeTime);
-	printf("Sleep time setting: %d milliseconds.\n", $sleepTime / 1000);
-	printf("Already %.2f seconds passed.\n\n", microtime(true) - $config['startTime']);
+	p(sprintf('Time limit: %.2f seconds.', $maxExeTime));
+	p(sprintf('Sleep time setting: %d milliseconds.', $sleepTime / 1000));
+	p(sprintf("Already %.2f seconds passed.\n", microtime(true) - $config['startTime']));
 
 	/**
 	 * Main algorithm.
@@ -69,20 +59,20 @@
 	 *    then push `comments` edges of each node to the stack.
 	 * 6. If the stack is not empty, then go to step 1.
 	 */
-	while($req = end($_SESSION['stack'])) {
+	while($req = array_pop($_SESSION['stack'])) {
 		$path = $req['path'];
 		$type = $req['type'];
 		$ancestors = is_array($req['ancestors']) ? $req['ancestors'] : [];
 
-		echo "Requesting $path\n";
+		p("Requesting $path");
 		$s = microtime(true);
 		$res = $fb->get($path);
-		printf("Got response after %d milliseconds.\n", (microtime(true) - $s) * 1000);
+		p(sprintf('Got response after %d milliseconds.', (microtime(true) - $s) * 1000));
 		$res = $res->getDecodedBody();
 		if(array_key_exists('data', $res)) {
-			echo "Processing edge data ...\n";
+			p('Processing edge data ...');
 			if($next = $res['paging']['next']) {
-				echo "Pushing the next page ...\n";
+				p('Pushing the next page ...');
 				push($next, $type, $ancestors);
 			}
 			foreach($res['data'] as $doc) {
@@ -104,21 +94,22 @@
 			}
 		}
 		else {
-			echo "Processing node data ...\n";
+			p('Processing node data ...');
 			save($res, $type, $ancestors);
-			/*$ancestors[] = array(
-				'type' => $type, 'id' => $res['id']
-			);
-			foreach($edgeInfo[$type] as $edge)
-				push("/{$res['id']}{$edge['subpath']}", $edge['type'], $ancestors);*/
 		}
-		array_pop($_SESSION['stack']);
 
 		$elapsedTime = microtime(true) - $config['startTime'];
-		printf("%.2f seconds have passed.\n\n", $elapsedTime);
+		p(sprintf("%.2f seconds have passed.\n", $elapsedTime));
 		if($elapsedTime >= $maxExeTime) break;
 		usleep($sleepTime);
 	}
+	/**
+	 * Output a JSON string.
+	 */
+	$output['status'] = 'success';
+	$output['stackCount'] = count($_SESSION['stack']);
+	$output['stack'] = $_SESSION['stack'];
+	echo json_encode($output);
 
 	/**
 	 * Functions
@@ -141,7 +132,7 @@
 
 		$path = $path . '?' . http_build_query($query);
 
-		echo "Pushing $path\n";
+		p("Pushing $path");
 		$_SESSION['stack'][] = [
 			'path' => $path,
 			'type' => $type,
@@ -171,8 +162,8 @@
 			if(!file_exists($dest)) {
 				if(!is_dir($dir)) mkdir($dir, 0777, true);
 				if(copy($source, $dest))
-					echo "Successfully downloaded photo to $dest\n";
-				else echo "Failed downloading $source to $dest\n";
+					p("Successfully downloaded photo to $dest");
+				else p("Warning: Failed downloading $source to $dest");
 				usleep(1000);
 			}
 			unset($doc['images']);
@@ -185,11 +176,7 @@
 			array_remove_empty($doc),
 			array('upsert' => true)
 		);
-		echo "Updated $type with id {$doc['_id']}\n";
+		p("Updated $type with id {$doc['_id']}.");
 		return $ret;
 	}
-
-	printf("\n\n--------\nThere are %d elements in the stack.\n", count($_SESSION['stack']));
-	foreach($_SESSION['stack'] as $ele) echo urldecode($ele['path']) . "\n";
-	//print_r($_SESSION['stack']);
 ?>

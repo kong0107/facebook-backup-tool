@@ -11,13 +11,13 @@
 			$scope.interval = 3;
 			$scope.lastExecute = "Unknown";
 			$scope.path = "crawler_dfs.php";
-			
+
 			$scope.request = function() {
 				$scope.lastExecute = (new Date).toISOString();
 				$http.get($scope.path).then(function(r){
 					$scope.data = r.data;
 					if($scope.timerId) $scope.timerId = window.setTimeout($scope.request, $scope.interval * 1000);
-				}, function(r){ 
+				}, function(r){
 					$scope.data = JSON.stringify(r, undefined, 4);
 					if($scope.timerId) $scope.timerId = window.setTimeout($scope.request, $scope.interval * 5000);
 				});
@@ -27,9 +27,9 @@
 				$scope.timerId = -1;
 			};
 			$scope.stop = function() {
-				if($scope.timerId > 0) window.clearInterval($scope.timerId);
+				if($scope.timerId > 0) window.clearTimeout($scope.timerId);
 				$scope.timerId = 0;
-			};			
+			};
 			$scope.push = function() {
 				$scope.stop();
 				var tmp = $scope.path;
