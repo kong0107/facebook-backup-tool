@@ -90,8 +90,11 @@ h1 {
 	display: inline-block;
 	margin: .3em;
 }
-h2,h3,h4,h5,h6 {
-	margin: .5em 0 .25em 0;
+h2 {
+	margin: 0.3em 0;
+}
+h3,h4,h5,h6 {
+	margin: .2em 0;
 	white-space: pre;
 }
 .about {
@@ -127,17 +130,29 @@ nav li:hover {
 article {
 	border-top: 1px solid #888;
 	margin-top: 1em;
-	padding-top: .5em;
+	padding: .5em;
 	line-height: 125%;
 	clear: both;
 }
+article > header {
+	display: inline-table;
+}
+article > header > * {
+	display: table-cell;
+	vertical-align: top;
+}
+article > header img {
+	max-width: 100px;
+	max-height: 100px;
+	margin: 0.2em;
+	padding: 0.2em;
+	border: 1px solid #ccc;
+}
 .metadata {
 	float: right;
-	clear: both;
 	font-size: smaller;
-	padding: .25em;
-	margin: .25em;
 }
+
 .message {
 	white-space: pre-wrap;
 }

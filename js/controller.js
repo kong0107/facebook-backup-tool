@@ -157,4 +157,17 @@ angular.module("myApp", [])
 	return function(input) {
 		return (!!input) ? input.charAt(0).toUpperCase() + input.substr(1) : '';
 	};
+})
+.filter("unique", function() {
+	return function(input) {
+		if(!Array.isArray(input) || !input.length) return [];
+		var strings = [], ret = [];
+		for(var i in input) {
+			var json = JSON.stringify(input[i]);
+			if(strings.indexOf(json) != -1) continue;
+			strings.push(json);
+			ret.push(input[i]);
+		}
+		return ret;
+	};
 });
