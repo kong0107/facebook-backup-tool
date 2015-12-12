@@ -20,6 +20,7 @@
 				});
 			};
 			$.getScript("js/fbsdk-extend.js");
+
 			var main = function(userID) {
 //--------
 if(!userID) return {};
@@ -224,7 +225,7 @@ model.start = function() {
 
 /**
  * Actual function for requesting.
- * 
+ *
  * Recursive by `setTimeout`.
  */
 model.request = function(qs) {
@@ -237,7 +238,7 @@ model.request = function(qs) {
 		model.stackCount = r.data.stackCount;
 		if(r.data.status == "success") {
 			console.log(r.data.stack);
-			if(model.timerId) 
+			if(model.timerId)
 				model.timerId = setTimeout(model.request, model.interval * 1000);
 		}
 		else {
@@ -277,6 +278,14 @@ model.clearStack = function() {
 		model.message = JSON.stringify(r, undefined, 4);
 	});
 };
+
+/**
+ * Download JSON files.
+ */
+model.download = function() {
+	window.open("dbExport.php?nodeName=" + model.nodeType + "_" + model.nodeId);
+}
+
 
 return model;
 //--------
@@ -380,12 +389,15 @@ return model;
 			<button ng-click="model.clearStack()">Clear Stack</button>
 		</div>
 		<button ng-click="model.continue()"
-			ng-disabled="model.timerId || model.status=='finished'" 
+			ng-disabled="model.timerId || model.status=='finished'"
 		>Continue</button>
 		<br>
 		<button ng-click="model.stop()" ng-disabled="!model.timerId">Stop</button>
 		<p>Last execute: <time ng-bind="model.lastExecute"></time></p>
-		<button ng-click="model.status='setting'" ng-show="model.status=='finished'">Crawl something else</button>
+		<div ng-show="model.status=='finished'">
+			<button ng-click="model.download()">Download JSON files</button>
+			<button ng-click="model.status='setting'">Crawl something else</button>
+		</div>
 		<div class="pre" ng-bind="model.message"></div>
 		<!--details class="pre"><summary>Debug</summary>{{model|json}}</details-->
 	</div>
