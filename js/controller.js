@@ -5,7 +5,7 @@ angular.module("myApp", [])
 		requireBase: false
 	});
 })
-.controller("main", function($scope, $http, $location, $window) {
+.controller("main", function($scope, $http, $location, $window, $filter) {
 	$scope.ret = function() {
 		/// Initialization
 		var id = $window.id;
@@ -88,26 +88,94 @@ angular.module("myApp", [])
 
 		/**
 		 * Get info and edges.
+		 *
+		 * Use `setTimeout` in a self-calling callback function
+		 * to prevent stack overflow problem.
+		 * @see https://blog.jcoglan.com/2010/08/30/the-potentially-asynchronous-loop/
 		 */
 		for(var i = 0; i < tabs.length; ++i) ret[tabs[i]] = [];
 		$http.get("data/json/" + type + "_" + id +"_info.json")
 		.then(function(r) {
 			ret.info = r.data;
-			for(var i = 0; i < tabs.length; ++i) {
-				(function() {
-					var tab = tabs[i];
-					$http.get("data/json/"
-						+ type + "_" + id + "_" + tab
-						+ ".json"
-					).then(function(r) {
-						ret[tab] = r.data;
-						if(tab == "posts" || tab == "feed" || tab == "comment")
-							groupByMonth(ret[tab], tab);
-						console.log("Edge " + tab + " is loaded.");
-					}, notFound);
-				})();
-			}
+			var iterator = 0;
+			var loadEdge = function() {
+				var tab = tabs[iterator];
+				$http.get("data/json/"
+					+ type + "_" + id + "_" + tab
+					+ ".json"
+				).then(function(r) {
+					ret[tab] = r.data;
+					if(tab == "posts" || tab == "feed" || tab == "comment")
+						groupByMonth(ret[tab], tab);
+					console.log("Edge " + tab + " is loaded.");
+					if(iterator < tabs.length - 1) {
+						++iterator;
+						setTimeout(loadEdge, 1);
+					}
+					else {
+						console.log("All edges are loaded.");
+						arrangeComments();
+						arrangePhotos();
+					}
+				}, notFound);
+			};
+			loadEdge();
 		}, notFound);
+
+		/**
+		 * Put comments to where each should be.
+		 *
+		 * This should be called before `arrangePhotos`.
+		 * Maintain only those without `fbbk_parent` for event node.
+		 */
+		var arrangeComments = function() {
+			if(!ret.comments || !ret.comments.length) return;
+			for(var i = 0; i < tabs.length; ++i) {
+				for(var j = 0; j < ret[tabs[i]].length; ++j) {
+					var node = ret[tabs[i]][j];
+					node.comments = $filter('filter')(
+						ret.comments,
+						{fbbk_parent: {id: node._id}},
+						function(a, b) {return a==b;}
+					);
+				}
+			}
+			if(type == "event") {
+				var all = ret.comments;
+				ret.comments = [];
+				for(var i = 0; i < all.length; ++i) {
+					if(!all[i].fbbk_parent)
+						ret.comments.push(all[i]);
+				}
+			}
+			else delete ret.comments;
+			console.log("Comments arranged.");
+		}
+		
+		/**
+		 * Put photos to the albums they should be in.
+		 *
+		 * This should be called after `arrangeComments`.
+		 */
+		var arrangePhotos = function() {
+			if(!ret.photos || !ret.photos.length) return;
+			for(var j = 0; j < ret.albums.length; ++j)
+				ret.albums[j].photos = [];
+			var tagged = [];
+			for(var i = 0; i < ret.photos.length; ++i) {
+				var photo = ret.photos[i];
+				for(var j = 0; j < ret.albums.length; ++j) {
+					var album = ret.albums[j];
+					if(photo.album && photo.album.id == album._id) {
+						album.photos.push(photo);
+						break;
+					}
+				}
+				if(j == ret.albums.length) tagged.push(photo);
+			}
+			ret.photos = tagged;
+			console.log("Photos arranged.");
+		}
 
 		/**
 		 * Create a link to Facebook by ID of the node.
@@ -119,17 +187,6 @@ angular.module("myApp", [])
 				id = id.replace("_", "/" + type + "/");
 			return "https://www.facebook.com/" + id;
 		};
-
-		/**
-		 * Get photos in a album.
-		 */
-		ret.getPhotosInAlbum = function(id) {
-			if($.isArray(ret.photosInAlbum[id])) return;
-			$http.get("data/json/album_" + id + "_photos.json")
-			.then(function(r) {
-				ret.photosInAlbum[id] = r.data;
-			}, notFound);
-		}
 
 		/**
 		 * Just for debug

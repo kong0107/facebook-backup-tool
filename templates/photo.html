@@ -18,7 +18,7 @@
 		<li ng-if="node.event">{{node.event|json}}</li>
 	</ul>
 </div>
-<a class="photo" href="data/photos/album_{{node.album.id}}_photos/{{node._id}}.jpg"
+<a class="photo" href="data/photos/album_{{node.album.id}}/{{node._id}}.jpg"
 ><img ng-src="{{node.picture}}"></a>
 <p class="photo_side description">{{node.name}}</p>
 <div class="photo" ng-include="'templates/photo.html'"
@@ -33,15 +33,7 @@
 	<h4 class="inlineBlock">Place</h4>
 	<address ng-include="'templates/place.html'" onload="place=node.place"></address>
 </div>
-<nav>
-	<h4>Different sizes</h4>
-	<ul>
-		<li ng-repeat="image in node.images">
-			<a href="{{image.source}}">{{image.width}}x{{image.height}}</a>
-		</li>
-	</ul>
-</nav>
-<details ng-if="node.comments" class="comments">
+<details ng-if="node.comments.length" class="comments">
 	<summary title="newest: {{node.updated_time|date:'yyyy-MM-dd HH:mm:ss'}}">
 		{{node.comments.length|number}} comment(s)
 	</summary>

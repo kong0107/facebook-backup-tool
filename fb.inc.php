@@ -1,4 +1,6 @@
 <?php
+	require_once __DIR__ . '/config.inc.php';
+
 	switch(session_status()) {
 		case PHP_SESSION_DISABLED: // sessions are disabled.
 			exit('Error: sessions disabled');
@@ -6,7 +8,6 @@
 			session_start();
 		case PHP_SESSION_ACTIVE: // sessions are enabled, and one exists.
 	}
-	require_once __DIR__ . '/config.inc.php';
 	require_once __DIR__ . '/vendor/autoload.php';
 
 	try {
@@ -22,17 +23,29 @@
 	/**
 	 * Get a FB login URL which redirects back to the current page.
 	 *
-	 * Due to the mechanism of the FB API, call this twice would 
+	 * Due to the mechanism of the FB API, call this twice would
 	 * not get the same result.
 	 */
-	function getFBLoginUrl($permissions = [], $seperator = '&') {
+	function getFBLoginUrl($permissions = [], $separator = '&') {
 		global $config, $fb;
 		$redirectUrl = $config['site_root']
 			. '/login-callback.php?rr='
 			. urlencode($_SERVER['REQUEST_URI'])
 		;
 		return $fb->getRedirectLoginHelper()->getLoginUrl(
-			$redirectUrl, $permissions, $seperator
+			$redirectUrl, $permissions, $separator
+		);
+	}
+	function getFBLogoutUrl($next = '', $separator = '&') {
+		global $config, $fb;
+		if(!$_SESSION['facebook_access_token'])
+			return $_SERVER['REQUEST_URI'];
+		$next = $config['site_root']
+			. '/logout-callback.php?rr='
+			. urlencode($next ? $next : $_SERVER['REQUEST_URI'])
+		;
+		return $fb->getRedirectLoginHelper()->getLogoutUrl(
+			$_SESSION['facebook_access_token'], $next, $separator
 		);
 	}
 
@@ -74,11 +87,12 @@
 		$ef = $excludedFields[$nodeType] or $ef = [];
 		$fields = [];
 		//print_r($metadata);
+		if(!is_array($metadata[$nodeType]['fields'])) return [];
 		foreach($metadata[$nodeType]['fields'] as $field) {
 			$fn = $field['name'];
 			if(!in_array($fn, $ef)) $fields[] = $fn;
 		}
-		if($includePicture 
+		if($includePicture
 			&& in_array('picture', $metadata[$nodeType]['connections'])
 		) $fields[] = 'picture';
 		return $fields;
@@ -101,27 +115,9 @@
 			foreach($res['data'] as $c) {
 				if($c['comment_count'] !== 0)
 					$c['comments'] = getComments($c['id']);
-				//else echo "no sub-comments.\n";
 				$result[] = $c;
 			}
 		} while($reqUrl = substr($res['paging']['next'], 31));
 		return $result;
-	}
-
-	/**
-	 * Remove null, '' and [] in an array recursively.
-	 *
-	 * Unlike `empty`, this does NOT remove zero and false.
-	 */
-	function array_remove_empty($arr) {
-		foreach($arr as $k => &$v) {
-			if(is_array($v)) {
-				$v = array_remove_empty($v);
-				if(!count($v)) unset($arr[$k]);
-				continue;
-			}
-			if(is_null($v) || $v === '') unset($arr[$k]);
-		}
-		return $arr;
 	}
 ?>

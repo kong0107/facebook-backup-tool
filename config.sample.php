@@ -1,4 +1,7 @@
 <?php
+	$config['startTime'] = microtime(true);
+	date_default_timezone_set('Asia/Taipei');
+
 	$config['app'] = array(
 		'app_id' => '****************',
 		'app_secret' => '********************************',

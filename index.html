@@ -6,9 +6,10 @@
 	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script>
-		var id = "10154193091691393";
-		var type = "user";
-		var tab = "likes";
+		var id = "299951923544433";
+		var type = "page";
+		var tab = "albums";
+		var tabs = ["albums", "photos", "posts", "comments", "events"];
 	</script>
 	<script src="js/controller.js"></script>
 	<link rel="stylesheet" href="styles/style.css">
@@ -19,13 +20,13 @@
 		<header ng-include="'templates/header.html'"
 			onload="node=ret.info; tabs=ret.tabs;"
 		></header>
-		<!--nav ng-if="true" title="debug">
+		<nav ng-if="true" title="debug">
 			<ul>
 				<li ng-repeat="t in ret.templates">
 					<a target="_blank" href="templates/{{t}}.html">{{t}}</a>
 				</li>
 			</ul>
-		</nav-->
+		</nav>
 		<section id="info" ng-if="ret.tab=='info'">
 			<h2>Info</h2>
 			<div ng-include="'templates/'+ret.type+'.html'" onload="node=ret.info;node._id=ret.id"></div>

@@ -57,7 +57,7 @@
 		<a href="{{'https://www.facebook.com/'+tag.id}}">{{tag.name}}</a>
 	</li>
 </ul>
-<details ng-if="node.comments">
+<details ng-if="node.comments.length">
 	<summary title="newest: {{node.updated_time|date:'yyyy-MM-dd HH:mm:ss'}}">
 		{{node.comments.length|number}} comment(s)
 	</summary>

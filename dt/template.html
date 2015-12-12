@@ -5,31 +5,43 @@
 	<title>Template</title>
 	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
-	<script src="//connect.facebook.net/en_US/sdk.js"></script>
+	<script src="//connect.facebook.net/zh_TW/sdk.js" id="facebook-jssdk"></script>
+	<script src="../js/fbsdk-config.js"></script>
 	<script>
-		window.fbAsyncInit = function() {
-			FB.init({
-				version    : 'v2.5',
-				appId      : '1598824630378971',
-				xfbml      : false,
-				status     : true
-			});
-			FB.getLoginStatus(function(response) {
-				if(response.status == 'connected') main();
-				else FB.login(main, {scope: ''});
-			});
-		};
-
-		function main(){}
-	</script>
-	<script src="js/fbsdk-extend.js"></script>
-	<script>
+		/**
+		 * Auto-load Facebook SDK in AngularJS initialization.
+		 *
+		 * Just modify `main` to what you want. The return value of `main`
+		 * is assgined to `$scope.model` to let AngularJS bind data to.
+		 * `main` can be defined elsewhere, but note that you shall 
+		 * call `$scope.$apply` manually after async functions return,
+		 * which means you have to access `$scope.$apply` in `main`.
+		 *
+		 * If you're also using Facebook SDK for PHP, note that
+		 * login with link of `FacebookRedirectLoginHelper::getLoginUrl`
+		 * would also make SDK for JS know the login status. Therefore,
+		 * you don't have to make user login twice even if you're working
+		 * on a site using both SDKs for PHP and JS.
+		 */
 		angular.module("myApp", []).controller("main", function($scope) {
+			window.fbAsyncInit = function() {
+				FB.init(FBConfig);
+				FB.getLoginStatus(function(r) {
+					$scope.model = main(r.authResponse ? r.authResponse.userID : "");
+					$scope.$apply();
+				});
+			};
+			$.getScript("../js/fbsdk-extend.js");
+			var main = function(userID) {
+				if(!userID) return {}
+				return {userID: userID};
+			};
 		});
 	</script>
 	<style></style>
 </head>
 <body ng-controller="main">
 	<h1>Template</h1>
+	<pre>{{model|json}}</pre>
 </body>
 </html>

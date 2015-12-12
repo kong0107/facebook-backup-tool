@@ -6,6 +6,9 @@
 		"device",
 		"payment_pricepoints",
 		"viewer_can_send_gift",
+		"languages",
+		"age_range",
+		"devices",
 
 		"context",
 		"favorite_athletes",
@@ -53,7 +56,8 @@
 		"is_private",
 		"is_hidden",
 		"object",
-		"parent"
+		"parent",
+		"user_likes"
 	],
 	"album": [
 		"can_upload"
