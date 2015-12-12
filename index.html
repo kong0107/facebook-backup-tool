@@ -6,32 +6,373 @@
 	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script>
-		var id = "299951923544433";
+		var node = {};
 		var type = "page";
 		var tab = "albums";
-		var tabs = ["albums", "photos", "posts", "comments", "events"];
 	</script>
+	<script src="data/js/page_359985940825230_info.js"></script>
+	<script src="data/js/page_359985940825230_albums.js"></script>
+	<script src="data/js/page_359985940825230_photos.js"></script>
+	<script src="data/js/page_359985940825230_posts.js"></script>
+	<script src="data/js/page_359985940825230_comments.js"></script>
 	<script src="js/controller.js"></script>
 	<link rel="stylesheet" href="styles/style.css">
 	<base target="_blank">
-</head>
-<body>
-	<div id="wrapper">
-		<header ng-include="'templates/header.html'"
-			onload="node=ret.info; tabs=ret.tabs;"
-		></header>
-		<nav ng-if="true" title="debug">
+	
+	<script type="text/ng-template" id="templateComment">
+		<div class="metadata">
+			<a class="time_container" name="{{comment.id}}" href="http://facebook.com/{{comment.id}}">
+				<time class="created_time" datetime="{{comment.created_time}}">
+					{{comment.created_time|date:'yyyy-MM-dd HH:mm:ss'}}
+				</time>
+			</a>
+			<div ng-if="comment.like_count">
+				{{comment.like_count|number}} 
+				like{{comment.like_count > 1 ? 's' : ''}}
+			</div>
+		</div>
+		<a class="from" href="https://www.facebook.com/{{comment.from.id}}">{{comment.from.name}}</a>
+		<div class="message" ng-if="comment.message">{{comment.message}}</div>
+		<div ng-if="comment.attachment" class="attachment">
+			<a href="{{comment.attachment.target.url}}" 
+				title="origin size: {{comment.attachment.media.image.width}}x{{comment.attachment.media.image.height}}"
+			><img class="attachment_image" ng-src="{{comment.attachment.media.image.src}}" alt="{{comment.attachment.title}}"
+			></a>
+			<span class="attachment_title" ng-if="comment.attachment.title&&(comment.attachment.type!='image_share')">
+				<a href="{{comment.attachment.target.url}}" title="{{comment.attachment.target.id}}">{{comment.attachment.title}}</a>
+			</span>
+			<blockquote class="attachment_description" ng-if="comment.attachment.description">{{comment.attachment.description}}</blockquote>
+			<div class="clear"></div>
+		</div>
+		<div class="cc" ng-include src="'templateComment'"
+			ng-repeat="comment in comment.comments |orderBy: 'created_time'"
+		></div>
+	</script>
+	
+	<script type="text/ng-template" id="templatePost">
+		<div class="metadata">
 			<ul>
-				<li ng-repeat="t in ret.templates">
-					<a target="_blank" href="templates/{{t}}.html">{{t}}</a>
+				<li>
+					<a class="time_container" name="{{node._id}}"
+						href="{{node.actions?node.actions[0].link:ret.createLink(node._id)}}"
+					>
+						<time class="created_time" datetime="{{node.created_time}}">
+							{{node.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}
+						</time>
+					</a>
+				</li>
+				<li ng-if="node.parent_id">
+					<a href="{{ret.createLink(node.parent_id,'posts')}}">Parent Post</a>
+				</li>
+				<li ng-repeat="a in node.actions" ng-if="a.name!='Comment'&&a.name!='Like'&&a.name!='Share'">
+					<a href="{{a.link}}">{{a.name}}</a>
+				</li>
+				<li ng-if="node.privacy" title="Privacy">
+					<div ng-if="node.privacy.value=='EVERYONE'">Public</li>
+					<details ng-if="node.privacy.value!='EVERYONE'" class="privacy">
+						<summary>Private</summary>
+						<dl>
+							<dt ng-repeat-start="(k,v) in node.privacy">{{k}}</dt>
+							<dd ng-repeat-end>{{v}}</dd>
+						</dl>
+					</details>
+				</li>
+			</ul>
+		</div>
+		<div class="story" ng-if="node.story">{{node.story}}</div>
+		<div class="message" ng-if="node.message">{{node.message}}</div>
+		<div class="link_container" ng-if="node.link">
+			<div ng-if="!node.child_attachments">
+				<h4><a class="link" href="{{node.link}}">{{node.name}}</a></h4>
+				<a ng-if="node.full_picture" href="{{node.full_picture}}"
+				><img ng-if="node.full_picture" ng-src="{{node.full_picture}}" class="full_picture"
+				></a>
+				<img ng-if="!node.full_picture && node.picture" ng-src="{{node.picture}}" class="picture">
+				<blockquote class="description">{{node.description}}</blockquote>
+			</div>
+			<div ng-if="node.child_attachments">
+				<!-- unsure structure... see node 299951923544433_408517786021179 -->
+				<h4><a class="link" href="{{node.link}}">{{node.child_attachments[0].name}}</a></h4>
+				<a ng-repeat="att in node.child_attachments" href="{{att.link}}"
+				><img ng-src="{{att.picture}}"></a>
+				<blockquote class="description">{{node.child_attachments[0].description}}</blockquote>
+			</div>
+		</div>
+		<ul class="tags">
+			<li ng-repeat="tag in node.story_tags" ng-if="tag.offset && tag.name">
+				<a href="{{'https://www.facebook.com/'+tag.id}}">{{tag.name}}</a>
+			</li>
+			<li ng-repeat="tag in node.message_tags" ng-if="tag.name">
+				<a href="{{'https://www.facebook.com/'+tag.id}}">{{tag.name}}</a>
+			</li>
+			<li ng-repeat="tag in node.with_tags">
+				<a href="{{'https://www.facebook.com/'+tag.id}}">{{tag.name}}</a>
+			</li>
+		</ul>
+	</script>
+	
+	<script type="text/ng-template" id="templateAlbum">
+		<h3>{{node.name}}</h3>
+		<div class="metadata">
+			<ul>
+				<li>
+					<a class="time_container" name="{{node._id}}" href="{{node.link}}">
+						<time ng-if="node.backdated_time" datetime="{{node.backdated_time}}"
+							title="backdated_time" class="backdated_time"
+						>{{node.backdated_time|date:'yyyy-MM-dd HH:mm:ss'}}
+						</time>
+						<time ng-if="!node.backdated_time"  datetime="{{node.created_time}}"
+							title="created_time" class="created_time"
+						>{{node.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}
+						</time>
+					</a>
+				</li>
+				<li title="privacy" class="privacy">Viewable to {{node.privacy}}</li>
+				<li>Type: {{node.type}}</li>
+				<li ng-if="node.event">{{node.event|json}}</li>
+			</ul>
+		</div>
+		<p ng-if="node.place">
+			Place:
+			<address ng-include src="'templatePlace'" onload="place=node.place"></address>
+		</p>
+		<p class="description">{{node.description}}</p>
+		<details>
+			<summary>
+				{{node.photos.length|number}} photos
+			</summary>
+			<div class="photoContainer" ng-include src="'templatePhoto'"
+				ng-repeat="node in node.photos"
+			></div>
+		</details>
+	</script>
+	
+	<script type="text/ng-template" id="templatePhoto">
+		<div class="metadata">
+			<ul>
+				<li>
+					<a class="time_container" name="{{node._id}}" href="{{node.link}}">
+						<time ng-if="node.backdated_time" datetime="{{node.backdated_time}}"
+							title="backdated_time" class="backdated_time"
+						>{{node.backdated_time|date:'yyyy-MM-dd HH:mm:ss'}}
+						</time>
+						<time ng-if="!node.backdated_time"  datetime="{{node.created_time}}"
+							title="created_time" class="created_time"
+						>{{node.created_time | date: 'yyyy-MM-dd HH:mm:ss'}}
+						</time>
+					</a>
+				</li>
+				<li ng-if="node.page_story_id">
+					<a href="{{ret.createLink(node.page_story_id,'posts')}}">page story</a>
+				</li>
+				<li ng-if="node.event">{{node.event|json}}</li>
+			</ul>
+		</div>
+		<a class="photo" href="data/photos/album_{{node.album.id}}/{{node._id}}.jpg"
+		><img ng-src="{{node.picture}}"></a>
+		<p class="photo_side description">{{node.name}}</p>
+		<ul class="tags">
+			<li ng-repeat="tag in node.name_tags">
+				<a href="createLink(tag.id)">{{tag.name}}</a>
+			</li>
+		</ul>
+		<div ng-if="node.place">
+			<h4 class="inlineBlock">Place</h4>
+			<address ng-include src="'templatePlace'" onload="place=node.place"></address>
+		</div>
+	</script>
+	
+	<script type="text/ng-template" id="templateEvent">
+		<h3>{{node.name}}</h3>
+		<div class="metadata">
+			<ul>
+				<li>
+					<a class="time_container" name="{{node._id}}" href="{{ret.createLink(node._id)}}">
+						<time datetime="{{node.updated_time}}"
+							title="Last update time" class="updated_time"
+						>{{node.updated_time | date: 'yyyy-MM-dd HH:mm:ss'}}
+						</time>
+					</a>
+				</li>
+				<li ng-if="node.category">Category: {{node.type}}</li>
+				<li ng-if="node.type">Type: {{node.type}}</li>
+				<li ng-if="node.timezone">Timezone: {{node.timezone}}</li>
+				<!--li title="Statistics">
+					<dl>
+						<dt>Attending</dt><dd>{{node.attending_count}}</dd>
+						<dt>Declined</dt><dd>{{node.declined_count}}</dd>
+						<dt>Maybe</dt><dd>{{node.maybe_count}}</dd>
+						<dt>No replay</dt><dd>{{node.noreply_count}}</dd>
+						<dt>Interested in</dt><dd>{{node.interested_count}}</dd>
+					</dl>
+				</li-->
+			</ul>
+		</div>
+		<nav>
+			<ul>
+				<li ng-if="node.ticket_uri">
+					<a href="{{node.ticket_uri}}">Buy a ticket</a>
+				</li>
+				<li>Owner: <a href="{{ret.createLink(node.owner.id)}}">{{node.owner.name}}</a></li>
+				<li ng-if="node.parent_group">
+					Parent:
+					<a href="{{ret.createLink(node.parent_group.id)}}"
+					>{{node.parent_group.name}}</a>
 				</li>
 			</ul>
 		</nav>
-		<section id="info" ng-if="ret.tab=='info'">
+		<dl>
+			<dt>From</dt>
+			<dd>
+				<time datetime="{{node.start_time}}">
+					{{node.start_time|date:'yyyy-MM-dd (EEE) HH:mm'}}
+				</time>
+			</dd>
+			<dt ng-if="node.end_time">To</dt>
+			<dd ng-if="node.end_time">
+				<time datetime="{{node.end_time}}">
+					{{node.end_time|date:'yyyy-MM-dd (EEE) HH:mm'}}
+				</time>
+			</dd>
+			<dt>Place</dt>
+			<dd><address ng-include src="'templatePlace'" onload="place=node.place"></address></dd>
+		</dl>
+		<details ng-if="node.description" class="description"
+		><summary>Description</summary>{{node.description}}
+		</details>
+		<div>
+			<h4>Statistics</h4>
+			<dl>
+				<dt>Attending</dt><dd>{{node.attending_count}}</dd>
+				<dt>Declined</dt><dd>{{node.declined_count}}</dd>
+				<dt>Maybe</dt><dd>{{node.maybe_count}}</dd>
+				<dt>No replay</dt><dd>{{node.noreply_count}}</dd>
+				<dt>Interested in</dt><dd>{{node.interested_count}}</dd>
+			</dl>
+		</div>
+	</script>
+	
+	<script type="text/ng-template" id="templatePage">
+		<header style="display: inline-block; width: 40%;">
+			<a class="photo" href="{{node.link}}"><img ng-src="{{node.picture.data.url}}"></a>
+			<div class="photo_side">
+				<h3 class="photo_name"><a href="{{node.link}}">{{node.name}}</a></h3>
+				{{node.category}}
+			</div>
+		</header>
+		<details>
+			<summary ng-click="ret.showDetails[node._id]=!ret.showDetails[node._id]">Details</summary>
+			<nav>
+				<ul>
+					<li ng-if="node.cover"><a href="{{node.cover.source}}">Cover Photo</a></li>
+					<li ng-if="node.website"><a href="{{node.website}}">Website</a></li>
+					<li ng-if="node.featured_video">
+						<a href="{{ret.createLink(node.featured_video.id)}}"
+							title="{{node.featured_video.description}}"
+						>Featured Video</a>
+					</li>
+					<li ng-if="node.best_page">
+						<a title="The best available Page on Facebook for the concept represented by this Page."
+							href="{{ret.createLink(node.best_page.id)}}"
+						>{{node.best_page.name}}</a>
+					</li>
+				</ul>
+			</nav>
+			<p>{{node.likes|number}} people like this.</p>
+			<p ng-if="node.were_here_count">{{node.were_here_count|number}} people were here.</p>
+			<p>{{node.talking_about_count|number}} are talking about this.</p>
+			<p ng-if="node.founded">Founded at <time>{{node.founded}}</time></p>
+			<p ng-if="node.release_date">Released at <time>{{note.release_date}}</time></p>
+			<p ng-if="node.start_info.date" title="start_info">
+				{{node.start_info.type}}
+				at
+				<time>
+					<span class="year">{{node.start_info.date.year}}</span
+					><span class="month" ng-if="node.start_info.date.month">-{{node.start_info.date.month}}</span
+					><span class="day" ng-if="node.start_info.date.day">-{{node.start_info.date.day}}</span>
+				</time>
+			</p>
+			<section ng-repeat="field in ret.displaySet.page.block"
+				ng-if="node[field]" class="description"
+			><h4>{{field|capitalize}}</h4>{{node[field]}}</section>
+
+			<section ng-repeat="field in ret.displaySet.page.complicated"
+				ng-if="node[field]" class="dlWrapper"
+			>
+				<h4>{{field|capitalize}}</h4>
+				<dl ng-repeat="(k,v) in node[field]">
+					<dt>{{k}}</dt><dd>{{v}}</dd>
+				</dl>
+			</section>
+			<div class="dlWrapper">
+				<dl ng-repeat="field in ret.displaySet.page.inline" ng-if="node[field]">
+					<dt>{{field|capitalize}}</dt><dd class="description">{{node[field]}}</dd>
+				</dl>
+				<dl ng-repeat="field in ret.displaySet.page.list" ng-if="node[field]">
+					<dt>{{field|capitalize}}</dt>
+					<dd><ul><li ng-repeat="ele in node[field]">{{ele}}</li></ul></dd>
+				</dl>
+				<dl ng-repeat="field in ret.displaySet.page.complicatedList" ng-if="node[field]">
+					<dt>{{field|capitalize}}</dt>
+					<dd>
+						<div class="tableRow">
+							<div ng-repeat="(k,v) in node[field][0]" class="tableCell">{{k}}</div>
+						</div>
+						<div ng-repeat="ele in node[field]" class="tableRow">
+							<div ng-repeat="(k,v) in ele" class="tableCell description"
+								title="{{k}}"
+							>{{v}}</div>
+						</div>
+					</dd>
+				</dl>
+
+				<dl ng-if="node.category_list">
+					<dt>Sub-categories</dt>
+					<dd><ul><li ng-repeat="c in node.category_list">{{c.name}}</li></ul></dd>
+				</dl>
+				<dl ng-repeat="field in ret.displaySet.page.unknown" ng-if="node[field]">
+					<dt>{{field}}</dt>
+					<dd style="white-space: pre-wrap;">{{node[field]}}</dd>
+				</dl>
+			</div>
+			<!--details class="rawdata"><summary>JSON</summary>{{node|json}}</details-->
+		</details>
+	</script>
+	
+	<script type="text/ng-template" id="templatePlace">
+		<a href="{{ret.createLink(place.id)}}">{{place.name}}</a>
+		<span ng-if="place.location.street">(<a href="https://www.google.com/maps?q={{
+			place.location.street
+			+ (place.location.city ? (',+' + place.location.city) : '')
+			+ (place.location.country ? (',+' + place.location.country) : '')
+		}}">{{
+			place.location.street
+			+ (place.location.city ? (',+' + place.location.city) : '')
+			+ (place.location.country ? (',+' + place.location.country) : '')
+		}}</a>)</span>
+	</script>
+</head>
+<body>
+	<div id="wrapper">
+		<h1 ng-bind="ret.info.name"></h1>
+		<p class="about" ng-if="ret.info.about" ng-bind="ret.info.about"></p>
+		<p class="about" ng-if="ret.info.bio" ng-bind="ret.info.bio"></p>
+		<blockquote class="about" ng-if="!ret.info.about && !ret.info.bio" ng-bind="ret.info.quotes"></blockquote>
+		<nav>
+			<ul>
+				<li ng-click="ret.tab='info'" ng-class="(ret.tab=='info')?'focus':''"
+				>Info</li>
+				<li ng-repeat="t in ret.tabs" ng-if="ret[t].length"
+					ng-click="ret.tab=t" ng-class="(ret.tab==t)?'focus':''"
+				>{{t|capitalize}} <span class="count">({{ret[t].length}})</span></li>
+				<li><a href="{{ret.info.link||ret.createLink(ret.info.id)}}">Facebook</a></li>
+			</ul>
+		</nav>
+		<section id="info" ng-show="ret.tab=='info'">
 			<h2>Info</h2>
-			<div ng-include="'templates/'+ret.type+'.html'" onload="node=ret.info;node._id=ret.id"></div>
+			<div class="rawdata">{{ret.info|json}}</div>
 		</section>
-		<section ng-repeat="t in ret.tabs" ng-show="t==ret.tab" id="{{t}}">
+		<section ng-repeat="t in ret.tabs" ng-if="t!='info'" ng-show="ret.tab==t" id="{{t}}">
 			<h2>{{t|capitalize}}</h2>
 			<div ng-if="t=='feed'||t=='posts'||t=='comments'||t=='likes'">
 				<label>
@@ -52,11 +393,27 @@
 					</ul>
 				</nav>
 			</div>
-			<article ng-if="t=='posts'||t=='feed'||t=='comments'"
-				ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))"
-				ng-include="'templates/post.html'"
-			></article>
-			<article ng-if="t=='albums'" class="albumContainer"
+			{{filtered.length}} {{t}}
+			<article ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))">
+				<div ng-if="t=='posts'" ng-include src="'templatePost'"></div>
+				<div ng-if="t=='albums'" ng-include src="'templateAlbum'"></div>
+				<div ng-if="t=='photos'" ng-include src="'templatePhoto'"></div>
+				<div ng-if="t=='events'" ng-include src="'templateEvent'"></div>
+				<div ng-if="t=='likes'" ng-include src="'templatePage'"></div>
+				
+			
+				<div class="rawdata" style="max-height: 12em; overflow: auto; border: 1px solid #ccc;">{{node|json}}</div>
+				<details ng-if="node.comments.length">
+					<summary title="newest: {{node.updated_time|date:'yyyy-MM-dd HH:mm:ss'}}">
+						{{node.comments.length|number}} comment(s)
+					</summary>
+					<section class="comment" ng-include src="'templateComment'"
+						ng-repeat="comment in node.comments | orderBy: 'created_time'"
+					></section>
+				</details>
+				<details class="rawdata"><summary>JSON</summary>{{node|json}}</details>
+			</article>
+			<!--article ng-if="t=='albums'" class="albumContainer"
 				ng-repeat="node in ret.albums" ng-include="'templates/album.html'"
 			></article>
 			<article ng-if="t=='photos'" class="photoContainer"
@@ -66,8 +423,9 @@
 			></article>
 			<article ng-if="t=='likes'" ng-repeat="node in filtered=(ret.likes|filter:ret.search[t])"
 				ng-include="'templates/page.html'" onload="node.id=node._id" class="pageContainer"
-			></article>
+			></article-->
 		</section>
+		<details class="rawdata" style="padding-bottom: 3em;"><summary>Debug</summary>{{ret|json}}</details>
 		<footer>This is the footer of the page.</footer>
 	</div>
 </body>

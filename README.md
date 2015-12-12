@@ -18,7 +18,7 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 3. Edit `config.sample.php` and save as `config.inc.php`; edit `js/fbsdk-config.js`.
 4. Browse `index.php`, select what to crawl, submit the form, and wait. Download the JSON files.
 5. Modify JavaScript in `index.html` to the id and type of what you crawled.
-6. Browse `index.html` through web server to see the results.
+6. Browse `index.html`.
 
 # Disclaimer
 I don't guarantee anything.
@@ -30,7 +30,6 @@ With post/photo data of the target node and their comments downloaded, you can:
 2. Check how often a user interacts with you. Listing all frequencies of all users is also possible.
 
 # Directory Structure
-* `templates`: HTML templates for AngularJS.
 * `metadata`: JSON files about structure of Facebook Graph API nodes.
 * `js`:
   * `fbsdk-extend.js`: functions based on [Facebook SDK for JavaScript](https://developers.facebook.com/docs/javascript).

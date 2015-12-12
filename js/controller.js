@@ -1,27 +1,18 @@
 angular.module("myApp", [])
-.config(function($locationProvider) {
-	$locationProvider.html5Mode({
-		enabled: true,
-		requireBase: false
-	});
-})
-.controller("main", function($scope, $http, $location, $window, $filter) {
+.controller("main", function($scope, $window, $filter) {
 	$scope.ret = function() {
 		/// Initialization
-		var id = $window.id;
-		var type = $window.type;
-		var notFound = function(r) {
-			//console.log(r.status + " " + r.statusText + " on " + r.config.url);
+		var node = $window.node;
+		if(!node) {
+			throw new Error('`window.node` must be defined.');
+			return;
 		}
-		var tabs = $window.tabs || [//"info",
-			"albums", "likes", "events",
-			"feed", "posts", "photos", "videos", "tagged",
-			"members", "docs", "comments"
-		];
+		var id = node.info._id;
+		var type = $window.type;
+		
 		var ret = {
 			id: id,
 			type: type,
-			tabs: tabs,
 			tab: $window.tab || "info",
 			months: {},
 			month: {},
@@ -70,69 +61,41 @@ angular.module("myApp", [])
 				}
 			}
 		};
-
+		
 		/**
-		 * Get distinct month of `created_time` in an array.
+		 * Load info and edges.
 		 */
-		var groupByMonth = function(arr, tab) {
-			arr.sort(function(a,b) {
-				return new Date(b.created_time) - new Date(a.created_time);
-			});
-			var ms = [];
-			for(var i = 0; i < arr.length; ++i)
-				ms.push(arr[i].created_time.substr(0, 7));
-			ret.months[tab] = $.unique(ms);
-			ret.month[tab] = ret.months[tab][0];
-			ret.search[tab] = "";
+		ret.tabs = []
+		for(var tab in node) {
+			ret.tabs.push(tab);
+			ret[tab] = node[tab];
+			
+			/**
+			 * Get distinct months of `created_time`.
+			 */
+			if(tab == "posts" || tab == "feed" || tab == "comments") {
+				ret[tab].sort(function(a, b) {
+					return new Date(b.created_time) - new Date(a.created_time);
+				});
+				var ms = [];
+				for(var i = 0; i < ret[tab].length; ++i)
+					ms.push(ret[tab][i].created_time.substr(0, 7));
+				ret.months[tab] = $.unique(ms);
+				ret.month[tab] = ret.months[tab][0];
+				ret.search[tab] = "";
+			}
 		}
-
-		/**
-		 * Get info and edges.
-		 *
-		 * Use `setTimeout` in a self-calling callback function
-		 * to prevent stack overflow problem.
-		 * @see https://blog.jcoglan.com/2010/08/30/the-potentially-asynchronous-loop/
-		 */
-		for(var i = 0; i < tabs.length; ++i) ret[tabs[i]] = [];
-		$http.get("data/json/" + type + "_" + id +"_info.json")
-		.then(function(r) {
-			ret.info = r.data;
-			var iterator = 0;
-			var loadEdge = function() {
-				var tab = tabs[iterator];
-				$http.get("data/json/"
-					+ type + "_" + id + "_" + tab
-					+ ".json"
-				).then(function(r) {
-					ret[tab] = r.data;
-					if(tab == "posts" || tab == "feed" || tab == "comment")
-						groupByMonth(ret[tab], tab);
-					console.log("Edge " + tab + " is loaded.");
-					if(iterator < tabs.length - 1) {
-						++iterator;
-						setTimeout(loadEdge, 1);
-					}
-					else {
-						console.log("All edges are loaded.");
-						arrangeComments();
-						arrangePhotos();
-					}
-				}, notFound);
-			};
-			loadEdge();
-		}, notFound);
 
 		/**
 		 * Put comments to where each should be.
 		 *
-		 * This should be called before `arrangePhotos`.
-		 * Maintain only those without `fbbk_parent` for event node.
+		 * This should be done before `arrangePhotos`.
+		 * Don't delete those without `fbbk_parent` for event node.
 		 */
-		var arrangeComments = function() {
-			if(!ret.comments || !ret.comments.length) return;
-			for(var i = 0; i < tabs.length; ++i) {
-				for(var j = 0; j < ret[tabs[i]].length; ++j) {
-					var node = ret[tabs[i]][j];
+		if(ret.comments && ret.comments.length) {
+			for(var i = 0; i < ret.tabs.length; ++i) {
+				for(var j = 0; j < ret[ret.tabs[i]].length; ++j) {
+					var node = ret[ret.tabs[i]][j];
 					node.comments = $filter('filter')(
 						ret.comments,
 						{fbbk_parent: {id: node._id}},
@@ -155,10 +118,9 @@ angular.module("myApp", [])
 		/**
 		 * Put photos to the albums they should be in.
 		 *
-		 * This should be called after `arrangeComments`.
+		 * Should be executed after comments are arranged.
 		 */
-		var arrangePhotos = function() {
-			if(!ret.photos || !ret.photos.length) return;
+		if(ret.photos && ret.photos.length) {
 			for(var j = 0; j < ret.albums.length; ++j)
 				ret.albums[j].photos = [];
 			var tagged = [];
@@ -187,21 +149,6 @@ angular.module("myApp", [])
 				id = id.replace("_", "/" + type + "/");
 			return "https://www.facebook.com/" + id;
 		};
-
-		/**
-		 * Just for debug
-		 */
-		ret.templates = [
-			"header",
-			"page",
-			"post",
-			"album",
-			"comment",
-			"photo",
-			"attachment",
-			"event",
-			"place"
-		];
 
 		return ret;
 	}();
