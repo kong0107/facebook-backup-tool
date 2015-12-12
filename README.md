@@ -10,13 +10,13 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 # Warning
 1. This is unfinished.
 2. Private posts and photos are crawled, too. You shall check if the contents of crawled data is suitable to publish.
-3. If the target you wanna backup may have many comments (user replies) in its posts, skip function `getComment` in `crawl.php`.
+3. Comments and photos are auto-downloaded. These may take more than half an hour.
 
 # Usage
 1. Install and start web server, PHP, and MongoDB server locally.
 2. Create your own App at [Facebook Developer](https://developers.facebook.com/).
 3. Edit `config.sample.php` and save as `config.inc.php`; edit `js/fbsdk-config.js`.
-4. Browse `crawl.html`, select what to crawl, submit the form, and wait.
+4. Browse `index.php`, select what to crawl, submit the form, and wait. Download the JSON files.
 5. Modify JavaScript in `index.html` to the id and type of what you crawled.
 6. Browse `index.html` through web server to see the results.
 
