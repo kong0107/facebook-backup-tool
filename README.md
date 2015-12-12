@@ -21,7 +21,7 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 6. Browse `index.html` through web server to see the results.
 
 # Disclaimer
-I don't gurantee anything.
+I don't guarantee anything.
 
 # Application
 (Contents of this paragraph are NOT what this app can do, but what you can do by the data you crawl by this app.)
@@ -51,9 +51,9 @@ With post/photo data of the target node and their comments downloaded, you can:
 6. If the stack is not empty, then go to step 1.
 7. Finish crawling.
 
-# Concerns
-* What kind of database structure to use? Especially, save comments to a collection/table separate from their targets, or as an array element field to their targets? 
-** You shall concern copyright and privacy issues.
-** If using MongoDB, note that positional `$` operator does NOT support nested array. See [MongoDB Manual](https://docs.mongodb.org/manual/reference/operator/update/positional/).
+## Concerns
+* What kind of database structure to use? Especially, save comments to a collection/table separate from their targets, or as an array element field to their targets?
+  * You shall concern copyright and privacy issues.
+  * If using MongoDB, note that positional `$` operator does NOT support nested array. See [MongoDB Manual](https://docs.mongodb.org/manual/reference/operator/update/positional/).
 * Where to save media files?
-* Which fields to request? Save them all or forget about some after process? (For example, as this is used for backup usage, it's a contradiction to save the URL of a media since we've already downloaded the file in case that the file is delete from Facebook.)
+* Which fields to request? Some fields are shown in [official introspection](https://developers.facebook.com/docs/graph-api/using-graph-api#introspection) but requesting them may trigger error. Furthermore, do you want to save all returned fields or forget about some after process? (For example, as this is used for backup usage, it's a contradiction to save the URL of a media since we've already downloaded the file in case that the file is delete from Facebook.)
