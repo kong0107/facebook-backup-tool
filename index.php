@@ -233,7 +233,7 @@ model.request = function(qs) {
 	model.showClearButton = false;
 	model.status = "crawling";
 	model.lastExecute = (new Date).toISOString();
-	$http.get("crawler_dfs.php" + qs).then(function(r) {
+	$http.get("crawler.php" + qs).then(function(r) {
 		model.message = r.data.message;
 		model.stackCount = r.data.stackCount;
 		if(r.data.status == "success") {
@@ -272,7 +272,7 @@ model.stop = function() {
  * Send "clear" message to the server to clear the stack.
  */
 model.clearStack = function() {
-	$http.get("crawler_dfs.php?clear=1").then(function(r) {
+	$http.get("crawler.php?clear=1").then(function(r) {
 		model.status = "setting";
 	}, function(r) {
 		model.message = JSON.stringify(r, undefined, 4);

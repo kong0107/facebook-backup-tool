@@ -1,256 +1,182 @@
 <?php
-	$time_start = microtime(true);
 	require_once 'fb.inc.php';
 	require_once 'db.inc.php';
-	$fieldsOfComment = implode(',', getFields('comment'));
-
+	
 	/**
-	 * A function map what shall be done to a node by its type.
+	 * JSON output functions and variables.
 	 */
-	$funcMap = array(
-		/*'post' => function($post) {
-			// Hmm.. what about delete duplicates of field `action`?
-			return $post;
-		},*/
-		'photo' => function($photo) {
-			// Field `image` seems to be superfluous,
-			// maybe delete some of its elements?
-			global $nodeType, $nodeId;
-			$image = $photo['images'][0];
-			$info = pathinfo(parse_url($image['source'], PHP_URL_PATH));
-			$dir = __DIR__ . "/data/photos/{$nodeType}_{$nodeId}_photos/";
-			$dest = "$dir{$photo['id']}.{$info['extension']}";
-			if(!file_exists($dest)) {
-				echo "Downloading photo to <code>$dest</code>\n";
-				if(!is_dir($dir)) mkdir($dir, 0777, true);
-				copy($image['source'], $dest);
-				usleep(250);
-			}
-			return $photo;
-		}/*,
-		'video' => function($video) {
-			// well.. `format` shall be shrunk.
-			// and.. what about download the file by `source` field?
-			return $video;
-		}*/
-	);
+	$output = ['message' => ''];
+	function stop($message, $status = 'error') {
+		exit(json_encode([
+			'status' => $status,
+			'message' => $message
+		]));
+	}
+	function p($str = '') {
+		global $output;
+		$output['message'] .= $str . "\n";
+	}
+	
+	/**
+	 * Basic checkings.
+	 */
+	if(!isset($_SESSION['stack'])) $_SESSION['stack'] = [];
+	if(!is_array($_SESSION['stack'])) stop('Error: stack shall be an array');
 
 	/**
-	 * Modify $_GET for photos in album.
+	 * Handling the initial data.
+	 */
+	if(is_array($_GET['stack'])) {
+		foreach($_GET['stack'] as $ele)
+			push($ele['path'], $ele['type'], $ele['ancestors']);
+		exit(json_encode([
+			'status' => 'success',
+			'message' => 'Finished pushing from HTTP get method.',
+			'stackCount' => count($_SESSION['stack'])
+		]));
+	}
+	if($_GET['clear']) {
+		$_SESSION['stack'] = [];
+		stop('Stack cleared.', 'warning');
+	}
+	if(!count($_SESSION['stack'])) stop('Stack is empty', 'warning');
+
+	$maxExeTime = 2; //ini_get('max_execution_time') / 2;
+	$sleepTime = 1e+5;
+	p(sprintf('Time limit: %.2f seconds.', $maxExeTime));
+	p(sprintf('Sleep time setting: %d milliseconds.', $sleepTime / 1000));
+	p(sprintf("Already %.2f seconds passed.\n", microtime(true) - $config['startTime']));
+
+	/**
+	 * Main algorithm.
 	 *
-	 * Not a good solution, but I'm lazy.
+	 * Steps:
+	 * 1. Pop an element from the stack.
+	 * 2. Request the data and save it to the database.
+	 * 3. If it's a node, then push its edges to the stack.
+	 * 4. If it's an edge and there's next page, then push the next page.
+	 * 5. If it's an edge whose nodes may have comments,
+	 *    then push `comments` edges of each node to the stack.
+	 * 6. If the stack is not empty, then go to step 1.
 	 */
-	if($_GET['album']) {
-		$params = array(
-			'nodeType' => 'album',
-			'nodeId' => $_GET['album'],
-			'edge' => 'photos'
-		);
-		$_GET = $params;
-	}
+	while($req = array_pop($_SESSION['stack'])) {
+		$path = $req['path'];
+		$type = $req['type'];
+		$ancestors = is_array($req['ancestors']) ? $req['ancestors'] : [];
 
-	$nodeType = $_GET['nodeType'];
-	$edge = $_GET['edge'];
-	switch($edge) {
-		case 'feed':
-		case 'posts':
-		case 'tagged':
-			$perms = ['user_posts'];
-			$containedNode = 'post';
-			break;
-		case 'albums':
-			$perms = ['user_photos'];
-			$containedNode = 'album';
-			break;
-		case 'photos':
-			$perms = ['user_photos'];
-			$containedNode = 'photo';
-			break;
-		case 'videos':
-			$perms = ['user_videos'];
-			$containedNode = 'video';
-			break;
-		case 'likes':
-			$perms = ['user_likes'];
-			$containedNode = 'page';
-			break;
-		case 'docs':
-			$containedNode = 'doc';
-			break;
-		case 'comments':
-			$perms = ['user_events'];
-			$containedNode = 'comment';
-			break;
-		case 'events':
-			$perms = ['user_events'];
-			$containedNode = 'event';
-			break;
-		default: //'admined_groups', 'groups'
-			exit('Unknown or unsupported edge');
-	}
-	if($nodeType == 'page') $perms = [];
-	else if($nodeType == 'group') $perms = ['user_managed_groups'];
-	else if($nodeType == 'event') $perms = ['user_events'];
+		p("Requesting $path");
+		$s = microtime(true);
+		$res = $fb->get($path);
+		p(sprintf('Got response after %d milliseconds.', (microtime(true) - $s) * 1000));
+		$res = $res->getDecodedBody();
+		if(array_key_exists('data', $res)) {
+			p('Processing edge data ...');
+			if($next = $res['paging']['next']) {
+				p('Pushing the next page ...');
+				push($next, $type, $ancestors);
+			}
+			foreach($res['data'] as $doc) {
+				save($doc, $type, $ancestors);
+				$newAnc = array_merge($ancestors, [
+					['type' => $type, 'id' => $doc['id']]
+				]);
 
-	checkLogin($perms);
+				/// Add comments.
+				if(in_array('comments', $metadata[$type]['connections'])
+					&& $doc['comment_count'] !== 0
+				) push("/{$doc['id']}/comments", "comment", $newAnc);
 
-	$user = $fb->get('/me')->getDecodedBody();
-	$nodeId = ($nodeType == 'user') ? $user['id'] : $_GET['nodeId'];
+				/// Add photos.
+				if($type == 'album')
+					push("/{$doc['id']}/photos", "photo", $newAnc);
 
-	$colName = "{$nodeType}_{$nodeId}_{$edge}";
-	$col = $db->selectCollection($colName);
-	$fields = implode(',', getFields($containedNode, $nodeType != 'group'));
-	$mayHaveComments = in_array('comments', $metadata[$containedNode]['connections']);
-
-	$requestUrl = empty($_GET['request'])
-		? "/$nodeId/$edge?limit=5&fields=$fields"
-		: urldecode($_GET['request'])
-	;
-
-	$waitTime = 2500;
-	if($containedNode == 'photo') $waitTime *= 2;
-	if($mayHaveComments) $waitTime *= 2;
-?>
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<title>Facebook Data Crawler</title>
-</head>
-<body style="white-space: pre-wrap; font-family: monospace; margin-top: 0;">
-<h1 style="margin-top: 0;">Facebook Data Crawler</h1>
-<div id="timeDiff">&nbsp;</div>
-<div id="waitMsg">Waits <?=number_format($waitTime)?> milliseconds for each request bundle.</div>
-<?php
-	echo 'Starts at ' . date('Y-m-d H:i:s') . "\n";
-	/**
-	 * Save node info to a JSON file and into DB.
-	 */
-	if(empty($_GET['request'])) {
-		$ru = "/$nodeId?fields=" . implode(',', getFields($nodeType));
-		echo "Requesting node info: $ru\n";
-		$nodeInfo = array_remove_empty($fb->get($ru)->getDecodedBody());
-
-		$dir = __DIR__ . '/data/json/';
-		if(!is_dir($dir)) mkdir($dir, 0777, true);
-		$dest = __DIR__ . "/data/json/{$nodeType}_{$nodeId}_info.json";
-		$bytes = file_put_contents($dest,
-			json_encode($nodeInfo, JSON_UNESCAPED_UNICODE) . "\n"
-		);
-		echo "Save node info into <code>$dest</code>\n";
-
-		$nodeInfo['_id'] = $nodeId;
-		unset($nodeInfo['id']);
-		$db->selectCollection($nodeType)->update(
-			array('_id' => $nodeId),
-			$nodeInfo,
-			array('upsert' => true)
-		);
-	}
-
-	echo "Requesting <code>$requestUrl</code>\n";
-	try {
-		$response = $fb->get($requestUrl)->getDecodedBody();
-	} catch(Facebook\Exceptions\FacebookResponseException $e) {
-		exit('Graph returned an error: ' . $e->getMessage());
-	} catch(Facebook\Exceptions\FacebookSDKException $e) {
-		exit('Facebook SDK returned an error: ' . $e->getMessage());
-	}
-	foreach($response['data'] as $node) {
-		echo "Parsing {$node['id']}\n";
-		if($mayHaveComments) {
-			$comments = getComments($node['id']);
-			if(count($comments)) $node['comments'] = $comments;
+				/// What about attachments?
+			}
 		}
-		if($funcMap[$containedNode])
-			$node = $funcMap[$containedNode]($node);
+		else {
+			p('Processing node data ...');
+			save($res, $type, $ancestors);
+		}
 
-		$node = array_remove_empty($node);
+		$elapsedTime = microtime(true) - $config['startTime'];
+		p(sprintf("%.2f seconds have passed.\n", $elapsedTime));
+		if($elapsedTime >= $maxExeTime) break;
+		usleep($sleepTime);
+	}
+	/**
+	 * Output a JSON string.
+	 */
+	$output['status'] = 'success';
+	$output['stackCount'] = count($_SESSION['stack']);
+	$output['stack'] = $_SESSION['stack'];
+	echo json_encode($output);
 
-		$node['_id'] = $node['id'];
-		unset($node['id']);
-		$col->update(
-			array('_id' => $node['_id']),
-			$node,
+	/**
+	 * Functions
+	 */
+	function push($path, $type, $ancestors = []) {
+		/**
+		 * Handling $path
+		 *
+		 * @see https://developers.facebook.com/docs/php/Facebook/5.0.0#get
+		 */
+		$parts = parse_url($path);
+
+		/// Remove the version prefix
+		$path = $parts['host'] ? substr($parts['path'], 5) : $parts['path'];
+
+		parse_str($parts['query'], $query);
+		unset($query['access_token']);
+		if(empty($query['fields']))
+			$query['fields'] = implode(',', getFields($type));
+
+		$path = $path . '?' . http_build_query($query);
+
+		p("Pushing $path");
+		$_SESSION['stack'][] = [
+			'path' => $path,
+			'type' => $type,
+			'ancestors' => $ancestors
+		];
+		return count($_SESSION['stack']);
+	}
+	function save($doc, $type, $ancestors) {
+		global $db;
+		$doc['fbbk_updated_time'] = date(DATE_ISO8601);
+		if(count($ancestors)) {
+			$r = $ancestors[0];
+			$colName = "{$r['type']}_{$r['id']}_{$type}s";
+			if(count($ancestors) > 1)
+				$doc['fbbk_parent'] = end($ancestors);
+		}
+		else $colName = $type . 's';
+
+		if($type == 'photo') {
+			/// Download the photo.
+			$p = end($ancestors);
+			$source = $doc['images'][0]['source'];
+			$dir = __DIR__ . "/data/photos/{$p['type']}_{$p['id']}/";
+			$dest = $dir . $doc['id'] . '.'
+				. pathinfo(parse_url($source, PHP_URL_PATH))['extension']
+			;
+			if(!file_exists($dest)) {
+				if(!is_dir($dir)) mkdir($dir, 0777, true);
+				if(copy($source, $dest))
+					p("Successfully downloaded photo to $dest");
+				else p("Warning: Failed downloading $source to $dest");
+				usleep(1000);
+			}
+			unset($doc['images']);
+		}
+
+		$doc['_id'] = $doc['id'];
+		unset($doc['id']);
+		$ret = $db->selectCollection($colName)->update(
+			array('_id' => $doc['_id']),
+			array_remove_empty($doc),
 			array('upsert' => true)
 		);
-		echo '<div style="max-height: 20em; overflow: auto; border: 1px solid #ccc;">';
-		echo htmlspecialchars(print_r($node, true));
-		echo '</div>';
+		p("Updated $type with id {$doc['_id']}.");
+		return $ret;
 	}
-
-	$next = $response['paging']['next'];
-	if($next) {
-		$params = $_GET;
-		$params['request'] = substr($next, 31);
-		$requestNext = $_SERVER['PHP_SELF'] . '?' . http_build_query($params);
-		echo "<a href=\"$requestNext\">Request next page</a>\n";
-		echo "<script>setTimeout(function(){location.href = '$requestNext';}, $waitTime);</script>";
-	}
-	else {
-		echo "No more data.\n";
-		$data = iterator_to_array(
-			$db->selectCollection($colName)->find()
-			->sort(array('created_time'=>-1))
-		, false);
-		$dest = __DIR__ . "/data/json/{$nodeType}_{$nodeId}_{$edge}.json";
-		$bytes = file_put_contents($dest,
-			json_encode($data, JSON_UNESCAPED_UNICODE) . "\n"
-		);
-		?>
-			<br>Saved all nodes in edge (totally <?=number_format($bytes)?> bytes) into <code><?=$dest?></code>
-			<script>
-				document.getElementById("waitMsg").textContent="Finished crawling this edge.";
-				if(window.parent != window) {
-					var p = window.parent;
-					var f = p.$('form').get(0);
-					var edges = f.edge;
-					var scope = p.angular.element(p.$("[ng-controller='main']")).scope();
-					var submit = function(){ 
-						f.submit(); 
-						p.$("#message").text("Form submitted. Crawling the edge ...");
-					};
-
-					if(edges.value != "photosInAlbum") {
-						for(var i = 0; i < edges.length - 1; ++i) {
-							if(edges[i].value == edges.value) {
-								edges.value = edges[i + 1].value;
-								break;
-							}
-						}
-						if(edges.value != "photosInAlbum")
-							scope.requestEdge(edges.value);
-						else scope.getAlbums(scope.nodeId);
-						setTimeout(submit, 5000);
-					}
-					else {
-						var albums = f.album;
-						if(albums.value == albums[albums.length - 1].value) {
-							alert('Finished every album.');
-						}
-						else {
-							for(var i = 0; i < albums.length - 1; ++i) {
-								if(albums[i].value == albums.value) {
-									albums.value = albums[i + 1].value;
-									break;
-								}
-							}
-							scope.getAlbumInfo(albums.value);
-							setTimeout(submit, 5000);
-						}
-					}
-					p.$("#message").text("Finished crawling edge <?=$colName?>.");
-				}
-			</script>
-		<?php
-	}
-	$time_end = microtime(true);
-	echo '<script>document.getElementById("timeDiff").textContent="'
-		. number_format($time_end - $time_start, 3)
-		. ' seconds were spent on this page.";</script>'
-	;
 ?>
-<br><a href="export.php?col=<?=$colName?>">Download JSON file</a>
-<br><a href="crawler.html">crawl another page</a>
-</body>
-</html>
