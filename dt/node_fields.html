@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+<html ng-app="myApp">
+<head>
+	<meta charset="utf-8">
+	<title>Fields and Edges of Nodes</title>
+	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+	<script>
+		angular.module("myApp", []).controller("main", function($scope, $http) {
+			$http.get("../metadata/v2.5.json").then(function(r) {
+				delete r.data.page_milestone;
+				var allTypes = [];
+				var allFields = [];
+				var allEdges = [];
+				for(var nodeType in r.data) {
+					allTypes.push(nodeType);
+					r.data[nodeType].fieldDesc = {};
+					for(var i in r.data[nodeType].fields) {
+						var fieldInfo = r.data[nodeType].fields[i];
+						r.data[nodeType].fieldDesc[fieldInfo.name] = fieldInfo.description;
+						if(allFields.indexOf(fieldInfo.name) == -1)
+							allFields.push(fieldInfo.name);
+					}
+					for(var i in r.data[nodeType].connections) {
+						var edge = r.data[nodeType].connections[i];
+						if(allEdges.indexOf(edge) == -1)
+							allEdges.push(edge);
+					}
+				}
+				$scope.metadata = r.data;
+				$scope.allTypes = allTypes.sort();
+				$scope.allFields = allFields.sort();
+				$scope.allEdges = allEdges.sort();
+			}, function(r) { console.log(r); }
+			);
+		});
+	</script>
+	<style>
+		h1 { margin: 0; }
+		ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+		}
+		th, td { vertical-align: top; }
+		tbody td { text-align: center; }
+	</style>
+</head>
+<body ng-controller="main">
+	<h1>Fields and Edges of Nodes</h1>
+	<a target="_blank" href="https://developers.facebook.com/docs/graph-api/reference">Official Reference</a>
+	<p ng-if="!allTypes">Loading ...</p>
+	<table border="1" ng-show="allTypes">
+		<thead>
+			<tr>
+				<th></th>
+				<th>node</th>
+				<th ng-repeat="type in allTypes" scope="col">{{type}}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="field in allFields">
+				<th scope="row">field</th>
+				<th scope="row">{{field}}</th>
+				<td ng-repeat="type in allTypes">
+					<span ng-if="metadata[type].fieldDesc[field]"
+						title="{{metadata[type].fieldDesc[field]}}"
+					>{{type}}</span>
+				</td>
+			</tr>
+		</tbody>
+		<tbody>
+			<tr ng-repeat="edge in allEdges">
+				<th scope="row">edge</th>
+				<th scope="row">{{edge}}</th>
+				<td ng-repeat="type in allTypes">
+					<span ng-if="metadata[type].connections.indexOf(edge)>-1"
+					>{{type}}</span>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+</html>
