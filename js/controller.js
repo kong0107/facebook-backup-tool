@@ -1,4 +1,10 @@
 angular.module("myApp", [])
+.config(function($locationProvider) {
+	$locationProvider.html5Mode({
+		enabled: true,
+		requireBase: false
+	});
+})
 .controller("main", function($scope, $window, $filter) {
 	$scope.ret = function() {
 		/// Initialization

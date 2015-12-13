@@ -4,6 +4,7 @@
 .table,
 .dlWrapper {
 	display: table;
+	width: 100%;
 }
 .table > header,
 .table > footer,
@@ -19,6 +20,7 @@
 .dlWrapper > dl > dt,
 .dlWrapper > dl > dd {
 	display: table-cell;
+	vertical-align: top;
 }
 .rawdata {
 	white-space: pre-wrap;
