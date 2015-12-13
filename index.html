@@ -50,7 +50,7 @@
 		<!-- Photos for album -->
 		<details ng-if="node.photos.length">
 			<summary>{{node.photos.length |number}} photos</summary>
-			<article ng-repeat="node in node.photos" ng-include="'templatePhoto'"></article>
+			<article ng-repeat="node in node.photos track by node._id" ng-include="'templatePhoto'"></article>
 		</details>
 	</script>
 
@@ -60,7 +60,7 @@
 		<nav>
 			<ul>
 				<li title="Original webpage of this on facebook"><a href="{{ret.createLink(node._id)}}">Facebook</a></li>
-				<li ng-repeat="a in node.actions" ng-if="['Comment','Like','Share'].indexOf(a.name)==-1">
+				<li ng-repeat="a in node.actions track by $index" ng-if="['Comment','Like','Share'].indexOf(a.name)==-1">
 					<a href="{{a.link}}">{{a.name}}</a>
 				</li>
 				<li ng-if="node.parent_id">
@@ -81,7 +81,7 @@
 			</li>
 		</ul>
 		
-		<section ng-repeat="node in node.attachments.data"
+		<section ng-repeat="atta in node.attachments.data track by $index"
 			ng-include="'templateAttachment'"
 		></section>
 	</script>
@@ -91,27 +91,27 @@
 		<ul class="metadata" ng-include="'templateMetadata'"></ul>
 		<div class="message" ng-if="node.message">{{node.message}}</div>
 		
-		<section ng-repeat="node in [node.attachment]"
+		<section ng-repeat="atta in [node.attachment] track by $index"
 			ng-include="'templateAttachment'"
 		></section>
 		<div class="cc" ng-include="'templateComment'"
-			ng-repeat="node in node.comments |orderBy: 'created_time'"
+			ng-repeat="node in (node.comments |orderBy: 'created_time') track by node._id"
 		></div>
 	</script>
 
 	<script type="text/ng-template" id="templateAttachment">
-		<div ng-switch="node.type" class="attachment">
+		<div ng-switch="atta.type" class="attachment">
 			<div ng-switch-when="multi_share">
-				<h4><a href="node.url">{{node.subattachments.data[0].title}}</a></h4>
-				<p class="description">{{node.subattachments.data[0].description}}</p>
-				<img ng-repeat="atta in node.subattachments.data" ng-src="atta.media.src">
+				<h4><a href="atta.url">{{atta.subattachments.data[0].title}}</a></h4>
+				<p class="description">{{atta.subattachments.data[0].description}}</p>
+				<img ng-repeat="atta in atta.subattachments.data track by $index" ng-src="atta.media.src">
 			</div>
 			<div ng-switch-default class="table">
-				<a class="tableCell" href="{{node.url}}"
-				><img ng-src="{{node.media.src}}" title="{{node.type}}"></a>
+				<a class="tableCell" href="{{atta.url}}"
+				><img ng-src="{{atta.media.src}}" title="{{atta.type}}"></a>
 				<div class="tableCell">
-					<h4 ng-if="node.title"><a href="{{node.url}}">{{node.title}}</a></h4>
-					<p class="description">{{node.description}}</p>
+					<h4 ng-if="atta.title"><a href="{{atta.url}}">{{atta.title}}</a></h4>
+					<p class="description">{{atta.description}}</p>
 				</div>
 			</div>
 		</div>
@@ -132,7 +132,7 @@
 			</ul>
 		</nav>
 		<ul class="tags">
-			<li ng-repeat="tag in node.name_tags">
+			<li ng-repeat="tag in node.name_tags track by tag.id">
 				<a href="{{ret.createLink(tag.id)}}">{{tag.name}}</a>
 			</li>
 			<li ng-if="node.place"><address ng-include="'templatePlace'" onload="place=node.place"></address></li>
@@ -275,7 +275,7 @@
 						<div class="tableRow">
 							<div ng-repeat="(k,v) in node[field][0]" class="tableCell">{{k}}</div>
 						</div>
-						<div ng-repeat="ele in node[field]" class="tableRow">
+						<div ng-repeat="ele in node[field] track by $index" class="tableRow">
 							<div ng-repeat="(k,v) in ele" class="tableCell description"
 								title="{{k}}"
 							>{{v}}</div>
@@ -285,7 +285,7 @@
 
 				<dl ng-if="node.category_list">
 					<dt>Sub-categories</dt>
-					<dd><ul><li ng-repeat="c in node.category_list">{{c.name}}</li></ul></dd>
+					<dd><ul><li ng-repeat="c in node.category_list track by $index">{{c.name}}</li></ul></dd>
 				</dl>
 				<dl ng-repeat="field in ret.displaySet.page.unknown" ng-if="node[field]">
 					<dt>{{field}}</dt>
@@ -355,14 +355,14 @@
 				</nav>
 			</div>
 			{{filtered.length}} {{t}}
-			<article ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))">
+			<article ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]})) track by node._id">
 				<div ng-include="(['posts','feed'].indexOf(t)>-1)?'templatePost':'templateGeneral'"></div>
 				<details ng-if="node.comments.length">
 					<summary title="newest: {{node.updated_time| date:'yyyy-MM-dd HH:mm'}}">
 						{{node.comments.length|number}} comment(s)
 					</summary>
 					<section class="comment" ng-include="'templateComment'"
-						ng-repeat="node in node.comments |orderBy: 'created_time'"
+						ng-repeat="node in (node.comments |orderBy: 'created_time') track by node._id"
 					></section>
 				</details>
 				<details class="rawdata"><summary>JSON</summary>{{node|json}}</details>
