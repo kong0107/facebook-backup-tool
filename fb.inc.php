@@ -82,7 +82,7 @@
 	/**
 	 * Get field names of a node type.
 	 */
-	function getFields($nodeType, $includePicture = true) {
+	function getFields($nodeType) {
 		global $metadata, $excludedFields;
 		$ef = $excludedFields[$nodeType] or $ef = [];
 		$fields = [];
@@ -92,9 +92,9 @@
 			$fn = $field['name'];
 			if(!in_array($fn, $ef)) $fields[] = $fn;
 		}
-		if($includePicture
-			&& in_array('picture', $metadata[$nodeType]['connections'])
-		) $fields[] = 'picture';
+		if(in_array('picture', $metadata[$nodeType]['connections']))
+			$fields[] = 'picture';
+		if($nodeType == 'post') $fields[] = 'attachments';
 		return $fields;
 	}
 
