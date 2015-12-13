@@ -134,14 +134,14 @@ article {
 	line-height: 125%;
 	clear: both;
 }
-article > header {
+article header {
 	display: inline-table;
 }
-article > header > * {
+article header > * {
 	display: table-cell;
 	vertical-align: top;
 }
-article > header img {
+article header img {
 	max-width: 100px;
 	max-height: 100px;
 	margin: 0.2em;
@@ -150,6 +150,15 @@ article > header img {
 }
 .metadata {
 	float: right;
+	font-size: smaller;
+	padding: 0 0 .3em .3em;
+	margin: 0 0 .3em .3em;
+	opacity: 0.5;
+}
+.metadata:hover {
+	opacity: 1;
+}
+article nav {
 	font-size: smaller;
 }
 
@@ -195,6 +204,7 @@ article > header img {
  */
 .story {
 	font-style: italic;
+	display: inline-block;
 }
 
 /**

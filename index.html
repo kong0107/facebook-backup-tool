@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<title ng-bind="ret.info.name">Backup Facebook</title>
-	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script>
 		var node = {};
@@ -19,40 +19,78 @@
 	<link rel="stylesheet" href="styles/style.css">
 	<base target="_blank">
 
-	<script type="text/ng-template" id="templateComment">
-		<div class="metadata">
-			<a class="time_container" name="{{comment.id}}" href="http://facebook.com/{{comment.id}}">
-				<time class="created_time" datetime="{{comment.created_time}}">
-					{{comment.created_time|date:'yyyy-MM-dd HH:mm:ss'}}
-				</time>
-			</a>
-			<div ng-if="comment.like_count">
-				{{comment.like_count|number}}
-				like{{comment.like_count > 1 ? 's' : ''}}
-			</div>
-		</div>
-		<a class="from" href="https://www.facebook.com/{{comment.from.id}}">{{comment.from.name}}</a>
-		<div class="message" ng-if="comment.message">{{comment.message}}</div>
-		<div ng-if="comment.attachment" class="attachment">
-			<a href="{{comment.attachment.target.url}}"
-				title="origin size: {{comment.attachment.media.image.width}}x{{comment.attachment.media.image.height}}"
-			><img class="attachment_image" ng-src="{{comment.attachment.media.image.src}}" alt="{{comment.attachment.title}}"
-			></a>
-			<span class="attachment_title" ng-if="comment.attachment.title&&(comment.attachment.type!='image_share')">
-				<a href="{{comment.attachment.target.url}}" title="{{comment.attachment.target.id}}">{{comment.attachment.title}}</a>
-			</span>
-			<blockquote class="attachment_description" ng-if="comment.attachment.description">{{comment.attachment.description}}</blockquote>
-			<div class="clear"></div>
-		</div>
-		<div class="cc" ng-include="'templateComment'"
-			ng-repeat="comment in comment.comments |orderBy: 'created_time'"
-		></div>
+	<script type="text/ng-template" id="templateMetadata">
+		<li title="ID">{{node._id}}</li>
+		<li ng-repeat="time in [node.created_time, node.backdated_time]"
+			ng-if="time" ng-include="'templateTime'"
+		></li>
+		<li ng-if="node.from">Author: <a href="{{ret.createLink(node.from.id)}}">{{node.from.name}}</a></li>
+		<li ng-if="node.privacy">Viewable to {{node.privacy.value || node.privacy}}</li>
+		<li ng-if="node.type">Type: {{node.type}}</li>
+	</script>
+
+	<script type="text/ng-template" id="templateGeneral">
+		<header>
+			<img ng-if="node.full_picture||node.picture"
+				ng-src="{{node.full_picture||node.picture.data.url||node.picture}}"
+			>
+			<h3>{{node.name}}</h3>
+		</header>
+		<ul class="metadata" ng-include="'templateMetadata'"></ul>
+		<nav>
+			<ul>
+				<li ng-if="node.link" title="Original webpage of this on facebook"><a href="{{node.link}}">Facebook</a></li>
+				<li ng-if="node.event">Event: <a href="{{ret.createLink(node.event.id)}}">node.event.name</a></li>
+			</ul>
+		</nav>
+		<address ng-if="node.place" ng-include="'templatePlace'" onload="place=node.place"></address>
+		<section class="description">{{node.description}}</section>
+
+		<!-- Photos for album -->
+		<details ng-if="node.photos.length">
+			<summary>{{node.photos.length |number}} photos</summary>
+			<article ng-repeat="node in node.photos" ng-include="'templatePhoto'"></article>
+		</details>
 	</script>
 
 	<script type="text/ng-template" id="templatePost">
-		<p ng-if="node.story">{{node.storoy}}</p>
-		<a ng-if="!node.story" title="Author" href="{{ret.createLink(node.from.id)}}">{{node.from.name}}</a>
-		<div ng-include="templateGeneralContent"></div>
+		<p ng-if="node.story" class="story">{{node.storoy}}</p>
+		<ul class="metadata" ng-include="'templateMetadata'"></ul>
+		<nav>
+			<ul>
+				<li title="Original webpage of this on facebook"><a href="{{ret.createLink(node._id)}}">Facebook</a></li>
+				<li ng-repeat="a in node.actions" ng-if="['Comment','Like','Share'].indexOf(a.name)==-1">
+					<a href="{{a.link}}">{{a.name}}</a>
+				</li>
+				<li ng-if="node.parent_id">
+					<a href="{{ret.createLink(node.parent_id,'posts')}}">Parent Post</a>
+				</li>
+				<li ng-if="node.event">Event: <a href="{{ret.createLink(node.event.id)}}">node.event.name</a></li>
+			</ul>
+		</nav>
+		<address ng-if="node.place" ng-include="'templatePlace'" onload="place=node.place"></address>
+
+		<section ng-if="node.link">
+			<h4><a href="{{node.link}}">{{node.child_attachments[0].name || node.name}}</a></h4>
+		</section>
+
+		<li ng-if="node.link"><a href="{{node.link}}">Link</a></li>
+		<!-- See post 299951923544433_408517786021179 for an example of multi-attachments. -->
+		<ul ng-if="node.child_attachments">
+			<li ng-repeat="att in node.child_attachments">
+				<a href="{{att.link}}"><img ng-src="{{att.picture}}"></a>
+			</li>
+		</ul>
+		<blockquote class="description">{{node.description}}</blockquote>
+		<section class="message">{{node.message}}</section>
+		<ul class="tags">
+			<li ng-repeat="tag in ([].concat(
+					node.story_tags, node.message_tags, node.with_tags
+				)|unique) track by tag.id"
+				ng-if="tag.name"
+			><a href="{{ret.createLink(tag.id)}}">{{tag.name}}</a>
+			</li>
+		</ul>
 		<!--div class="link_container" ng-if="node.link">
 			<div ng-if="!node.child_attachments">
 				<h4><a class="link" href="{{node.link}}">{{node.name}}</a></h4>
@@ -70,39 +108,40 @@
 			</div>
 		</div-->
 	</script>
-		
-	<script type="text/ng-template" id="templateGeneralContent">
-		<ul class="metadata">
-			<li title="ID">{{node._id}}</li>
-			<li ng-repeat="time in [node.created_time, node.backdated_time]"
-				ng-if="time" ng-include="'templateTime'"
-			></li>
-			<li ng-if="node.privacy">Viewable to {{node.privacy.value || node.privacy}}</li>
-			<li ng-if="node.type">Type: {{node.type}}</li>
-		</ul>
-		<nav>
-			<ul>
-				<li title="Original webpage of this"><a href="{{ret.createLink(node._id)}}">Facebook</a></li>
-				<li ng-if="node.link"><a href="{{node.link}}">Link</a></li>
-				<li ng-repeat="a in node.actions" ng-if="['Comment','Like','Share'].indexOf(a.name)==-1">
-					<a href="{{a.link}}">{{a.name}}</a>
-				</li>
-				<li ng-if="node.parent_id">
-					<a href="{{ret.createLink(node.parent_id,'posts')}}">Parent Post</a>
-				</li>
-				<li ng-if="node.event">Event: <a href="{{ret.createLink(node.event.id)}}">node.event.name</a></li>
-			</ul>
-		</nav>
-		<address ng-if="node.place" ng-include="'templatePlace'" onload="place=node.place"></address>
+
+	<script type="text/ng-template" id="templateComment">
+		<a class="from" href="https://www.facebook.com/{{comment.from.id}}">{{comment.from.name}}</a>
+		<ul class="metadata" ng-include="'templateMetadata'"></ul>
+		<!--div class="metadata">
+			<a class="time_container" name="{{comment.id}}" href="http://facebook.com/{{comment.id}}">
+				<time class="created_time" datetime="{{comment.created_time}}">
+					{{comment.created_time|date:'yyyy-MM-dd HH:mm:ss'}}
+				</time>
+			</a>
+			<div ng-if="comment.like_count">
+				{{comment.like_count|number}}
+				like{{comment.like_count > 1 ? 's' : ''}}
+			</div>
+		</div-->
+		<div class="message" ng-if="comment.message">{{comment.message}}</div>
+		<div ng-if="comment.attachment" class="attachment">
+			<a href="{{comment.attachment.target.url}}"
+				title="origin size: {{comment.attachment.media.image.width}}x{{comment.attachment.media.image.height}}"
+			><img class="attachment_image" ng-src="{{comment.attachment.media.image.src}}" alt="{{comment.attachment.title}}"
+			></a>
+			<span class="attachment_title" ng-if="comment.attachment.title&&(comment.attachment.type!='image_share')">
+				<a href="{{comment.attachment.target.url}}" title="{{comment.attachment.target.id}}">{{comment.attachment.title}}</a>
+			</span>
+			<blockquote class="attachment_description" ng-if="comment.attachment.description">{{comment.attachment.description}}</blockquote>
+			<div class="clear"></div>
+		</div>
+		<div class="cc" ng-include="'templateComment'"
+			ng-repeat="comment in comment.comments |orderBy: 'created_time'"
+		></div>
 	</script>
-	
-	
-	
-	
-	<script type="text/ng-template" id="templateDefaultHeader">
-	</script>
-	
-	<script type="text/ng-template" id="templateAuthorHeader">
+
+	<script type="text/ng-template" id="tempalteAttachment">
+
 	</script>
 
 	<script type="text/ng-template" id="templatePhoto">
@@ -369,48 +408,14 @@
 			</div>
 			{{filtered.length}} {{t}}
 			<article ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))">
-				<header>
-					<img ng-if="node.full_picture||node.picture" 
-						ng-src="{{node.full_picture||node.picture.data.url||node.picture}}"
-					>
-					<div>
-						<h3>{{node.name}}</h3>
-						<span ng-if="node.story" class="story">{{node.story}}</span>
-					</div>
-				</header>
-				<ng-include src="'templateGeneralContent'"></ng-include>
-				<!-- See post 299951923544433_408517786021179 for an example of multi-attachments. -->
-				<ul ng-if="node.child_attachments">
-					<li ng-repeat="att in node.child_attachments">
-						<a href="{{att.link}}"><img ng-src="{{att.picture}}"></a>
-					</li>
-				</ul>
-				
-				<!-- For link posts, description would be the quotes of the target webpage. -->
-				<section class="description">{{node.description}}</section>
-				<section class="message">{{node.message}}</section>
+				<div ng-include="(['posts','feed'].indexOf(t)>-1)?'templatePost':'templateGeneral'"></div>
+
 
 				<!--div ng-if="t=='posts'" ng-include="'templatePost'"></div>
 				<div ng-if="t=='photos'" ng-include="'templatePhoto'"></div>
 				<div ng-if="t=='events'" ng-include="'templateEvent'"></div>
 				<div ng-if="t=='likes'" ng-include="'templatePage'"></div-->
-				
-				<!-- Tags for post -->
-				<ul class="tags">
-					<li ng-repeat="tag in ([].concat(
-							node.story_tags, node.message_tags, node.with_tags
-						)|unique) track by tag.id"
-						ng-if="tag.name"
-					><a href="{{ret.createLink(tag.id)}}">{{tag.name}}</a>
-					</li>
-				</ul>
-				
-				<!-- Photos for album -->
-				<details ng-if="node.photos.length">
-					<summary>{{node.photos.length |number}} photos</summary>
-					<article ng-repeat="node in node.photos" ng-include="'templatePhoto'"></article>
-				</details>
-				
+
 				<!-- Comments -->
 				<details ng-if="node.comments.length">
 					<summary title="newest: {{node.updated_time|date:'yyyy-MM-dd HH:mm:ss'}}">
