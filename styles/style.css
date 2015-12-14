@@ -4,7 +4,6 @@
 .table,
 .dlWrapper {
 	display: table;
-	width: 100%;
 }
 .table > header,
 .table > footer,
@@ -55,6 +54,11 @@ dt {
 }
 dd {
 	padding: 0.2em;
+}
+img {
+	margin: 0.2em;
+	padding: 0.2em;
+	border: 1px solid #ccc;
 }
 
 /**
@@ -146,9 +150,6 @@ article header > * {
 article header img {
 	max-width: 100px;
 	max-height: 100px;
-	margin: 0.2em;
-	padding: 0.2em;
-	border: 1px solid #ccc;
 }
 .metadata {
 	float: right;
@@ -248,44 +249,16 @@ article nav {
 }
 
 /**
- * Attachment (of comment only?)
+ * Attachment
  */
 .attachment {
-	margin: .5em 0 0 1em;
-	padding: 0 .5em;
+	/*margin: .5em 0 0 1em;
+	padding: 0 .5em;*/
 }
-.attachment_image {
-	width: 64px;
+.attachment img {
+	max-width: 200px;
+	max-height: 150px;
 }
-.attachment_title {
-	font-weight: bold;
-}
-.attachment_description {
-	white-space: pre-wrap;
+.attachment .description {
 	font-size: smaller;
-	margin: 0;
-}
-
-/**
- * Photo
- */
-.photoContainer {
-	clear: both;
-	margin: 1em;
-	border-left: 2px solid #888;
-	padding: 1em;
-}
-.photo {
-	display: table-cell;
-}
-.photo_side {
-	display: table-cell;
-	vertical-align: top;
-	padding: 0 1em;
-}
-
-/**
- * Page
- */
-.pageContainer {
 }

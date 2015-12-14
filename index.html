@@ -8,7 +8,7 @@
 	<script>
 		var node = {};
 		var type = "page";
-		var tab = "albums";
+		var tab = "posts";
 	</script>
 	<script src="data/js/page_359985940825230_info.js"></script>
 	<script src="data/js/page_359985940825230_albums.js"></script>
@@ -55,8 +55,34 @@
 	</script>
 
 	<script type="text/ng-template" id="templatePost">
-		<p ng-if="node.story" class="story">{{node.storoy}}</p>
+		<p ng-if="node.story" class="story">{{node.story}}</p>
 		<ul class="metadata" ng-include="'templateMetadata'"></ul>
+		<div ng-if="node.link">
+			<!--
+				While posting a photo, `attachments.data[0].subattachments.data[0].description`
+				and `description` would have the same value.
+				Therefore, using `attachments` (and `templateAttachment`) here
+				may not be a good idea.
+			-->
+			<section ng-if="node.child_attachments" class="attachments">
+				<h4><a href="{{node.link}}">{{node.child_attachments[0].name}}</a></h4>
+				<p class="description">{{node.child_attachments[0].description}}</p>
+				<img ng-repeat="ca in node.child_attachments track by $index" ng-src="{{ca.picture}}">
+				<!--h4><a href="{{node.link}}">{{node.attachments.data[0].subattachments.data[0].title}}</a></h4>
+				<p class="description">{{node.attachments.data[0].subattachments.data[0].description}}</p>
+				<img ng-repeat="atta in node.attachments.data[0].subattachments.data track by $index" ng-src="attr.media.src"-->
+			</section>
+			<section ng-if="!node.child_attachments" class="table attachment">
+				<a class="tableCell" href="{{node.link}}"
+					ng-if="node.full_picture||node.picture"
+				><img ng-src="{{node.full_picture||node.picture}}"></a>
+				<div class="tableCell">
+					<h4 ng-if="node.name"><a href="{{node.link}}">{{node.name}}</a></h4>
+					<p class="description">{{node.description}}</p>
+				</div>
+			</section>
+		</div>
+		
 		<nav>
 			<ul>
 				<li title="Original webpage of this on facebook"><a href="{{ret.createLink(node._id)}}">Facebook</a></li>
@@ -71,6 +97,7 @@
 		</nav>
 		<address ng-if="node.place" ng-include="'templatePlace'" onload="place=node.place"></address>
 
+
 		<section class="message">{{node.message}}</section>
 		<ul class="tags">
 			<li ng-repeat="tag in ([].concat(
@@ -80,19 +107,15 @@
 			><a href="{{ret.createLink(tag.id)}}">{{tag.name}}</a>
 			</li>
 		</ul>
-		
-		<section ng-repeat="atta in node.attachments.data track by $index"
-			ng-include="'templateAttachment'"
-		></section>
 	</script>
 
 	<script type="text/ng-template" id="templateComment">
 		<a href="{{ret.createLink(node.from.id)}}">{{node.from.name}}</a>
 		<ul class="metadata" ng-include="'templateMetadata'"></ul>
 		<div class="message" ng-if="node.message">{{node.message}}</div>
-		
+
 		<section ng-repeat="atta in [node.attachment] track by $index"
-			ng-include="'templateAttachment'"
+			ng-include="'templateAttachment'" class="table attachment"
 		></section>
 		<div class="cc" ng-include="'templateComment'"
 			ng-repeat="node in (node.comments |orderBy: 'created_time') track by node._id"
@@ -100,26 +123,18 @@
 	</script>
 
 	<script type="text/ng-template" id="templateAttachment">
-		<div ng-switch="atta.type" class="attachment">
-			<div ng-switch-when="multi_share">
-				<h4><a href="atta.url">{{atta.subattachments.data[0].title}}</a></h4>
-				<p class="description">{{atta.subattachments.data[0].description}}</p>
-				<img ng-repeat="atta in atta.subattachments.data track by $index" ng-src="atta.media.src">
-			</div>
-			<div ng-switch-default class="table">
-				<a class="tableCell" href="{{atta.url}}"
-				><img ng-src="{{atta.media.src}}" title="{{atta.type}}"></a>
-				<div class="tableCell">
-					<h4 ng-if="atta.title"><a href="{{atta.url}}">{{atta.title}}</a></h4>
-					<p class="description">{{atta.description}}</p>
-				</div>
-			</div>
+		<!-- Used only by `templateComment`. -->
+		<a class="tableCell" href="{{atta.url}}"
+		><img ng-src="{{atta.media.image.src}}" title="{{atta.type}}"></a>
+		<div class="tableCell">
+			<h4 ng-if="atta.title"><a href="{{atta.url}}">{{atta.title}}</a></h4>
+			<p class="description">{{atta.description}}</p>
 		</div>
 	</script>
 
 	<script type="text/ng-template" id="templatePhoto">
-		<div class="table">
-			<a class="tableCell" 
+		<div class="table" style="width: 100%;">
+			<a class="tableCell"
 				href="data/photos/album_{{node.album.id}}/{{node._id}}.jpg"
 			><img ng-src="{{node.picture}}"></a>
 			<p class="tableCell description">{{node.name}}</p>

@@ -94,7 +94,7 @@
 		}
 		if(in_array('picture', $metadata[$nodeType]['connections']))
 			$fields[] = 'picture';
-		if($nodeType == 'post') $fields[] = 'attachments';
+		//if($nodeType == 'post') $fields[] = 'attachments';
 		return $fields;
 	}
 

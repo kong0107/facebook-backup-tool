@@ -90,7 +90,7 @@
 				if($type == 'album')
 					push("/{$doc['id']}/photos", "photo", $newAnc);
 
-				/// `attachments` edge for post nodes is added in `getFields`
+				/// What about photo in comment?
 			}
 		}
 		else {
