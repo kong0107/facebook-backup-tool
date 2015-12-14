@@ -24,10 +24,11 @@
 		<li ng-repeat="time in [node.created_time, node.backdated_time]"
 			ng-if="time" ng-include="'templateTime'"
 		></li>
-		<li ng-if="node.from">Author: <a href="{{ret.createLink(node.from.id)}}">{{node.from.name}}</a></li>
+		<li ng-if="node.from && isNaN(node.comment_count)">Author: <a href="{{ret.createLink(node.from.id)}}">{{node.from.name}}</a></li>
 		<li ng-if="node.like_count">{{node.like_count|number}} likes</li>
 		<li ng-if="node.privacy">Viewable to {{node.privacy.value || node.privacy}}</li>
 		<li ng-if="node.type">Type: {{node.type}}</li>
+		<li ng-if="node.status_type">Type: {{node.status_type}}</li>
 	</script>
 
 	<script type="text/ng-template" id="templateGeneral">
@@ -63,6 +64,10 @@
 				and `description` would have the same value.
 				Therefore, using `attachments` (and `templateAttachment`) here
 				may not be a good idea.
+				
+				For different situation of multi-attachment posts, see
+				299951923544433_408517786021179 (with `status_type` as "shared_story", having `child_attachments` and `attachments.data[0].media`)
+				606956099400421_916078315154863 (with `status_type` as "added_photos", without `child_attachments` and `attachments.data[0].media`)
 			-->
 			<section ng-if="node.child_attachments" class="attachments">
 				<h4><a href="{{node.link}}">{{node.child_attachments[0].name}}</a></h4>
@@ -110,16 +115,17 @@
 	</script>
 
 	<script type="text/ng-template" id="templateComment">
-		<a href="{{ret.createLink(node.from.id)}}">{{node.from.name}}</a>
 		<ul class="metadata" ng-include="'templateMetadata'"></ul>
+		<div class="author"><a href="{{ret.createLink(node.from.id)}}">{{node.from.name}}</a></div>
 		<div class="message" ng-if="node.message">{{node.message}}</div>
 
-		<section ng-repeat="atta in [node.attachment] track by $index"
+		<section ng-if="node.attachment" ng-repeat="atta in [node.attachment] track by $index"
 			ng-include="'templateAttachment'" class="table attachment"
 		></section>
 		<div class="cc" ng-include="'templateComment'"
 			ng-repeat="node in (node.comments |orderBy: 'created_time') track by node._id"
 		></div>
+		<div style="clear: both;"></div>
 	</script>
 
 	<script type="text/ng-template" id="templateAttachment">

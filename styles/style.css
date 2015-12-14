@@ -60,6 +60,12 @@ img {
 	padding: 0.2em;
 	border: 1px solid #ccc;
 }
+a[href] {
+	text-decoration: none;
+}
+a[href]:hover {
+	text-decoration: underline;
+}
 
 /**
  * Main parts
@@ -246,6 +252,10 @@ article nav {
 }
 .comment:nth-child(odd) .cc:nth-child(odd) {
 	background-color: #ccc;
+}
+.author {
+	font-weight: bold;
+	margin-bottom: .2em;
 }
 
 /**
