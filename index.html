@@ -141,12 +141,12 @@
 	</script>
 
 	<script type="text/ng-template" id="templatePhoto">
-		<div class="table" style="width: 100%;">
+		<ul class="metadata" ng-include="'templateMetadata'"></ul>
+		<div class="table">
 			<a class="tableCell"
 				href="data/photos/album_{{node.album.id}}/{{node._id}}.jpg"
 			><img ng-src="{{node.picture}}"></a>
 			<p class="tableCell description">{{node.name}}</p>
-			<div class="tableCell"><ul class="metadata" ng-include="'templateMetadata'"></ul></div>
 		</div>
 		<nav>
 			<ul>
