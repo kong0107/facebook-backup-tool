@@ -237,7 +237,8 @@ model.request = function(qs) {
 		model.message = r.data.message;
 		model.stackCount = r.data.stackCount;
 		if(r.data.status == "success") {
-			console.log(r.data.stack);
+			//console.log(r.data.stack);
+			console.log("There is/are " + r.data.stack.length + " element(s) in the stack.");
 			if(model.timerId)
 				model.timerId = setTimeout(model.request, model.interval * 1000);
 		}
@@ -283,9 +284,8 @@ model.clearStack = function() {
  * Download JSON files.
  */
 model.download = function() {
-	window.open("dbExport.php?nodeName=" + model.nodeType + "_" + model.nodeId);
+	window.open("export.php?nodeName=" + model.nodeType + "_" + model.nodeId);
 }
-
 
 return model;
 //--------
@@ -395,7 +395,7 @@ return model;
 		<button ng-click="model.stop()" ng-disabled="!model.timerId">Stop</button>
 		<p>Last execute: <time ng-bind="model.lastExecute"></time></p>
 		<div ng-show="model.status=='finished'">
-			<button ng-click="model.download()">Download JSON files</button>
+			<button ng-click="model.download()">Download the package</button>
 			<button ng-click="model.status='setting'">Crawl something else</button>
 		</div>
 		<div class="pre" ng-bind="model.message"></div>

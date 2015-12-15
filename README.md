@@ -14,11 +14,11 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 
 # Usage
 1. Install and start web server, PHP, and MongoDB server locally.
-2. Create your own App at [Facebook Developer](https://developers.facebook.com/).
+2. Create your own App on [Facebook Developer](https://developers.facebook.com/).
 3. Edit `config.sample.php` and save as `config.inc.php`; edit `js/fbsdk-config.js`.
-4. Browse `index.php`, select what to crawl, submit the form, and wait. Download the JSON files.
-5. Modify JavaScript in `index.html` to the id and type of what you crawled.
-6. Browse `index.html` through web server to see the results.
+4. Browse `index.php`, select what to crawl, submit the form, and wait.
+5. Download the ZIP file and extract it.
+6. Browse `index.html`.
 
 # Disclaimer
 I don't guarantee anything.
@@ -30,7 +30,6 @@ With post/photo data of the target node and their comments downloaded, you can:
 2. Check how often a user interacts with you. Listing all frequencies of all users is also possible.
 
 # Directory Structure
-* `templates`: HTML templates for AngularJS.
 * `metadata`: JSON files about structure of Facebook Graph API nodes.
 * `js`:
   * `fbsdk-extend.js`: functions based on [Facebook SDK for JavaScript](https://developers.facebook.com/docs/javascript).
@@ -57,3 +56,4 @@ With post/photo data of the target node and their comments downloaded, you can:
   * If using MongoDB, note that positional `$` operator does NOT support nested array. See [MongoDB Manual](https://docs.mongodb.org/manual/reference/operator/update/positional/).
 * Where to save media files?
 * Which fields to request? Some fields are shown in [official introspection](https://developers.facebook.com/docs/graph-api/using-graph-api#introspection) but requesting them may trigger error. Furthermore, do you want to save all returned fields or forget about some after process? (For example, as this is used for backup usage, it's a contradiction to save the URL of a media since we've already downloaded the file in case that the file is delete from Facebook.)
+* Output HTML files browsable without web server (by using protocol `file://`). This means you cannot use AJAX. But AngularJS's `<script type="text/ng-template" />` may be a good solution (though it does not support `src` attribute).

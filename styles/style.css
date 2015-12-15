@@ -19,6 +19,7 @@
 .dlWrapper > dl > dt,
 .dlWrapper > dl > dd {
 	display: table-cell;
+	vertical-align: top;
 }
 .rawdata {
 	white-space: pre-wrap;
@@ -53,6 +54,17 @@ dt {
 }
 dd {
 	padding: 0.2em;
+}
+img {
+	margin: 0.2em;
+	padding: 0.2em;
+	border: 1px solid #ccc;
+}
+a[href] {
+	text-decoration: none;
+}
+a[href]:hover {
+	text-decoration: underline;
 }
 
 /**
@@ -90,8 +102,11 @@ h1 {
 	display: inline-block;
 	margin: .3em;
 }
-h2,h3,h4,h5,h6 {
-	margin: .5em 0 .25em 0;
+h2 {
+	margin: 0.3em 0;
+}
+h3,h4,h5,h6 {
+	margin: .2em 0;
 	white-space: pre;
 }
 .about {
@@ -127,17 +142,35 @@ nav li:hover {
 article {
 	border-top: 1px solid #888;
 	margin-top: 1em;
-	padding-top: .5em;
+	padding: .5em;
 	line-height: 125%;
 	clear: both;
 }
+article header {
+	display: inline-table;
+}
+article header > * {
+	display: table-cell;
+	vertical-align: top;
+}
+article header img {
+	max-width: 100px;
+	max-height: 100px;
+}
 .metadata {
 	float: right;
-	clear: both;
 	font-size: smaller;
-	padding: .25em;
-	margin: .25em;
+	padding: 0 0 .3em .3em;
+	margin: 0 0 .3em .3em;
+	opacity: 0.5;
 }
+.metadata:hover {
+	opacity: 1;
+}
+article nav {
+	font-size: smaller;
+}
+
 .message {
 	white-space: pre-wrap;
 }
@@ -180,6 +213,7 @@ article {
  */
 .story {
 	font-style: italic;
+	display: inline-block;
 }
 
 /**
@@ -219,46 +253,22 @@ article {
 .comment:nth-child(odd) .cc:nth-child(odd) {
 	background-color: #ccc;
 }
+.author {
+	font-weight: bold;
+	margin-bottom: .2em;
+}
 
 /**
- * Attachment (of comment only?)
+ * Attachment
  */
 .attachment {
-	margin: .5em 0 0 1em;
-	padding: 0 .5em;
+	/*margin: .5em 0 0 1em;
+	padding: 0 .5em;*/
 }
-.attachment_image {
-	width: 64px;
+.attachment img {
+	max-width: 200px;
+	max-height: 150px;
 }
-.attachment_title {
-	font-weight: bold;
-}
-.attachment_description {
-	white-space: pre-wrap;
+.attachment .description {
 	font-size: smaller;
-	margin: 0;
-}
-
-/**
- * Photo
- */
-.photoContainer {
-	clear: both;
-	margin: 1em;
-	border-left: 2px solid #888;
-	padding: 1em;
-}
-.photo {
-	display: table-cell;
-}
-.photo_side {
-	display: table-cell;
-	vertical-align: top;
-	padding: 0 1em;
-}
-
-/**
- * Page
- */
-.pageContainer {
 }

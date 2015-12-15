@@ -86,11 +86,11 @@
 					&& $doc['comment_count'] !== 0
 				) push("/{$doc['id']}/comments", "comment", $newAnc);
 
-				/// Add photos.
+				/// Add photos for albums.
 				if($type == 'album')
 					push("/{$doc['id']}/photos", "photo", $newAnc);
 
-				/// What about attachments?
+				/// What about photo in comment?
 			}
 		}
 		else {
