@@ -3,8 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<title ng-bind="ret.info.name">Backup Facebook</title>
-	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+	<!--FBBKTemplateStart-->
 	<script>
 		var node = {};
 		var type = "page";
@@ -15,13 +14,16 @@
 	<script src="data/js/page_359985940825230_photos.js"></script>
 	<script src="data/js/page_359985940825230_posts.js"></script>
 	<script src="data/js/page_359985940825230_comments.js"></script>
+	<!--FBBKTemplateEnd-->
+	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script src="js/controller.js"></script>
 	<link rel="stylesheet" href="styles/style.css">
 	<base target="_blank">
 
 	<script type="text/ng-template" id="templateMetadata">
 		<li title="ID">{{node._id}}</li>
-		<li ng-repeat="time in [node.created_time, node.backdated_time]"
+		<li ng-repeat="time in [node.created_time, node.backdated_time] track by $index"
 			ng-if="time" ng-include="'templateTime'"
 		></li>
 		<li ng-if="node.from && isNaN(node.comment_count)">Author: <a href="{{ret.createLink(node.from.id)}}">{{node.from.name}}</a></li>
@@ -386,11 +388,14 @@
 						ng-repeat="node in (node.comments |orderBy: 'created_time') track by node._id"
 					></section>
 				</details>
-				<details class="rawdata"><summary>JSON</summary>{{node|json}}</details>
+				<!--details class="rawdata"><summary>JSON</summary>{{node|json}}</details-->
 			</article>
 		</section>
-		<details class="rawdata" style="padding-bottom: 3em;"><summary>Debug</summary>{{ret|json}}</details>
-		<footer>This is the footer of the page.</footer>
+		<!--details class="rawdata" style="padding-bottom: 3em;"><summary>Debug</summary>{{ret|json}}</details-->
+		<footer>
+			Backed up by <a href="https://github.com/kong0107/facebook-backup">this tool</a>
+			at <time><!--EXPORT_TIME--></time>.
+		</footer>
 	</div>
 </body>
 </html>

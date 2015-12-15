@@ -6,6 +6,8 @@ angular.module("myApp", [])
 	});
 })
 .controller("main", function($scope, $window, $filter) {
+	if($window.debug_startTime)
+		console.log("Controller start after " + (new Date - $window.debug_startTime) + " milliseconds.");
 	$scope.ret = function() {
 		/// Initialization
 		var node = $window.node;
@@ -15,7 +17,7 @@ angular.module("myApp", [])
 		}
 		var id = node.info._id;
 		var type = $window.type;
-		
+
 		var ret = {
 			id: id,
 			type: type,
@@ -67,7 +69,7 @@ angular.module("myApp", [])
 				}
 			}
 		};
-		
+
 		/**
 		 * Load info and edges.
 		 */
@@ -75,7 +77,7 @@ angular.module("myApp", [])
 		for(var tab in node) {
 			ret.tabs.push(tab);
 			ret[tab] = node[tab];
-			
+
 			/**
 			 * Get distinct months of `created_time`.
 			 */
@@ -120,7 +122,7 @@ angular.module("myApp", [])
 			else delete ret.comments;
 			console.log("Comments arranged.");
 		}
-		
+
 		/**
 		 * Put photos to the albums they should be in.
 		 *
@@ -155,6 +157,9 @@ angular.module("myApp", [])
 				id = id.replace("_", "/" + type + "/");
 			return "https://www.facebook.com/" + id;
 		};
+
+		if($window.debug_startTime)
+			console.log("Model ready after " + (new Date - $window.debug_startTime) + " milliseconds.");
 
 		return ret;
 	}();

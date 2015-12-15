@@ -14,10 +14,10 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 
 # Usage
 1. Install and start web server, PHP, and MongoDB server locally.
-2. Create your own App at [Facebook Developer](https://developers.facebook.com/).
+2. Create your own App on [Facebook Developer](https://developers.facebook.com/).
 3. Edit `config.sample.php` and save as `config.inc.php`; edit `js/fbsdk-config.js`.
-4. Browse `index.php`, select what to crawl, submit the form, and wait. Download the JSON files.
-5. Modify JavaScript in `index.html` to the id and type of what you crawled.
+4. Browse `index.php`, select what to crawl, submit the form, and wait.
+5. Download the ZIP file and extract it.
 6. Browse `index.html`.
 
 # Disclaimer
