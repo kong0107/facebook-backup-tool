@@ -118,15 +118,15 @@
 			ng-class="(node._id==ret.displayingPhoto)?'displayingPhoto':'inlineBlock'"
 		>
 			<img ng-src="{{node.picture}}"
-				title="{{node.name}}"
-				ng-click="ret.displayingPhoto=node._id"
+				title="{{node.name |limitTo :32}} ..."
+				ng-click="ret.displayingPhoto=(ret.displayingPhoto==node._id)?0:node._id;"
 				style="cursor: pointer;"
 			>
 			<div ng-show="node._id==ret.displayingPhoto">
 				<ul class="metadata" ng-include="'templateMetadata'"></ul>
-				<img ng-src="data/photos/album_{{node.album.id}}/{{node._id}}.jpg"
+				<!--img ng-src="data/photos/album_{{node.album.id}}/{{node._id}}.jpg"
 					style="max-width: 100%;"
-				>
+				-->
 				<p class="description">{{node.name}}</p>
 				<ul class="tags">
 					<li ng-repeat="tag in node.name_tags track by tag.id">
@@ -363,7 +363,8 @@
 				<li ng-click="ret.tab='info'" ng-class="(ret.tab=='info')?'focus':''"
 				>Info</li>
 				<li ng-repeat="t in ret.tabs" ng-if="ret[t].length"
-					ng-click="ret.tab=t" ng-class="(ret.tab==t)?'focus':''"
+					ng-click="ret.tab = t; ret.skip = 0;"
+					ng-class="(ret.tab==t)?'focus':''"
 				>{{t|capitalize}} <span class="count">({{ret[t].length}})</span></li>
 				<li><a href="{{ret.info.link||ret.createLink(ret.info.id)}}">Facebook</a></li>
 			</ul>
@@ -375,7 +376,7 @@
 		</article>
 		<section ng-repeat="t in ret.tabs" ng-if="t!='info'" ng-show="ret.tab==t" id="{{t}}">
 			<h2>{{t|capitalize}}</h2>
-			<div ng-if="t=='feed'||t=='posts'||t=='comments'||t=='likes'">
+			<div ng-if="t=='feed'||t=='posts'||t=='comments'||t=='pages'">
 				<label>
 					Search:
 					<input ng-model="ret.search[t]"
