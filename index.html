@@ -27,7 +27,7 @@
 		<li ng-repeat="time in [node.created_time, node.backdated_time] track by $index"
 			ng-if="time" ng-include="'templateTime'"
 		></li>
-		<li ng-if="node.from && isNaN(node.comment_count)">Author: <a href="{{ret.createLink(node.from.id)}}">{{node.from.name}}</a></li>
+		<li ng-if="node.from && !(node.comment_count>=0)">Author: <a href="{{ret.createLink(node.from.id)}}">{{node.from.name}}</a></li>
 		<li ng-if="node.like_count">{{node.like_count|number}} likes</li>
 		<li ng-if="node.privacy">Viewable to {{node.privacy.value || node.privacy}}</li>
 		<li ng-if="node.type">Type: {{node.type}}</li>
@@ -50,7 +50,7 @@
 		</nav>
 		<address ng-if="node.place" ng-include="'templatePlace'" onload="place=node.place"></address>
 		<section class="description">{{node.description}}</section>
-		
+
 		<!-- Show fields without knowing its meaning. -->
 		<section ng-repeat="field in ret.displaySet[fbbk_type].block"
 			ng-if="node[field]" class="description"
@@ -94,12 +94,61 @@
 				<dd style="white-space: pre-wrap;">{{node[field]}}</dd>
 			</dl>
 		</div>
+	</script>
 
-		<!-- Photos for album -->
-		<details ng-if="node.photos.length">
-			<summary>{{node.photos.length |number}} photos</summary>
-			<article ng-repeat="node in node.photos track by node._id" ng-include="'templatePhoto'"></article>
-		</details>
+	<script type="text/ng-template" id="templateAlbum">
+		<header>
+			<div>
+				<h3>{{node.name}}</h3>
+				{{node.count |number}} photos
+				<p class="description">{{node.description}}</p>
+			</div>
+		</header>
+		<ul class="metadata" ng-include="'templateMetadata'"></ul>
+		<nav>
+			<ul>
+				<li ng-if="node.link" title="Original webpage of this on facebook"><a href="{{node.link}}">Facebook</a></li>
+				<li ng-if="node.event">Event: <a href="{{ret.createLink(node.event.id)}}">{{node.event.name}}</a></li>
+				<li><address ng-if="node.place" ng-include="'templatePlace'" onload="place=node.place"></address></li>
+			</ul>
+		</nav>
+
+		<div ng-repeat="node in node.photos track by node._id"
+			ng-class="(node._id==ret.displayingPhoto)?'displayingPhoto':'inlineBlock'"
+		>
+			<img ng-src="{{node.picture}}"
+				title="{{node.name}}"
+				ng-click="ret.displayingPhoto=node._id"
+				style="cursor: pointer;"
+			>
+			<div ng-show="node._id==ret.displayingPhoto">
+				<ul class="metadata" ng-include="'templateMetadata'"></ul>
+				<img ng-src="data/photos/album_{{node.album.id}}/{{node._id}}.jpg"
+					style="max-width: 100%;"
+				>
+				<p class="description">{{node.name}}</p>
+				<ul class="tags">
+					<li ng-repeat="tag in node.name_tags track by tag.id">
+						<a href="{{ret.createLink(tag.id)}}">{{tag.name}}</a>
+					</li>
+					<li ng-if="node.place"><address ng-include="'templatePlace'" onload="place=node.place"></address></li>
+				</ul>
+				<nav>
+					<ul>
+						<li><a href="{{node.link}}">Facebook</a></li>
+						<li><a title="{{node.album.name}}" href="{{ret.createLink(node.album.id)}}">Album</a></li>
+					</ul>
+				</nav>
+				<details ng-if="node.comments.length">
+					<summary title="newest: {{node.updated_time| date:'yyyy-MM-dd HH:mm'}}">
+						{{node.comments.length|number}} comment(s)
+					</summary>
+					<section class="comment" ng-include="'templateComment'"
+						ng-repeat="node in (node.comments |orderBy: 'created_time') track by node._id"
+					></section>
+				</details>
+			</div>
+		</div>
 	</script>
 
 	<script type="text/ng-template" id="templatePost">
@@ -111,7 +160,7 @@
 				and `description` would have the same value.
 				Therefore, using `attachments` (and `templateAttachment`) here
 				may not be a good idea.
-				
+
 				For different situation of multi-attachment posts, see
 				299951923544433_408517786021179 (with `status_type` as "shared_story", having `child_attachments` and `attachments.data[0].media`)
 				606956099400421_916078315154863 (with `status_type` as "added_photos", without `child_attachments` and `attachments.data[0].media`)
@@ -120,9 +169,6 @@
 				<h4><a href="{{node.link}}">{{node.child_attachments[0].name}}</a></h4>
 				<p class="description">{{node.child_attachments[0].description}}</p>
 				<img ng-repeat="ca in node.child_attachments track by $index" ng-src="{{ca.picture}}">
-				<!--h4><a href="{{node.link}}">{{node.attachments.data[0].subattachments.data[0].title}}</a></h4>
-				<p class="description">{{node.attachments.data[0].subattachments.data[0].description}}</p>
-				<img ng-repeat="atta in node.attachments.data[0].subattachments.data track by $index" ng-src="attr.media.src"-->
 			</section>
 			<section ng-if="!node.child_attachments" class="table attachment">
 				<a class="tableCell" href="{{node.link}}"
@@ -134,7 +180,7 @@
 				</div>
 			</section>
 		</div>
-		
+
 		<nav>
 			<ul>
 				<li title="Original webpage of this on facebook"><a href="{{ret.createLink(node._id)}}">Facebook</a></li>
@@ -208,72 +254,47 @@
 	</script>
 
 	<script type="text/ng-template" id="templateEvent">
-		<h3>{{node.name}}</h3>
-		<div class="metadata">
-			<ul>
-				<li>
-					<a class="time_container" name="{{node._id}}" href="{{ret.createLink(node._id)}}">
-						<time datetime="{{node.updated_time}}"
-							title="Last update time" class="updated_time"
-						>{{node.updated_time | date: 'yyyy-MM-dd HH:mm:ss'}}
-						</time>
-					</a>
-				</li>
-				<li ng-if="node.category">Category: {{node.type}}</li>
-				<li ng-if="node.type">Type: {{node.type}}</li>
-				<li ng-if="node.timezone">Timezone: {{node.timezone}}</li>
-				<!--li title="Statistics">
-					<dl>
-						<dt>Attending</dt><dd>{{node.attending_count}}</dd>
-						<dt>Declined</dt><dd>{{node.declined_count}}</dd>
-						<dt>Maybe</dt><dd>{{node.maybe_count}}</dd>
-						<dt>No replay</dt><dd>{{node.noreply_count}}</dd>
-						<dt>Interested in</dt><dd>{{node.interested_count}}</dd>
-					</dl>
-				</li-->
-			</ul>
-		</div>
+		<h3><a href="https://www.facebook.com/events/{{node._id}}">{{node.name}}</a></h3>
+		<ul class="metadata" ng-include="'templateMetadata'"></ul>
 		<nav>
 			<ul>
 				<li ng-if="node.ticket_uri">
 					<a href="{{node.ticket_uri}}">Buy a ticket</a>
 				</li>
-				<li>Owner: <a href="{{ret.createLink(node.owner.id)}}">{{node.owner.name}}</a></li>
-				<li ng-if="node.parent_group">
-					Parent:
-					<a href="{{ret.createLink(node.parent_group.id)}}"
-					>{{node.parent_group.name}}</a>
-				</li>
 			</ul>
 		</nav>
-		<dl>
-			<dt>From</dt>
-			<dd>
-				<time datetime="{{node.start_time}}">
-					{{node.start_time|date:'yyyy-MM-dd (EEE) HH:mm'}}
-				</time>
-			</dd>
-			<dt ng-if="node.end_time">To</dt>
-			<dd ng-if="node.end_time">
-				<time datetime="{{node.end_time}}">
-					{{node.end_time|date:'yyyy-MM-dd (EEE) HH:mm'}}
-				</time>
-			</dd>
-			<dt>Place</dt>
-			<dd><address ng-include="'templatePlace'" onload="place=node.place"></address></dd>
-		</dl>
-		<details ng-if="node.description" class="description"
-		><summary>Description</summary>{{node.description}}
-		</details>
-		<div>
-			<h4>Statistics</h4>
-			<dl>
-				<dt>Attending</dt><dd>{{node.attending_count}}</dd>
-				<dt>Declined</dt><dd>{{node.declined_count}}</dd>
-				<dt>Maybe</dt><dd>{{node.maybe_count}}</dd>
-				<dt>No replay</dt><dd>{{node.noreply_count}}</dd>
-				<dt>Interested in</dt><dd>{{node.interested_count}}</dd>
+		<div class="dlWrapper">
+			<dl ng-if="node.place">
+				<dt>Place</dt>
+				<dd><address ng-include="'templatePlace'" onload="place=node.place"></address></dd>
 			</dl>
+			<dl ng-if="node.start_time">
+				<dt>From</dt>
+				<dd ng-repeat="time in [node.start_time]" ng-include="'templateTime'"></dd>
+			</dl>
+			<dl ng-if="node.end_time">
+				<dt>To</dt>
+				<dd ng-repeat="time in [node.end_time]" ng-include="'templateTime'"></dd>
+			</dl>
+			<dl ng-if="node.parent_group">
+				<dt>Parent</dt>
+				<dd><a href="{{ret.createLink(node.parent_group.id)}}">{{node.parent_group.name}}</a></dd>
+			</dl>
+			<dl ng-if="node.owner">
+				<dt>Owner</dt>
+				<dd><a href="{{ret.createLink(node.owner.id)}}">{{node.owner.name}}</a></dd>
+			</dl>
+		</div>
+		<div class="description" 
+			style="max-height: 90%; overflow: auto; font-size: smaller; background-color: #ddd;"
+		>{{node.description}}</div>
+		<div class="dlWrapper">
+			<header><h4>Statistics</h4></header>
+			<dl><dt>Attending</dt><dd>{{node.attending_count}}</dd></dl>
+			<dl><dt>Declined</dt><dd>{{node.declined_count}}</dd></dl>
+			<dl><dt>Maybe</dt><dd>{{node.maybe_count}}</dd></dl>
+			<dl><dt>No replay</dt><dd>{{node.noreply_count}}</dd></dl>
+			<dl><dt>Interested in</dt><dd>{{node.interested_count}}</dd></dl>
 		</div>
 	</script>
 
@@ -347,7 +368,6 @@
 		</nav>
 		<article id="info" ng-show="ret.tab=='info'">
 			<h2>Info</h2>
-			<!--div ng-repeat="node in [ret.info]" ng-include="'template'+(ret.type|capitalize)"></div-->
 			<div ng-repeat="node in [ret.info]" ng-include="'templateGeneral'" onload="fbbk_type=ret.type"></div>
 			<details class="rawdata"><summary>JSON</summary>{{ret.info|json}}</details>
 		</article>
@@ -376,7 +396,8 @@
 			<article ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]})) track by node._id">
 				<div ng-include="'template'+({
 					posts: 'Post',
-					feed: 'Post',
+					albums: 'Album',
+					events: 'Event',
 					photos:'Photo'
 				}[t]||'General')"></div>
 				<details ng-if="node.comments.length">

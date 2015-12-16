@@ -238,7 +238,8 @@ model.request = function(qs) {
 		model.stackCount = r.data.stackCount;
 		if(r.data.status == "success") {
 			//console.log(r.data.stack);
-			console.log("There is/are " + r.data.stack.length + " element(s) in the stack.");
+			if(r.data.stack)
+				console.log("There is/are " + r.data.stack.length + " element(s) in the stack.");
 			if(model.timerId)
 				model.timerId = setTimeout(model.request, model.interval * 1000);
 		}

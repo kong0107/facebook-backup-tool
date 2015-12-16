@@ -25,7 +25,6 @@ angular.module("myApp", [])
 			months: {},
 			month: {},
 			search: {},
-			photosInAlbum: {},
 			showDetails: {},
 			displaySet: {
 				user: {
