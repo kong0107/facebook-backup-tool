@@ -7,14 +7,15 @@
 	<script>
 		var node = {};
 		var type = "page";
-		var tab = "info";
+		var tab = "posts";
 		debug_startTime = new Date;
 	</script>
-	<script src="data/js/page_359985940825230_info.js"></script>
-	<script src="data/js/page_359985940825230_albums.js"></script>
-	<script src="data/js/page_359985940825230_photos.js"></script>
-	<script src="data/js/page_359985940825230_posts.js"></script>
-	<script src="data/js/page_359985940825230_comments.js"></script>
+	<script src="data/js/page_299951923544433_info.js"></script>
+	<script src="data/js/page_299951923544433_events.js"></script>
+	<script src="data/js/page_299951923544433_albums.js"></script>
+	<script src="data/js/page_299951923544433_photos.js"></script>
+	<script src="data/js/page_299951923544433_posts.js"></script>
+	<script src="data/js/page_299951923544433_comments.js"></script>
 	<!--FBBKTemplateEnd-->
 	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
@@ -232,17 +233,18 @@
 	</script>
 
 	<script type="text/ng-template" id="templatePhoto">
+		<!-- only used for tagged photos -->
 		<ul class="metadata" ng-include="'templateMetadata'"></ul>
 		<div class="table">
 			<a class="tableCell"
-				href="data/photos/album_{{node.album.id}}/{{node._id}}.jpg"
+				href="data/photos/{{ret.type}}_{{ret.id}}/{{node._id}}.jpg"
 			><img ng-src="{{node.picture}}"></a>
 			<p class="tableCell description">{{node.name}}</p>
 		</div>
 		<nav>
 			<ul>
 				<li><a href="{{node.link}}">Facebook</a></li>
-				<li><a title="{{node.album.name}}" href="{{ret.createLink(node.album.id)}}">Album</a></li>
+				<li ng-if="node.album"><a title="{{node.album.name}}" href="{{ret.createLink(node.album.id)}}">Album</a></li>
 			</ul>
 		</nav>
 		<ul class="tags">
@@ -285,7 +287,7 @@
 				<dd><a href="{{ret.createLink(node.owner.id)}}">{{node.owner.name}}</a></dd>
 			</dl>
 		</div>
-		<div class="description" 
+		<div class="description"
 			style="max-height: 90%; overflow: auto; font-size: smaller; background-color: #ddd;"
 		>{{node.description}}</div>
 		<div class="dlWrapper">
@@ -378,22 +380,32 @@
 					Search:
 					<input ng-model="ret.search[t]"
 						ng-model-options="{debounce: 250}" placeholder="search text"
+						ng-change="ret.skip = 0"
 					>
 				</label>
-				<p ng-show="ret.search[t]">matched {{filtered.length}} {{t}}</p>
+				<p>{{filtered.length}} {{t}}</p>
 			</div>
 			<div ng-if="t=='feed'||t=='posts'||t=='comments'">
 				<nav ng-hide="ret.search[t]">
 					<ul>
 						<li ng-repeat="m in ret.months[t]"
-							ng-click="ret.month[t] = m"
+							ng-click="ret.month[t] = m; ret.skip = 0;"
 							ng-class="(ret.month[t] == m)?'focus':''"
 						>{{m}}</li>
 					</ul>
 				</nav>
 			</div>
-			{{filtered.length}} {{t}}
-			<article ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]})) track by node._id">
+			<nav ng-show="filtered.length > ret.itemsPerPage">
+				Page:
+				<ul style="display: inline-block;">
+					<li ng-repeat="d in filtered track by $index"
+						ng-if="!($index%ret.itemsPerPage)" ng-click="ret.skip=$index"
+						ng-class="(ret.skip==$index)?'focus':''"
+					>{{$index/ret.itemsPerPage+1}}</li>
+				</ul>
+				<span style="font-size: smaller; color: #888;">({{ret.itemsPerPage}} items per page)</span>
+			</nav>
+			<article ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))|limitTo :ret.itemsPerPage :ret.skip track by node._id">
 				<div ng-include="'template'+({
 					posts: 'Post',
 					albums: 'Album',
