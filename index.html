@@ -124,7 +124,7 @@
 			>
 			<div ng-show="node._id==ret.displayingPhoto">
 				<ul class="metadata" ng-include="'templateMetadata'"></ul>
-				<img ng-src="data/photos/album_{{node.album.id}}/{{node._id}}.jpg"
+				<img ng-src="{{ret.getSourcePhoto(node)}}"
 					style="max-width: 100%;"
 				>
 				<p class="description">{{node.name}}</p>
@@ -237,7 +237,7 @@
 		<ul class="metadata" ng-include="'templateMetadata'"></ul>
 		<div class="table">
 			<a class="tableCell"
-				href="data/photos/{{ret.type}}_{{ret.id}}/{{node._id}}.jpg"
+				href="{{ret.getSourcePhoto(node, ret.type + '_' + ret.id)}}"
 			><img ng-src="{{node.picture}}"></a>
 			<p class="tableCell description">{{node.name}}</p>
 		</div>
