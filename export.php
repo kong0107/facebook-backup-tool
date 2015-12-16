@@ -8,7 +8,6 @@
 	$nodeInfo = $db->selectCollection($type . 's')->findOne(array('_id' => $id));
 	if(!$nodeInfo) exit('no such node');
 
-
 	/**
 	 * Open a Zip file.
 	 */
@@ -29,23 +28,29 @@
 	 *
 	 * Load every collection about the requested node.
 	 * `$jss` is used later for inserting `SCRIPT` tags in `index.html`.
+	 * `$albums` is used later for adding photos.
 	 */
-	$dir = 'data/js';
-	$dest = "{$dir}/{$nodeName}_info.js";
-	$zip->addFromString($dest,
-		'node.info=' . json_encode($nodeInfo, JSON_UNESCAPED_UNICODE) . ";\n"
-	);
+	$dest = "data/js/{$nodeName}_info.js";
+	$json = json_encode($nodeInfo, JSON_UNESCAPED_UNICODE);
+	$zip->addFromString("data/json/{$nodeName}_info.json", $json);
+	$zip->addFromString($dest, "node.info=$json;\n");
 	$jss = [$dest];
+	$albums = [$nodeName];
 	foreach($db->getCollectionNames() as $colName) {
 		if(strpos($colName, $nodeName) !== 0) continue;
 		$col = $db->selectCollection($colName);
 		$dest = "data/js/$colName.js";
 		$data = iterator_to_array($col->find(), false);
 		list( , , $edge) = explode('_', $colName);
-		$zip->addFromString($dest,
-			"node.$edge=" . json_encode($data, JSON_UNESCAPED_UNICODE) . ";\n"
-		);
+		$json = json_encode($data, JSON_UNESCAPED_UNICODE);
+		$zip->addFromString("data/json/$colName.json", $json);
+		$zip->addFromString($dest, "node.$edge=$json;\n");
 		$jss[] = $dest;
+
+		if($edge == 'albums') {
+			foreach($data as $doc)
+				$albums[] = 'album_' . $doc['_id'];
+		}
 	}
 
 	/**
@@ -63,8 +68,19 @@
 	$html = str_replace('<!--EXPORT_TIME-->', date(DATE_ISO8601), $html);
 	$zip->addFromString("$nodeName.html", $html);
 
-	$zip->close();
+	/**
+	 * Add photos.
+	 */
+	foreach($albums as $album) {
+		$dir = "data/photos/$album";
+		if(!is_dir($dir)) continue;
+		foreach(scandir($dir) as $filename) {
+			if(in_array($filename, array('.', '..'))) continue;
+			$zip->addFile("$dir/$filename");
+		}
+	}
 
+	$zip->close();
 
 	header('Content-Type: application/zip');
 	header("Content-disposition: attachment; filename=$nodeName.zip");

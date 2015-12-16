@@ -124,9 +124,9 @@
 			>
 			<div ng-show="node._id==ret.displayingPhoto">
 				<ul class="metadata" ng-include="'templateMetadata'"></ul>
-				<!--img ng-src="data/photos/album_{{node.album.id}}/{{node._id}}.jpg"
+				<img ng-src="data/photos/album_{{node.album.id}}/{{node._id}}.jpg"
 					style="max-width: 100%;"
-				-->
+				>
 				<p class="description">{{node.name}}</p>
 				<ul class="tags">
 					<li ng-repeat="tag in node.name_tags track by tag.id">

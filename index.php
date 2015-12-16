@@ -354,13 +354,14 @@ return model;
 			<header style="display: table;">
 				<img ng-if="model.nodeInfo.picture"
 					ng-src="{{model.nodeInfo.picture.data.url}}"
-					style="display: table-cell; padding: 0.1em; margin: 0.1em;"
+					style="display: table-cell; padding: 0.2em; margin: 0.2em;"
 				>
 				<div style="display: table-cell; vertical-align: top;">
 					<h3><a target="_blank" href="{{model.nodeInfo.link}}" style="text-decoration: none;">{{model.nodeInfo.name}}</a></h3>
 					<span>{{model.nodeInfo.category}}</span>
 				</div>
 			</header>
+			ID: {{model.nodeInfo.id}}
 			<p ng-if="model.nodeInfo.likes">{{model.nodeInfo.likes|number}} likes</p>
 			<div style="white-space: pre-wrap; max-height: 8em; overflow: auto; border-top: 1px dashed #ccc;">{{(
 				model.nodeInfo.description
