@@ -203,17 +203,20 @@ article nav {
 	border-left: 1px solid #ccc;
 }
 
-.time_container {
-	font-size: smaller;
-	color: #888;
-}
-
 /**
  * Posts
  */
 .story {
 	font-style: italic;
 	display: inline-block;
+}
+
+/**
+ * Albums and photos
+ */
+.displayingPhoto {
+	background-color: #ccc;
+	padding: 1em;
 }
 
 /**

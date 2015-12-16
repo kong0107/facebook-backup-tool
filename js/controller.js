@@ -21,11 +21,11 @@ angular.module("myApp", [])
 		var ret = {
 			id: id,
 			type: type,
+			itemsPerPage: 10, ///< used for pagination
 			tab: $window.tab || "info",
 			months: {},
 			month: {},
 			search: {},
-			photosInAlbum: {},
 			showDetails: {},
 			displaySet: {
 				user: {
