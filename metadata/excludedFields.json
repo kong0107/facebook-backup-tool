@@ -12,7 +12,9 @@
 
 		"context",
 		"favorite_athletes",
-		"favorite_teams"
+		"favorite_teams",
+		"installed",
+		"is_shared_login"
 	],
 	"page": [
 		"ad_campaign",

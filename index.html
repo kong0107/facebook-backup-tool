@@ -7,7 +7,8 @@
 	<script>
 		var node = {};
 		var type = "page";
-		var tab = "posts";
+		var tab = "info";
+		debug_startTime = new Date;
 	</script>
 	<script src="data/js/page_359985940825230_info.js"></script>
 	<script src="data/js/page_359985940825230_albums.js"></script>
@@ -49,6 +50,50 @@
 		</nav>
 		<address ng-if="node.place" ng-include="'templatePlace'" onload="place=node.place"></address>
 		<section class="description">{{node.description}}</section>
+		
+		<!-- Show fields without knowing its meaning. -->
+		<section ng-repeat="field in ret.displaySet[fbbk_type].block"
+			ng-if="node[field]" class="description"
+		><h4>{{field|capitalize}}</h4>{{node[field]}}</section>
+		<section ng-repeat="field in ret.displaySet[fbbk_type].pairs"
+			ng-if="node[field]" class="dlWrapper"
+		>
+			<h4>{{field|capitalize}}</h4>
+			<dl ng-repeat="(k,v) in node[field]">
+				<dt>{{k}}</dt><dd>{{v}}</dd>
+			</dl>
+		</section>
+		<div class="dlWrapper">
+			<dl ng-repeat="field in ret.displaySet[fbbk_type].inline" ng-if="node[field]">
+				<dt>{{field|capitalize}}</dt><dd class="description">{{node[field]}}</dd>
+			</dl>
+			<dl ng-repeat="field in ret.displaySet[fbbk_type].list" ng-if="node[field]">
+				<dt>{{field|capitalize}}</dt>
+				<dd><ul><li ng-repeat="ele in node[field]">{{ele}}</li></ul></dd>
+			</dl>
+			<dl ng-repeat="field in ret.displaySet[fbbk_type].table" ng-if="node[field]">
+				<dt>{{field|capitalize}}</dt>
+				<dd>
+					<div class="tableRow">
+						<div ng-repeat="(k,v) in node[field][0]" class="tableCell">{{k}}</div>
+					</div>
+					<div ng-repeat="ele in node[field] track by $index" class="tableRow">
+						<div ng-repeat="(k,v) in ele" class="tableCell description"
+							title="{{k}}"
+						>{{v}}</div>
+					</div>
+				</dd>
+			</dl>
+
+			<dl ng-if="node.category_list">
+				<dt>Sub-categories</dt>
+				<dd><ul><li ng-repeat="c in node.category_list track by $index">{{c.name}}</li></ul></dd>
+			</dl>
+			<dl ng-repeat="field in ret.displaySet[fbbk_type].unknown" ng-if="node[field]">
+				<dt>{{field}}</dt>
+				<dd style="white-space: pre-wrap;">{{node[field]}}</dd>
+			</dl>
+		</div>
 
 		<!-- Photos for album -->
 		<details ng-if="node.photos.length">
@@ -233,90 +278,38 @@
 	</script>
 
 	<script type="text/ng-template" id="templatePage">
-		<header style="display: inline-block; width: 40%;">
-			<a class="photo" href="{{node.link}}"><img ng-src="{{node.picture.data.url}}"></a>
-			<div class="photo_side">
+		<header>
+			<a href="{{node.link}}"><img ng-src="{{node.picture.data.url}}"></a>
+			<div>
 				<h3 class="photo_name"><a href="{{node.link}}">{{node.name}}</a></h3>
 				{{node.category}}
 			</div>
 		</header>
-		<details>
-			<summary ng-click="ret.showDetails[node._id]=!ret.showDetails[node._id]">Details</summary>
-			<nav>
-				<ul>
-					<li ng-if="node.cover"><a href="{{node.cover.source}}">Cover Photo</a></li>
-					<li ng-if="node.website"><a href="{{node.website}}">Website</a></li>
-					<li ng-if="node.featured_video">
-						<a href="{{ret.createLink(node.featured_video.id)}}"
-							title="{{node.featured_video.description}}"
-						>Featured Video</a>
-					</li>
-					<li ng-if="node.best_page">
-						<a title="The best available Page on Facebook for the concept represented by this Page."
-							href="{{ret.createLink(node.best_page.id)}}"
-						>{{node.best_page.name}}</a>
-					</li>
-				</ul>
-			</nav>
-			<p>{{node.likes|number}} people like this.</p>
-			<p ng-if="node.were_here_count">{{node.were_here_count|number}} people were here.</p>
-			<p>{{node.talking_about_count|number}} are talking about this.</p>
-			<p ng-if="node.founded">Founded at <time>{{node.founded}}</time></p>
-			<p ng-if="node.release_date">Released at <time>{{note.release_date}}</time></p>
-			<p ng-if="node.start_info.date" title="start_info">
-				{{node.start_info.type}}
-				at
-				<time>
-					<span class="year">{{node.start_info.date.year}}</span
-					><span class="month" ng-if="node.start_info.date.month">-{{node.start_info.date.month}}</span
-					><span class="day" ng-if="node.start_info.date.day">-{{node.start_info.date.day}}</span>
-				</time>
-			</p>
-			<section ng-repeat="field in ret.displaySet.page.block"
-				ng-if="node[field]" class="description"
-			><h4>{{field|capitalize}}</h4>{{node[field]}}</section>
-
-			<section ng-repeat="field in ret.displaySet.page.complicated"
-				ng-if="node[field]" class="dlWrapper"
-			>
-				<h4>{{field|capitalize}}</h4>
-				<dl ng-repeat="(k,v) in node[field]">
-					<dt>{{k}}</dt><dd>{{v}}</dd>
-				</dl>
-			</section>
-			<div class="dlWrapper">
-				<dl ng-repeat="field in ret.displaySet.page.inline" ng-if="node[field]">
-					<dt>{{field|capitalize}}</dt><dd class="description">{{node[field]}}</dd>
-				</dl>
-				<dl ng-repeat="field in ret.displaySet.page.list" ng-if="node[field]">
-					<dt>{{field|capitalize}}</dt>
-					<dd><ul><li ng-repeat="ele in node[field]">{{ele}}</li></ul></dd>
-				</dl>
-				<dl ng-repeat="field in ret.displaySet.page.complicatedList" ng-if="node[field]">
-					<dt>{{field|capitalize}}</dt>
-					<dd>
-						<div class="tableRow">
-							<div ng-repeat="(k,v) in node[field][0]" class="tableCell">{{k}}</div>
-						</div>
-						<div ng-repeat="ele in node[field] track by $index" class="tableRow">
-							<div ng-repeat="(k,v) in ele" class="tableCell description"
-								title="{{k}}"
-							>{{v}}</div>
-						</div>
-					</dd>
-				</dl>
-
-				<dl ng-if="node.category_list">
-					<dt>Sub-categories</dt>
-					<dd><ul><li ng-repeat="c in node.category_list track by $index">{{c.name}}</li></ul></dd>
-				</dl>
-				<dl ng-repeat="field in ret.displaySet.page.unknown" ng-if="node[field]">
-					<dt>{{field}}</dt>
-					<dd style="white-space: pre-wrap;">{{node[field]}}</dd>
-				</dl>
-			</div>
-			<!--details class="rawdata"><summary>JSON</summary>{{node|json}}</details-->
-		</details>
+		<nav>
+			<ul>
+				<li ng-if="node.cover"><a href="{{node.cover.source}}">Cover Photo</a></li>
+				<li ng-if="node.website"><a href="{{node.website}}">Website</a></li>
+				<li ng-if="node.featured_video">
+					<a href="{{ret.createLink(node.featured_video.id)}}"
+						title="{{node.featured_video.description}}"
+					>Featured Video</a>
+				</li>
+				<li ng-if="node.best_page">
+					<a title="The best available Page on Facebook for the concept represented by this Page."
+						href="{{ret.createLink(node.best_page.id)}}"
+					>{{node.best_page.name}}</a>
+				</li>
+			</ul>
+		</nav>
+		<p>{{node.likes|number}} people like this.</p>
+		<p ng-if="node.were_here_count">{{node.were_here_count|number}} people were here.</p>
+		<p>{{node.talking_about_count|number}} are talking about this.</p>
+		<p ng-if="node.founded">Founded at <time>{{node.founded}}</time></p>
+		<p ng-if="node.release_date">Released at <time>{{note.release_date}}</time></p>
+		<p ng-if="node.start_info.date" title="start_info">
+			{{node.start_info.type}}
+			at <time>{{node.start_info.date |dateFromArray}}</time>
+		</p>
 	</script>
 
 	<script type="text/ng-template" id="templatePlace">
@@ -352,10 +345,12 @@
 				<li><a href="{{ret.info.link||ret.createLink(ret.info.id)}}">Facebook</a></li>
 			</ul>
 		</nav>
-		<section id="info" ng-show="ret.tab=='info'">
+		<article id="info" ng-show="ret.tab=='info'">
 			<h2>Info</h2>
-			<div class="rawdata">{{ret.info|json}}</div>
-		</section>
+			<!--div ng-repeat="node in [ret.info]" ng-include="'template'+(ret.type|capitalize)"></div-->
+			<div ng-repeat="node in [ret.info]" ng-include="'templateGeneral'" onload="fbbk_type=ret.type"></div>
+			<details class="rawdata"><summary>JSON</summary>{{ret.info|json}}</details>
+		</article>
 		<section ng-repeat="t in ret.tabs" ng-if="t!='info'" ng-show="ret.tab==t" id="{{t}}">
 			<h2>{{t|capitalize}}</h2>
 			<div ng-if="t=='feed'||t=='posts'||t=='comments'||t=='likes'">
@@ -379,7 +374,11 @@
 			</div>
 			{{filtered.length}} {{t}}
 			<article ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]})) track by node._id">
-				<div ng-include="(['posts','feed'].indexOf(t)>-1)?'templatePost':'templateGeneral'"></div>
+				<div ng-include="'template'+({
+					posts: 'Post',
+					feed: 'Post',
+					photos:'Photo'
+				}[t]||'General')"></div>
 				<details ng-if="node.comments.length">
 					<summary title="newest: {{node.updated_time| date:'yyyy-MM-dd HH:mm'}}">
 						{{node.comments.length|number}} comment(s)

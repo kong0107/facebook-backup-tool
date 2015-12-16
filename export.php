@@ -12,7 +12,7 @@
 	/**
 	 * Open a Zip file.
 	 */
-	$dir = __DIR__ . '/data/json';
+	$dir = __DIR__ . '/data/archives';
 	if(!is_dir($dir)) mkdir($dir, 0777, true);
 	$zipFile = "$dir/$nodeName.zip";
 	$zip = new ZipArchive;
@@ -41,9 +41,9 @@
 		$col = $db->selectCollection($colName);
 		$dest = "data/js/$colName.js";
 		$data = iterator_to_array($col->find(), false);
-		list( , , $type) = explode('_', $colName);
+		list( , , $edge) = explode('_', $colName);
 		$zip->addFromString($dest,
-			"node.$type=" . json_encode($data, JSON_UNESCAPED_UNICODE) . ";\n"
+			"node.$edge=" . json_encode($data, JSON_UNESCAPED_UNICODE) . ";\n"
 		);
 		$jss[] = $dest;
 	}
@@ -52,7 +52,11 @@
 	 * Render `index.html`
 	 */
 	$html = file_get_contents('index.html');
-	$script_tags = "<script>node = {};\ndebug_startTime=new Date;</script>\n";
+	$script_tags = "<script>
+		node = {};
+		type = \"$type\";
+		debug_startTime = new Date;
+	</script>\n";
 	for($i = 0; $i < count($jss); ++$i)
 		$script_tags .= "<script src=\"{$jss[$i]}\"></script>\n";
 	$html = preg_replace('/<!--FBBKTemplateStart(.*)FBBKTemplateEnd-->/s', $script_tags, $html);

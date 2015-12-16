@@ -114,7 +114,7 @@ function($scope, $http, $window) {
 		<h3>Fields</h3>
 		<ul>
 			<li ng-repeat="f in info.fields"
-			>{{f.name}}<span ng-if="!$last">,</span
+			>"{{f.name}}"<span ng-if="!$last">,</span
 			></li>
 		</ul>
 		<table ng-if="info.fields" border="1">

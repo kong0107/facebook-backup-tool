@@ -28,6 +28,29 @@ angular.module("myApp", [])
 			photosInAlbum: {},
 			showDetails: {},
 			displaySet: {
+				user: {
+					block: [
+						"bio","quotes","website"
+					],
+					inline: [
+						/*"first_name","middle_name","last_name",*/"name_format",
+						"birthday","gender","email",
+						"political","religion","relationship_status",
+						"updated_time","link","locale","install_type","verified","is_verified","test_group","third_party_id","timezone","shared_login_upgrade_required_by","public_key"
+					],
+					list: [
+						"interested_in","meeting_for"
+					],
+					pairs: [
+						"significant_other","hometown","location","cover"
+					],
+					table: [
+						"education","languages","work","inspirational_people","sports"
+					],
+					unknown: [
+						"about"
+					]
+				},
 				page: {
 					block: [
 						"about", "awards", "bio", "company_overview",
@@ -45,11 +68,11 @@ angular.module("myApp", [])
 					list: [
 						"emails"
 					],
-					complicated: [
+					pairs: [
 						"parking",
 						"hours", "payment_options", "restaurant_services", "restaurant_specialties"
 					],
-					complicatedList: [
+					table: [
 						"category_list"
 					],
 					unknown: [
@@ -65,6 +88,16 @@ angular.module("myApp", [])
 						"press_contact","schedule","season",
 						"store_location_descriptor","store_number","studio",
 						"voip_info","written_by","asset_score","checkins","members"
+					]
+				},
+				event: {
+					unknown: [
+						"id","category","cover","description","type","end_time","is_viewer_admin","is_page_owned","can_guests_invite","guest_list_enabled","name","owner","parent_group","place","start_time","ticket_uri","timezone","updated_time","attending_count","declined_count","maybe_count","noreply_count","interested_count"
+					]
+				},
+				group: {
+					unknown: [
+						"id","cover","description","email","icon","link","name","member_request_count","owner","parent","privacy","updated_time","venue"
 					]
 				}
 			}
@@ -180,5 +213,18 @@ angular.module("myApp", [])
 			ret.push(input[i]);
 		}
 		return ret;
+	};
+})
+.filter("dateFromArray", function(dateFilter) {
+	return function(arr, format, timezone) {
+		var date = new Date;
+		date.setFullYear(arr.year || arr.Year || 1970);
+		date.setMonth((arr.month || arr.Month || 1) - 1);
+		date.setDate(arr.date || arr.Date || arr.day || arr.Day || 1);
+		date.setHours(arr.hour || arr.hours || arr.Hour || 0);
+		date.setMinutes(arr.minute || arr.minutes || arr.Minute || 0);
+		date.setSeconds(arr.second || arr.seconds || arr.Second  || 0);
+		date.setMilliseconds(arr.millisecond || arr.milliseconds || 0);
+		return dateFilter(date, format, timezone);
 	};
 });
