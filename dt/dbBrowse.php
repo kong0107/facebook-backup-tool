@@ -63,6 +63,7 @@
 			td, article { white-space: pre-wrap; font-family: monospace; }
 			div { margin-bottom: 1em; }
 			#pagination { position: fixed; top: 0; right: 0; background-color: #ccc; padding: 0.5em; text-align: center; line-height: 150%; }
+			label { display: inline-block; border: 1px solid #ccc; margin: .1em .25em; padding: .15em; }
 		</style>
 	</head>
 	<body ng-app="myApp" ng-controller="main">

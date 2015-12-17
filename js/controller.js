@@ -190,6 +190,16 @@ angular.module("myApp", [])
 				id = id.replace("_", "/" + type + "/");
 			return "https://www.facebook.com/" + id;
 		};
+		
+		/**
+		 * Render the path to the downloaded photo.
+		 */
+		ret.getSourcePhoto = function(photoNode, dir) {
+			if(!dir) dir = "album_" + photoNode.album.id;
+			var p = photoNode.picture;
+			var suffix = p.substr(p.indexOf('?') - 4, 4);
+			return "data/photos/" + dir + "/" + photoNode._id + suffix;
+		};
 
 		if($window.debug_startTime)
 			console.log("Model ready after " + (new Date - $window.debug_startTime) + " milliseconds.");
