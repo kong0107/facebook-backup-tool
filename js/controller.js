@@ -213,11 +213,14 @@ angular.module("myApp", [])
 	};
 })
 .filter("unique", function() {
-	return function(input) {
+	return function(input, field) {
 		if(!Array.isArray(input) || !input.length) return [];
 		var strings = [], ret = [];
 		for(var i in input) {
-			var json = JSON.stringify(input[i]);
+			if(!input[i]) continue;
+			var json = JSON.stringify(
+				(typeof field == "undefined" || !input[i][field]) ? input[i] : input[i][field]
+			);
 			if(strings.indexOf(json) != -1) continue;
 			strings.push(json);
 			ret.push(input[i]);

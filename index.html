@@ -168,7 +168,7 @@
 		<ul class="tags">
 			<li ng-repeat="tag in ([].concat(
 					node.story_tags, node.message_tags, node.with_tags
-				)|unique) track by tag.id"
+				)|unique :'id') track by tag.id"
 				ng-if="tag.name"
 			><a href="{{ret.createLink(tag.id)}}">{{tag.name}}</a>
 			</li>
