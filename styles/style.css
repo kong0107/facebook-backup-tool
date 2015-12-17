@@ -217,6 +217,11 @@ article nav {
 .displayingPhoto {
 	background-color: #ccc;
 	padding: 1em;
+	width: 100%;
+}
+.photosContainer {
+	display: inline-block;
+	border: none;
 }
 
 /**
