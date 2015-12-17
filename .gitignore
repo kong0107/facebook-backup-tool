@@ -1,9 +1,5 @@
 vendor/
-data/
-journal/
-_tmp/
+composer.lock
+data/*
+!data/.htaccess
 config.inc.php
-*.0
-*.ns
-*.lock
-*.bson
