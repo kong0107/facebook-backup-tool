@@ -190,7 +190,7 @@ angular.module("myApp", [])
 				id = id.replace("_", "/" + type + "/");
 			return "https://www.facebook.com/" + id;
 		};
-		
+
 		/**
 		 * Render the path to the downloaded photo.
 		 */
@@ -236,5 +236,20 @@ angular.module("myApp", [])
 		date.setSeconds(arr.second || arr.seconds || arr.Second  || 0);
 		date.setMilliseconds(arr.millisecond || arr.milliseconds || 0);
 		return dateFilter(date, format, timezone);
+	};
+})
+.filter("truncate", function() {
+	/**
+	 * Truncate a long string.
+	 *
+	 * Cut `str` if it's longer than `limit` and append `ellipsis`.
+	 */
+	return function(str, limit, ellipsis) {
+		if(!str) return "";
+		str += ""; limit *= 1;
+		if(isNaN(limit)) return str;
+		if(typeof ellipsis == "undefined") ellipsis = " ...";
+		if(str.length < limit) return str;
+		return str.substr(0, limit) + ellipsis;
 	};
 });

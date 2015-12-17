@@ -82,8 +82,8 @@ html, body {
 #wrapper > header {
 	padding: .5em;
 }
-#wrapper > section {
-	padding: 0 .5em 4em .5em;
+#wrapper > section:last-of-type {
+	padding: 0 .5em 3em .5em;
 }
 #wrapper > footer {
 	width:100%;
@@ -217,6 +217,11 @@ article nav {
 .displayingPhoto {
 	background-color: #ccc;
 	padding: 1em;
+	width: 100%;
+}
+.photosContainer {
+	display: inline-block;
+	border: none;
 }
 
 /**
