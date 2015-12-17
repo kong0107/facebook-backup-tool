@@ -13,7 +13,8 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 3. Comments and photos are auto-downloaded. These may take more than half an hour.
 
 # Usage
-1. Install and start web server, PHP, and MongoDB server locally.
+需要會架網站。
+1. Install and start web server with PHP, and MongoDB server locally.
 2. Create your own App on [Facebook Developer](https://developers.facebook.com/).
 3. Edit `config.sample.php` and save as `config.inc.php`; edit `js/fbsdk-config.js`.
 4. Browse `index.php`, select what to crawl, submit the form, and wait.
@@ -41,13 +42,12 @@ With post/photo data of the target node and their comments downloaded, you can:
 
 # Algorithm
 ## Crawler: DFS / Stack
-0. Push what to request to the stack.
-1. Pop an element from the stack.
-2. Request the data and save it to the database.
-3. If it's a node, then push its edges to the stack.
-4. If it's an edge and there's next page, then push the next page.
-5. If it's an edge whose nodes may have comments, then push `comments` edge of all nodes (in the current page) to the stack.
-6. If the stack is not empty, then go to step 1.
+1. Push what to request to the stack.
+2. Pop an element from the stack.
+3. Request by the information of that element, and then save the response to the database.
+4. If there's a next page, then push the next page to the stack.
+5. If the nodes in the response may have comments, then push `comments` edge of all nodes to the stack.
+6. If the stack is not empty, then go to step 2.
 7. Finish crawling.
 
 ## Concerns
