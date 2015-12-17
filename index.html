@@ -332,6 +332,41 @@
 	<script type="text/ng-template" id="templateTime">
 		<time datetime="{{time}}">{{time |date: 'yyyy-MM-dd HH:mm'}}</time>
 	</script>
+
+	<script type="text/ng-template" id="templateSearch">
+		<label>
+			Search:
+			<input ng-model="ret.search[t]"
+				ng-model-options="{debounce: 250}" placeholder="search text"
+				ng-change="ret.skip = 0"
+			>
+		</label>
+		<p>{{filtered.length}} {{t}}</p>
+	</script>
+
+	<script type="text/ng-template" id="templateMonthSelector">
+		<nav ng-hide="ret.search[t]">
+			<ul>
+				<li ng-repeat="m in ret.months[t]"
+					ng-click="ret.month[t] = m; ret.skip = 0;"
+					ng-class="(ret.month[t] == m)?'focus':''"
+				>{{m}}</li>
+			</ul>
+		</nav>
+	</script>
+
+	<script type="text/ng-template" id="templatePagination">
+		<div ng-show="filtered.length > ret.itemsPerPage">
+			Page:
+			<ul style="display: inline-block;">
+				<li ng-repeat="d in filtered track by $index"
+					ng-if="!($index%ret.itemsPerPage)" ng-click="ret.skip=$index"
+					ng-class="(ret.skip==$index)?'focus':''"
+				>{{$index/ret.itemsPerPage+1}}</li>
+			</ul>
+			<span style="font-size: smaller; color: #888;">({{ret.itemsPerPage}} items per page)</span>
+		</div>
+	</script>
 </head>
 <body>
 	<div id="wrapper">
@@ -350,54 +385,28 @@
 				<li><a href="{{ret.info.link||ret.createLink(ret.info.id)}}">Facebook</a></li>
 			</ul>
 		</nav>
+
 		<article id="info" ng-show="ret.tab=='info'">
 			<h2>Info</h2>
 			<div ng-repeat="node in [ret.info]" ng-include="'templateGeneral'" onload="fbbk_type=ret.type"></div>
 			<details class="rawdata"><summary>JSON</summary>{{ret.info|json}}</details>
 		</article>
-		<section ng-repeat="t in ret.tabs" ng-if="t!='info'" ng-show="ret.tab==t" id="{{t}}">
-			<h2>{{ret.displayName[t]?ret.displayName[t]:t|capitalize}}</h2>
-			<div ng-if="t=='feed'||t=='posts'||t=='comments'||t=='pages'">
-				<label>
-					Search:
-					<input ng-model="ret.search[t]"
-						ng-model-options="{debounce: 250}" placeholder="search text"
-						ng-change="ret.skip = 0"
-					>
-				</label>
-				<p>{{filtered.length}} {{t}}</p>
-			</div>
-			<div ng-if="t=='feed'||t=='posts'||t=='comments'">
-				<nav ng-hide="ret.search[t]">
-					<ul>
-						<li ng-repeat="m in ret.months[t]"
-							ng-click="ret.month[t] = m; ret.skip = 0;"
-							ng-class="(ret.month[t] == m)?'focus':''"
-						>{{m}}</li>
-					</ul>
-				</nav>
-			</div>
-			<nav ng-show="filtered.length > ret.itemsPerPage">
-				Page:
-				<ul style="display: inline-block;">
-					<li ng-repeat="d in filtered track by $index"
-						ng-if="!($index%ret.itemsPerPage)" ng-click="ret.skip=$index"
-						ng-class="(ret.skip==$index)?'focus':''"
-					>{{$index/ret.itemsPerPage+1}}</li>
-				</ul>
-				<span style="font-size: smaller; color: #888;">({{ret.itemsPerPage}} items per page)</span>
-			</nav>
-			<article ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))|limitTo :ret.itemsPerPage :ret.skip track by node._id" ng-class="t+'Container'">
+
+		<section ng-repeat="t in ret.tabs" ng-show="ret.tab==t" id="{{t}}"
+			ng-if="['info','photos'].indexOf(t)==-1"
+		>
+			<h2>{{t|capitalize}}</h2>
+			<div ng-include="'templateSearch'"></div>
+			<div ng-if="ret.months[t]" ng-include="'templateMonthSelector'"></div>
+			<nav ng-include="'templatePagination'"></nav>
+			<article ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))|limitTo :ret.itemsPerPage :ret.skip track by node._id">
 				<div ng-include="'template'+({
 					posts: 'Post',
 					albums: 'Album',
-					events: 'Event',
-					photos:'Photo'
+					events: 'Event'
 				}[t]||'General')"
-					onload="dir = ret.type + '_' + ret.id;"
-					ng-class="(t!='photos')?'':((node._id==ret.displayingPhoto)?'displayingPhoto':'inlineBlock')"
 				></div>
-				<details ng-if="node.comments.length && t != 'photos'">
+				<details ng-if="node.comments.length">
 					<summary title="newest: {{node.updated_time| date:'yyyy-MM-dd HH:mm'}}">
 						{{node.comments.length|number}} comment(s)
 					</summary>
@@ -408,7 +417,20 @@
 				<!--details class="rawdata"><summary>JSON</summary>{{node|json}}</details-->
 			</article>
 		</section>
-		<!--details class="rawdata" style="padding-bottom: 3em;"><summary>Debug</summary>{{ret|json}}</details-->
+
+		<section ng-show="ret.tab=='photos'" id="photos">
+			<h2>Tagged Photos</h2>
+			<div ng-include="'templateSearch'" ng-repeat="t in ['photos']"></div>
+			<nav ng-include="'templatePagination'"></nav>
+			<article ng-repeat="node in filtered=(ret.photos|filter:ret.search.photos)|limitTo :ret.itemsPerPage :ret.skip track by node._id"
+				ng-class="(node._id==ret.displayingPhoto)?'displayingPhoto':'inlineBlock'"
+				ng-include="'templatePhoto'"
+				onload="dir = ret.type + '_' + ret.id;"
+				style="border: none;"
+			></article>
+		</section>
+
+		<details class="rawdata" style="padding-bottom: 3em;"><summary>Debug</summary>{{ret|json}}</details>
 		<footer>
 			Backed up by <a href="https://github.com/kong0107/facebook-backup">this tool</a>
 			at <time><!--EXPORT_TIME--></time>.

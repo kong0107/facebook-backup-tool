@@ -27,9 +27,6 @@ angular.module("myApp", [])
 			month: {},
 			search: {},
 			showDetails: {},
-			displayName: {
-				photos: "Tagged Photos"
-			},
 			displaySet: {
 				user: {
 					block: [
