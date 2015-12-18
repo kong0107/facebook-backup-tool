@@ -1,7 +1,7 @@
 <?php
 	require_once 'fb.inc.php';
 	require_once 'db.inc.php';
-	
+
 	/**
 	 * User must login to browse/download data.
 	 */
@@ -9,9 +9,9 @@
 		printf('<a href="%s">Login with Facebook</a>', getFBLoginUrl());
 		exit;
 	}
-	
+
 	$userId = $fb->get('/me?fields=id')->getDecodedBody()['id'];
-	
+
 	/**
 	 * Get groups where user is an admin.
 	 *
@@ -20,7 +20,7 @@
 	$adminnedGroups = [];
 	$groups = $fb->get('/me/groups')->getDecodedBody()['data'];
 	foreach($groups as $g) $adminnedGroups[] = $g['id'];
-	
+
 	/**
 	 * Get info of collections.
 	 */
