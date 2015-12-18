@@ -14,6 +14,7 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 
 # Usage
 需要會架網站。
+
 1. Install and start web server with PHP, and MongoDB server locally.
 2. Create your own App on [Facebook Developer](https://developers.facebook.com/).
 3. Edit `config.sample.php` and save as `config.inc.php`; edit `js/fbsdk-config.js`.
