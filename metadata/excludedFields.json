@@ -70,5 +70,9 @@
 	],
 	"event": [
 		"is_viewer_admin"
+	],
+	"doc": [
+		"can_delete",
+		"can_edit"
 	]
 }

@@ -99,6 +99,11 @@ angular.module("myApp", [])
 					unknown: [
 						"id","cover","description","email","icon","link","name","member_request_count","owner","parent","privacy","updated_time","venue"
 					]
+				},
+				doc: {
+					unknown: [
+						"id","can_delete","can_edit","created_time","from","icon","link","message","revision","subject","updated_time"
+					]
 				}
 			}
 		};

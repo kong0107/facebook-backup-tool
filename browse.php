@@ -24,17 +24,16 @@
 	/**
 	 * Get info of collections.
 	 */
-	//$data = ['users' => [], 'pages' => [], 'groups' => []];
 	$data = [
-		'users' => iterator_to_array($db->users->find(
+		'user' => iterator_to_array($db->users->find(
 			['_id' => $userId],
 			['name' => 1, 'bio' => 1, 'picture.data.url' => 1]
 		)),
-		'pages' => iterator_to_array($db->pages->find(
+		'page' => iterator_to_array($db->pages->find(
 			[],
 			['name' => 1, 'username' => 1, 'category' => 1, 'about' => 1, 'picture.data.url' => 1]
 		)),
-		'groups' => iterator_to_array($db->groups->find(
+		'group' => iterator_to_array($db->groups->find(
 			['_id' => [ '$in' => $adminnedGroups] ],
 			['name' => 1, 'picture.data.url' => 1]
 		))
@@ -43,9 +42,25 @@
 	foreach($db->getCollectionNames() as $colName) {
 		list($type, $id, $edge) = explode('_', $colName);
 		if(!$id) continue;
-		$count = $db->selectCollection($colName)->count();
-		$data[$type . 's'][$id]['counts'][$edge] = $count;
-		/// We should show `fbbk_updated_time` also, to let users make decision whether to crawl again.
+		$col = $db->selectCollection($colName);
+		$count = $col->count();
+		if($count) {
+			$last = $col->aggregate([['$group' => [
+				'_id' => null,
+				'last' => ['$max' => '$fbbk_updated_time']
+			]]])['result'][0]['last'];
+			$first = $col->aggregate([['$group' => [
+				'_id' => null,
+				'first' => ['$min' => '$fbbk_updated_time']
+			]]])['result'][0]['first'];
+		}
+		else $last = $first = null;
+		
+		$data[$type][$id]['edges'][$edge] = [
+			'first' => $first,
+			'last' => $last,
+			'count' => $count
+		];
 	}
 ?>
 <!DOCTYPE HTML>
@@ -96,25 +111,29 @@ return model;
 			padding: 0;
 			list-style-type: none;
 		}
+		span {
+			font-size: smaller;
+		}
 	</style>
 </head>
 <body ng-controller="main">
 	<h1>Choose what to Download</h1>
-	<form action="browse.php">
+	<form action="export.php" method="post">
 		<fieldset ng-repeat="(type,nodes) in model track by type">
 			<legend><h2>{{type}}</h2></legend>
 			<article ng-repeat="(id,node) in nodes track by id">
 				<header>
 					<img ng-src="{{node.picture.data.url}}">
 					<h3 title="{{node.bio||node.about}}">
-						<a href="http://facebook.com/{{node.username||id}}">{{node.name}}</a>
+						<a target="_blank" href="http://facebook.com/{{node.username||id}}">{{node.name}}</a>
 					</h3>
 				</header>
 				<ul>
-					<li ng-repeat="(edge,count) in node.counts track by $index">
-						<label>
-							<input type="checkbox" name="options[]" value="{{type+'_'+id+'_'+edge}}">
-							{{edge}} ({{count}})
+					<li ng-repeat="(edgeName,info) in node.edges track by $index">
+						<label title="crawled from {{info.first |date: 'yyyy-MM-dd HH:mm'}} to {{info.last |date: 'yyyy-MM-dd HH:mm'}}">
+							<input type="checkbox" name="collections[{{type+'_'+id}}][]" value="{{edgeName}}">
+							{{edgeName}} 
+							<span>({{info.count}})</span>
 						</label>
 					</li>
 				</ul>
@@ -122,7 +141,5 @@ return model;
 		</fieldset>
 		<input type="submit">
 	</form>
-	<pre><?=print_r($_GET,true)?></pre>
-	<!--pre>{{model|json}}</pre-->
 </body>
 </html>
