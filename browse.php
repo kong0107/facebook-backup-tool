@@ -42,6 +42,7 @@
 	foreach($db->getCollectionNames() as $colName) {
 		list($type, $id, $edge) = explode('_', $colName);
 		if(!$id) continue;
+		if(!array_key_exists($id, $data[$type])) continue;
 		$col = $db->selectCollection($colName);
 		$count = $col->count();
 		if($count) {
@@ -119,7 +120,7 @@ return model;
 <body ng-controller="main">
 	<h1>Choose what to Download</h1>
 	<form action="export.php" method="post">
-		<fieldset ng-repeat="(type,nodes) in model track by type">
+		<fieldset ng-repeat="(type,nodes) in model track by type" ng-if="'[]'!=(nodes|json)">
 			<legend><h2>{{type}}</h2></legend>
 			<article ng-repeat="(id,node) in nodes track by id">
 				<header>
