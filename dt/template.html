@@ -7,6 +7,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script src="//connect.facebook.net/zh_TW/sdk.js" id="facebook-jssdk"></script>
 	<script src="../js/fbsdk-config.js"></script>
+	<script src="../js/fbsdk-extend.js"></script>
 	<script>
 		/**
 		 * Auto-load Facebook SDK in AngularJS initialization.
@@ -31,7 +32,6 @@
 					$scope.$apply();
 				});
 			};
-			$.getScript("../js/fbsdk-extend.js");
 			var main = function(userID) {
 				if(!userID) return {}
 				return {userID: userID};

@@ -10,6 +10,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script src="//connect.facebook.net/zh_TW/sdk.js" id="facebook-jssdk"></script>
 	<script src="js/fbsdk-config.js"></script>
+	<script src="js/fbsdk-extend.js"></script>
 	<script>
 		angular.module("myApp", []).controller("main", function($scope, $http) {
 			window.fbAsyncInit = function() {
@@ -19,7 +20,6 @@
 					$scope.$apply();
 				});
 			};
-			$.getScript("js/fbsdk-extend.js");
 
 			var main = function(userID) {
 //--------
@@ -32,8 +32,9 @@ if(!userID) return {};
  */
 var userInfo = {};
 FB.apiwt(userID + "?fields=id,name,groups{id,name,description}", function(r) {
-	r.groups = r.groups.data;
+	if(r.groups) r.groups = r.groups.data;
 	userInfo = r;
+	console.log(r);
 });
 
 
