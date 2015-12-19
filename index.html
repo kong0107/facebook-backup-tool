@@ -25,6 +25,7 @@
 
 	<script type="text/ng-template" id="templateMetadata">
 		<li title="ID">{{node._id}}</li>
+		<li ng-if="node.revision" title="Revision ID">{{node.revision}}</li>
 		<li ng-repeat="time in [node.created_time, node.backdated_time] track by $index"
 			ng-if="time" ng-include="'templateTime'"
 		></li>
@@ -32,7 +33,7 @@
 		<li ng-if="node.like_count">{{node.like_count|number}} likes</li>
 		<li ng-if="node.privacy">Viewable to {{node.privacy.value || node.privacy}}</li>
 		<li ng-if="node.type">Type: {{node.type}}</li>
-		<li ng-if="node.status_type">Type: {{node.status_type}}</li>
+		<li ng-if="node.status_type" title="status_type">{{node.status_type}}</li>
 	</script>
 
 	<script type="text/ng-template" id="templateGeneral">
@@ -237,7 +238,7 @@
 	</script>
 
 	<script type="text/ng-template" id="templateEvent">
-		<h3><a href="https://www.facebook.com/events/{{node._id}}">{{node.name}}</a></h3>
+		<header><h3><a href="https://www.facebook.com/events/{{node._id}}">{{node.name}}</a></h3></header>
 		<ul class="metadata" ng-include="'templateMetadata'"></ul>
 		<nav>
 			<ul>
@@ -314,6 +315,13 @@
 			{{node.start_info.type}}
 			at <time>{{node.start_info.date |dateFromArray}}</time>
 		</p>
+	</script>
+	
+	<script type="text/ng-template" id="templateDoc">
+		<header><h3>{{node.subject}}</h3></header>
+		<a ng-if="node.link" href="{{node.link}}">{{node.link}}</a>
+		<ul class="metadata" ng-include="'templateMetadata'"></ul>
+		<div class="description">{{node.message}}</div>
 	</script>
 
 	<script type="text/ng-template" id="templatePlace">
@@ -403,7 +411,8 @@
 				<div ng-include="'template'+({
 					posts: 'Post',
 					albums: 'Album',
-					events: 'Event'
+					events: 'Event',
+					docs: 'Doc'
 				}[t]||'General')"
 				></div>
 				<details ng-if="node.comments.length">
@@ -430,7 +439,7 @@
 			></article>
 		</section>
 
-		<details class="rawdata" style="padding-bottom: 3em;"><summary>Debug</summary>{{ret|json}}</details>
+		<!--details class="rawdata" style="padding-bottom: 3em;"><summary>Debug</summary>{{ret|json}}</details-->
 		<footer>
 			Backed up by <a href="https://github.com/kong0107/facebook-backup">this tool</a>
 			at <time><!--EXPORT_TIME--></time>.

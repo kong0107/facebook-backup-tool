@@ -281,13 +281,6 @@ model.clearStack = function() {
 	});
 };
 
-/**
- * Download JSON files.
- */
-model.download = function() {
-	window.open("export.php?nodeName=" + model.nodeType + "_" + model.nodeId);
-}
-
 return model;
 //--------
 			};
@@ -397,7 +390,7 @@ return model;
 		<button ng-click="model.stop()" ng-disabled="!model.timerId">Stop</button>
 		<p>Last execute: <time ng-bind="model.lastExecute"></time></p>
 		<div ng-show="model.status=='finished'">
-			<button ng-click="model.download()">Download the package</button>
+			<a href="browse.php">Browse what to download</a>
 			<button ng-click="model.status='setting'">Crawl something else</button>
 		</div>
 		<div class="pre" ng-bind="model.message"></div>
