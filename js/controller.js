@@ -91,8 +91,16 @@ angular.module("myApp", [])
 					]
 				},
 				event: {
+					inline: [
+						"category","type","start_time","end_time",
+						"updated_time","attending_count","declined_count","maybe_count","noreply_count","interested_count",
+						"ticket_uri"
+					],
+					pairs: [
+						"owner","parent_group"
+					],
 					unknown: [
-						"id","category","cover","description","type","end_time","is_viewer_admin","is_page_owned","can_guests_invite","guest_list_enabled","name","owner","parent_group","place","start_time","ticket_uri","timezone","updated_time","attending_count","declined_count","maybe_count","noreply_count","interested_count"
+						"id","place"
 					]
 				},
 				group: {
@@ -166,7 +174,9 @@ angular.module("myApp", [])
 		 *
 		 * Should be executed after comments are arranged.
 		 */
-		if(ret.photos && ret.photos.length) {
+		if(ret.albums && ret.albums.length 
+			&& ret.photos && ret.photos.length
+		) {
 			for(var j = 0; j < ret.albums.length; ++j)
 				ret.albums[j].photos = [];
 			var tagged = [];

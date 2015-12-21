@@ -82,7 +82,7 @@ html, body {
 #wrapper > header {
 	padding: .5em;
 }
-#wrapper > section:last-of-type {
+#wrapper > section {
 	padding: 0 .5em 3em .5em;
 }
 #wrapper > footer {

@@ -23,6 +23,8 @@
 
 	/**
 	 * Get info of collections.
+	 *
+	 * Warning: should notice privacy issue of non-public groups and events.
 	 */
 	$data = [
 		'user' => iterator_to_array($db->users->find(
@@ -36,8 +38,11 @@
 		'group' => iterator_to_array($db->groups->find(
 			['_id' => [ '$in' => $adminnedGroups] ],
 			['name' => 1, 'picture.data.url' => 1]
+		)),
+		'event' => iterator_to_array($db->events->find(
+			[],
+			['name' => 1, 'picture.data.url' => 1]
 		))
-		/// what about non-public events?
 	];
 	foreach($db->getCollectionNames() as $colName) {
 		list($type, $id, $edge) = explode('_', $colName);

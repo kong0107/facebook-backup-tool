@@ -34,9 +34,7 @@ var userInfo = {};
 FB.apiwt(userID + "?fields=id,name,groups{id,name,description}", function(r) {
 	if(r.groups) r.groups = r.groups.data;
 	userInfo = r;
-	console.log(r);
 });
-
 
 /**
  * Define binding data and functions.
@@ -101,10 +99,13 @@ model.edgeLists = {
 		{path: "/feed", type: "post", desc: "Posts including status updates and links"},
 		{path: "/members", type: "user", desc: "Members"},
 		{path: "/docs", type: "doc", desc: "Documents"}
-	]/*,
+	],
 	event: [
-		"posts", "photos", "comments", "feed"//, "videos"
-	]*/
+		/// It seems that edges "posts", "comments", "videos" are always empty,
+		/// though stuff in "feed" is posts, including photo posts.
+		{path: "/feed", type: "post", desc: "Posts published to the event"},
+		{path: "/photos", type: "photo", desc: "Photos published to the event"}
+	]
 };
 
 /**
@@ -172,6 +173,11 @@ model.nodeSelected = function() {
 			$scope.$apply();
 		});
 		break;
+	case "event":
+		FB.apiwt(model.nodeId + "?fields=id,category,description,end_time,name,owner,parent_group,place,start_time,attending_count,picture", function(r) {
+			model.nodeInfo = r;
+			$scope.$apply();
+		});
 	case "group":
 		for(var i = 0; i < userInfo.groups.length; ++i) {
 			if(userInfo.groups[i].id == model.nodeId) {
@@ -324,12 +330,12 @@ return model;
 				</li>
 			</ul>
 		</section>
-		<section ng-show="model.nodeType=='page'">
-			<h2>Search for a page</h2>
+		<section ng-show="['page', 'event'].indexOf(model.nodeType) != -1">
+			<h2>Search for a {{model.nodeType}}</h2>
 			<input ng-model="model.q"
 				ng-change="model.search()"
 				ng-model-options="{debounce: 500}"
-				placeholder="page ID or search text"
+				placeholder="{{model.nodeType}} ID or search text"
 			>
 		</section>
 		<section ng-show="model.nodeList.length">
@@ -351,12 +357,22 @@ return model;
 					style="display: table-cell; padding: 0.2em; margin: 0.2em;"
 				>
 				<div style="display: table-cell; vertical-align: top;">
-					<h3><a target="_blank" href="{{model.nodeInfo.link}}" style="text-decoration: none;">{{model.nodeInfo.name}}</a></h3>
+					<h3><a target="_blank" href="{{model.nodeInfo.link||('http://facebook.com/'+model.nodeInfo.id)}}" style="text-decoration: none;">{{model.nodeInfo.name}}</a></h3>
 					<span>{{model.nodeInfo.category}}</span>
 				</div>
 			</header>
 			ID: {{model.nodeInfo.id}}
-			<p ng-if="model.nodeInfo.likes">{{model.nodeInfo.likes|number}} likes</p>
+			
+			<!-- For Pages -->
+			<p ng-if="model.nodeInfo.likes">{{model.nodeInfo.likes |number}} likes</p>
+			
+			<!-- For events -->
+			<p ng-if="model.nodeInfo.attending_count">{{model.nodeInfo.attending_count |number}} attendees</p>
+			<p ng-if="model.nodeInfo.start_time">From {{model.nodeInfo.start_time |date : 'yyyy-MM-dd HH:mm'}}</p>
+			<p ng-if="model.nodeInfo.end_time">To {{model.nodeInfo.end_time |date : 'yyyy-MM-dd HH:mm'}}</p>
+			<p ng-if="model.owner">Owner: <a href="http://facebook.com/{{node.owner.id}}">{{node.owner.name}}</a></p>
+			<p ng-if="model.parent_group">Parent group: <a href="http://facebook.com/{{node.parent_group.id}}">{{node.parent_group.name}}</a></p>
+			
 			<div style="white-space: pre-wrap; max-height: 8em; overflow: auto; border-top: 1px dashed #ccc;">{{(
 				model.nodeInfo.description
 				? model.nodeInfo.description
