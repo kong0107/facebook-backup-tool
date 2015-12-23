@@ -83,7 +83,7 @@ model.edgeLists = {
 		{path: "/albums", type: "album", desc: "Albums and photos inside"},
 		{path: "/posts", type: "post", desc: "Posts published by the user"},
 		{path: "/likes", type: "page", desc: "Liked pages"},
-		//{path: "/events", type: "event", desc: "There are different types of events."},
+		{path: "/events?type=created", type: "event", desc: "Events the user created"},
 		{path: "/photos?type=tagged", type: "photo", desc: "Photos the user has been tagged in"},
 		{path: "/tagged", type: "post", desc: "Posts the user was tagged in"}
 	],
@@ -208,40 +208,52 @@ model.isButtonDisabled = function() {
 };
 
 /**
- * Start crawling.
+ * Add what to crawl to the deque.
  */
-model.start = function() {
+model.enqueue = function() {
 	var nid = model.nodeId;
 	var nType = model.nodeType;
 	var edgeList = model.edgeLists[nType];
-	var qs = "?stack[0][path]=/" + nid + "&stack[0][type]=" + nType;
-	var counter = 1;
+	var body = {
+		op: "enqueue",
+		data: [{
+			path: "/" + nid,
+			type: nType
+		}]
+	};
+	var ancestors = [{type: nType, id: nid}];
 	for(var i = 0; i < edgeList.length; ++i) {
 		if(model.edgeChecked[i]) {
-			var prefix = "&stack[" + counter + "]";
-			qs += prefix + "[path]=/" + nid + edgeList[i].path
-				+ prefix + "[type]=" + edgeList[i].type
-				+ prefix + "[ancestors][0][type]=" + nType
-				+ prefix + "[ancestors][0][id]=" + nid
-			;
-			++counter;
+			body.data.push({
+				path: "/" + nid + edgeList[i].path,
+				type: edgeList[i].type,
+				ancestors: ancestors
+			});
 		}
 	}
-	model.timerId = -1;
-	model.request(qs);
-};
+	/// Most server-side language does not support `$http.post` of AngularJS.
+	/// @see http://stackoverflow.com/questions/19254029
+	$.post("array_op.php", body, function(data) {
+		model.message = "";
+		model.stack = data.stack;
+		model.continue();
+		$scope.$apply();
+	}, "json").fail(function() {
+		model.message = JSON.stringify(arguments, undefined, 4);
+		$scope.$apply();
+	});
+}
 
 /**
  * Actual function for requesting.
  *
  * Recursive by `setTimeout`.
  */
-model.request = function(qs) {
-	if(typeof qs != "string") qs = "";
+model.request = function() {
 	model.showClearButton = false;
 	model.status = "crawling";
 	model.lastExecute = (new Date).toISOString();
-	$http.get("crawler.php" + qs).then(function(r) {
+	$http.get("crawler.php").then(function(r) {
 		model.message = r.data.message;
 		model.stackCount = r.data.stackCount;
 		if(r.data.status == "success") {
@@ -282,18 +294,11 @@ model.stop = function() {
  */
 model.clearStack = function() {
 	model.stack = [];
-	$http.get("crawler.php?clear=1").then(function(r) {
+	$http.get("array_op.php?op=clear").then(function(r) {
 		model.status = "setting";
 	}, function(r) {
 		model.message = JSON.stringify(r, undefined, 4);
 	});
-};
-
-/**
- * For display, remove "fields" from `path`.
- */
-model.shrinkPath = function(path) {
-	return path.replace(/fields=[a-z,_]+&?/, '');
 };
 
 return model;
@@ -399,7 +404,7 @@ return model;
 				</li>
 			</ul>
 		</section>
-		<button ng-disabled="model.isButtonDisabled()" ng-click="model.start()">Start crawl</button>
+		<button ng-disabled="model.isButtonDisabled()" ng-click="model.enqueue()">Start crawl</button>
 	</form>
 	<div ng-show="model && model.status!='setting'">
 		<div ng-if="model.showClearButton">
@@ -422,11 +427,10 @@ return model;
 			<summary>{{model.stack.length}} in stack</summary>
 			<ol>
 				<li ng-repeat="ele in model.stack track by ele.path"
-				>{{model.shrinkPath(ele.path)}}</li>
+				>{{ele.path}}</li>
 			</ol>
 		</details>
-		<div class="pre" ng-bind="model.message"></div>
-		<!--details class="pre"><summary>Debug</summary>{{model|json}}</details-->
 	</div>
+	<div class="pre" ng-bind="model.message"></div>
 </body>
 </html>

@@ -22,23 +22,6 @@
 	 */
 	if(!isset($_SESSION['stack'])) $_SESSION['stack'] = [];
 	if(!is_array($_SESSION['stack'])) stop('Error: stack shall be an array');
-
-	/**
-	 * Handling the initial data.
-	 */
-	if(is_array($_GET['stack'])) {
-		foreach($_GET['stack'] as $ele)
-			push($ele['path'], $ele['type'], $ele['ancestors']);
-		exit(json_encode([
-			'status' => 'success',
-			'message' => 'Finished pushing from HTTP get method.',
-			'stackCount' => count($_SESSION['stack'])
-		]));
-	}
-	if($_GET['clear']) {
-		$_SESSION['stack'] = [];
-		stop('Stack cleared.', 'warning');
-	}
 	if(!count($_SESSION['stack'])) stop('Stack is empty', 'warning');
 
 	$maxExeTime = 2; //ini_get('max_execution_time') / 2;
@@ -63,6 +46,9 @@
 		$type = $req['type'];
 		$ancestors = is_array($req['ancestors']) ? $req['ancestors'] : [];
 
+		$path .= (strpos($path, '?') ? '&' : '?')
+			. 'fields=' . implode(',', getFields($type))
+		;
 		p("Requesting $path");
 		$s = microtime(true);
 		$res = $fb->get($path);
@@ -126,10 +112,8 @@
 
 		parse_str($parts['query'], $query);
 		unset($query['access_token']);
-		if(empty($query['fields']))
-			$query['fields'] = implode(',', getFields($type));
-
-		$path = $path . '?' . str_replace('%2C', ',', http_build_query($query));
+		unset($query['fields']);
+		if(count($query)) $path .= '?' . http_build_query($query);
 
 		p("Pushing $path");
 		$_SESSION['stack'][] = [
