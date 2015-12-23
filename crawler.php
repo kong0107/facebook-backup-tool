@@ -1,7 +1,7 @@
 <?php
 	require_once 'fb.inc.php';
 	require_once 'db.inc.php';
-	
+
 	/**
 	 * JSON output functions and variables.
 	 */
@@ -16,7 +16,7 @@
 		global $output;
 		$output['message'] .= $str . "\n";
 	}
-	
+
 	/**
 	 * Basic checkings.
 	 */
@@ -53,11 +53,10 @@
 	 * Steps:
 	 * 1. Pop an element from the stack.
 	 * 2. Request the data and save it to the database.
-	 * 3. If it's a node, then push its edges to the stack.
-	 * 4. If it's an edge and there's next page, then push the next page.
-	 * 5. If it's an edge whose nodes may have comments,
+	 * 3. If it's an edge and there's next page, then push the next page.
+	 * 4. If it's an edge whose nodes may have comments,
 	 *    then push `comments` edges of each node to the stack.
-	 * 6. If the stack is not empty, then go to step 1.
+	 * 5. If the stack is not empty, then go to step 1.
 	 */
 	while($req = array_pop($_SESSION['stack'])) {
 		$path = $req['path'];
@@ -130,7 +129,7 @@
 		if(empty($query['fields']))
 			$query['fields'] = implode(',', getFields($type));
 
-		$path = $path . '?' . http_build_query($query);
+		$path = $path . '?' . str_replace('%2C', ',', http_build_query($query));
 
 		p("Pushing $path");
 		$_SESSION['stack'][] = [

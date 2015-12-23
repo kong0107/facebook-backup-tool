@@ -58,6 +58,7 @@ model.interval = 3;
 	 */
 	if(count($_SESSION['stack'])) {
 		echo 'model.showClearButton = true;';
+		echo 'model.stack = ' . json_encode($_SESSION['stack'], JSON_UNESCAPED_UNICODE) . ';';
 		printf('model.stackCount = %d;', count($_SESSION['stack']));
 		echo 'model.status = "crawling";';
 	}
@@ -244,9 +245,8 @@ model.request = function(qs) {
 		model.message = r.data.message;
 		model.stackCount = r.data.stackCount;
 		if(r.data.status == "success") {
-			//console.log(r.data.stack);
 			if(r.data.stack)
-				console.log("There is/are " + r.data.stack.length + " element(s) in the stack.");
+				model.stack = r.data.stack;
 			if(model.timerId)
 				model.timerId = setTimeout(model.request, model.interval * 1000);
 		}
@@ -281,11 +281,19 @@ model.stop = function() {
  * Send "clear" message to the server to clear the stack.
  */
 model.clearStack = function() {
+	model.stack = [];
 	$http.get("crawler.php?clear=1").then(function(r) {
 		model.status = "setting";
 	}, function(r) {
 		model.message = JSON.stringify(r, undefined, 4);
 	});
+};
+
+/**
+ * For display, remove "fields" from `path`.
+ */
+model.shrinkPath = function(path) {
+	return path.replace(/fields=[a-z,_]+&?/, '');
 };
 
 return model;
@@ -362,17 +370,17 @@ return model;
 				</div>
 			</header>
 			ID: {{model.nodeInfo.id}}
-			
+
 			<!-- For Pages -->
 			<p ng-if="model.nodeInfo.likes">{{model.nodeInfo.likes |number}} likes</p>
-			
+
 			<!-- For events -->
 			<p ng-if="model.nodeInfo.attending_count">{{model.nodeInfo.attending_count |number}} attendees</p>
 			<p ng-if="model.nodeInfo.start_time">From {{model.nodeInfo.start_time |date : 'yyyy-MM-dd HH:mm'}}</p>
 			<p ng-if="model.nodeInfo.end_time">To {{model.nodeInfo.end_time |date : 'yyyy-MM-dd HH:mm'}}</p>
 			<p ng-if="model.owner">Owner: <a href="http://facebook.com/{{node.owner.id}}">{{node.owner.name}}</a></p>
 			<p ng-if="model.parent_group">Parent group: <a href="http://facebook.com/{{node.parent_group.id}}">{{node.parent_group.name}}</a></p>
-			
+
 			<div style="white-space: pre-wrap; max-height: 8em; overflow: auto; border-top: 1px dashed #ccc;">{{(
 				model.nodeInfo.description
 				? model.nodeInfo.description
@@ -410,6 +418,13 @@ return model;
 			<a href="browse.php">Browse what to download</a>
 			<button ng-click="model.status='setting'">Crawl something else</button>
 		</div>
+		<details ng-show="model.stack">
+			<summary>{{model.stack.length}} in stack</summary>
+			<ol>
+				<li ng-repeat="ele in model.stack track by ele.path"
+				>{{model.shrinkPath(ele.path)}}</li>
+			</ol>
+		</details>
 		<div class="pre" ng-bind="model.message"></div>
 		<!--details class="pre"><summary>Debug</summary>{{model|json}}</details-->
 	</div>

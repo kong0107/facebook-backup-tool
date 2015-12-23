@@ -61,7 +61,7 @@
 			]]])['result'][0]['first'];
 		}
 		else $last = $first = null;
-		
+
 		$data[$type][$id]['edges'][$edge] = [
 			'first' => $first,
 			'last' => $last,
@@ -138,7 +138,7 @@ return model;
 					<li ng-repeat="(edgeName,info) in node.edges track by $index">
 						<label title="crawled from {{info.first |date: 'yyyy-MM-dd HH:mm'}} to {{info.last |date: 'yyyy-MM-dd HH:mm'}}">
 							<input type="checkbox" name="collections[{{type+'_'+id}}][]" value="{{edgeName}}">
-							{{edgeName}} 
+							{{edgeName}}
 							<span>({{info.count}})</span>
 						</label>
 					</li>

@@ -76,8 +76,8 @@
 		return true;
 	}
 
-	$metadata = json_decode(file_get_contents('metadata/v2.5.json'), true);
-	$excludedFields = json_decode(file_get_contents('metadata/excludedFields.json'), true);
+	$metadata = json_decode(file_get_contents(__DIR__ . '/metadata/v2.5.json'), true);
+	$excludedFields = json_decode(file_get_contents(__DIR__ . '/metadata/excludedFields.json'), true);
 
 	/**
 	 * Get field names of a node type.

@@ -4,6 +4,7 @@
 	<meta charset="utf-8">
 	<title ng-bind="ret.info.name">Backup Facebook</title>
 	<!--FBBKTemplateStart-->
+	<!-- Don't delete the comment above. -->
 	<script>
 		var node = {};
 		var type = "page";
@@ -16,6 +17,7 @@
 	<script src="data/js/page_299951923544433_photos.js"></script>
 	<script src="data/js/page_299951923544433_posts.js"></script>
 	<script src="data/js/page_299951923544433_comments.js"></script>
+	<!-- Don't delete the comment below. -->
 	<!--FBBKTemplateEnd-->
 	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
@@ -316,7 +318,7 @@
 			at <time>{{node.start_info.date |dateFromArray}}</time>
 		</p>
 	</script>
-	
+
 	<script type="text/ng-template" id="templateDoc">
 		<header><h3>{{node.subject}}</h3></header>
 		<a ng-if="node.link" href="{{node.link}}">{{node.link}}</a>
