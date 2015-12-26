@@ -5,7 +5,7 @@
 <html ng-app="myApp">
 <head>
 	<meta charset="utf-8">
-	<title>Login Facebook</title>
+	<title>Backup Facebook</title>
 	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script src="//connect.facebook.net/zh_TW/sdk.js" id="facebook-jssdk"></script>
@@ -29,6 +29,8 @@ if(!userID) return {};
  * Initialization.
  *
  * Load user info and adminned groups.
+ * Permission "user_managed_groups" would be requested in `model.typeSelected`
+ * if it hasn't been granted.
  */
 var userInfo = {};
 FB.apiwt(userID + "?fields=id,name,groups{id,name,description}", function(r) {
@@ -126,6 +128,22 @@ model.typeSelected = function(nodeType) {
 		model.nodeId = userID;
 		break;
 	case "group":
+		if(!userInfo.groups) {
+			FB.ifPermitted("user_managed_groups", 0, function() {
+				FB.requestPermission(
+					"user_managed_groups", 
+					function() {
+						FB.apiwt("me/groups", function(r) {
+							model.nodeList = userInfo.groups = r.data;
+							$scope.$apply();
+						});
+					},
+					function() {
+						alert("This app cannot access groups you managed if permission `user_managed_groups` is not granted.");
+					}
+				);
+			});
+		}
 		model.nodeList = userInfo.groups;
 		break;
 	}
@@ -301,6 +319,34 @@ model.clearStack = function() {
 	});
 };
 
+/**
+ * Request permission if some type of node/edge is checked.
+ */
+model.checkPerm = function(index) {
+	//console.log(model.nodeType, model.nodeId, model.edgeLists[model.nodeType][index], model.edgeChecked[index]);
+	if(!model.edgeChecked[index]) return;
+	if(model.nodeType != "user") return;
+	var perms = [];
+	switch(model.edgeLists.user[index].type) {
+		case "album":
+		case "photo":
+			perms.push("user_photos"); break;
+		case "post": perms.push("user_posts"); break;
+		case "page": perms.push("user_likes"); break;
+		case "event": perms.push("user_events"); break;
+	}
+	if(perms.length) FB.ifPermitted(perms, 0, function() {
+		FB.login(function() {
+			FB.getGrantedPermissions(function(gs){
+				if(gs.indexOf(perms[0]) != -1) return;
+				alert("This app cannot access some checked edge(s) if permission `" + perms[0] + "` is not granted.");
+				/*console.log("Now we have permissions:");
+				console.log(perms);*/
+			});
+		}, {scope: perms.toString(), auth_type: "rerequest"});
+	});
+}
+
 return model;
 //--------
 			};
@@ -398,6 +444,7 @@ return model;
 				<li ng-repeat="edgeInfo in model.edgeLists[model.nodeType]">
 					<label>
 						<input type="checkbox" ng-model="model.edgeChecked[$index]"
+							ng-click="model.checkPerm($index)"
 						>{{edgeInfo.desc}}
 						<code>({{edgeInfo.path}})</code>
 					</label>

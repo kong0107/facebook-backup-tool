@@ -121,11 +121,23 @@ FB.requestPermissionUntilGranted = function(perms, callback) {
  *
  * Revoking a permission which is already declined
  * would still return success.
+ * Deleting several permissions at a time seem lead to 
+ * only deletion of the first in the list.
  *
  * @see https://developers.facebook.com/docs/graph-api/reference/user/permissions
+ * @see http://stackoverflow.com/questions/14933641
  */
 FB.revokePermission = function(perm, callback) {
 	FB.apiwt('me/permissions/' + perm, 'delete', callback);
+	/*if(!Array.isArray(perms)) perms = perms.split(',');
+	var batch = [];
+	perms.forEach(function(p) {
+		batch.push({
+			method: "DELETE",
+			relative_url: "me/permissions/" + p
+		});
+	});
+	FB.apiwt("/", "POST", {batch: batch}, callback);*/
 };
 
 /**
