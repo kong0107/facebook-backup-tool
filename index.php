@@ -13,6 +13,7 @@
 	<script src="js/fbsdk-extend.js"></script>
 	<script>
 		angular.module("myApp", []).controller("main", function($scope, $http) {
+			$scope.FB = window.FB;
 			window.fbAsyncInit = function() {
 				FB.init(FBConfig);
 				FB.getLoginStatus(function(r) {
@@ -89,19 +90,19 @@ model.edgeLists = {
 		{path: "/photos?type=tagged", type: "photo", desc: "Photos the user has been tagged in"},
 		{path: "/tagged", type: "post", desc: "Posts the user was tagged in"}
 	],
-	page: [
-		{path: "/albums", type: "album", desc: "Albums and photos inside"},
-		{path: "/events", type: "event", desc: "Events the page created"},
-		{path: "/posts", type: "post", desc: "Posts published by the page"},
-		{path: "/photos?type=tagged", type: "photo", desc: "Photos the page is tagged in"},
-		{path: "/videos?type=uploaded", type: "video", desc: "Videos the page uploaded"}
-	],
 	group: [
 		{path: "/albums", type: "album", desc: "Albums"},
 		{path: "/events", type: "event", desc: "Events within the last two weeks"},
 		{path: "/feed", type: "post", desc: "Posts including status updates and links"},
 		{path: "/members", type: "user", desc: "Members"},
 		{path: "/docs", type: "doc", desc: "Documents"}
+	],
+	page: [
+		{path: "/albums", type: "album", desc: "Albums and photos inside"},
+		{path: "/events", type: "event", desc: "Events the page created"},
+		{path: "/posts", type: "post", desc: "Posts published by the page"},
+		{path: "/photos?type=tagged", type: "photo", desc: "Photos the page is tagged in"},
+		{path: "/videos?type=uploaded", type: "video", desc: "Videos the page uploaded"}
 	],
 	event: [
 		/// It seems that edges "posts", "comments", "videos" are always empty,
@@ -131,7 +132,7 @@ model.typeSelected = function(nodeType) {
 		if(!userInfo.groups) {
 			FB.ifPermitted("user_managed_groups", 0, function() {
 				FB.requestPermission(
-					"user_managed_groups", 
+					"user_managed_groups",
 					function() {
 						FB.apiwt("me/groups", function(r) {
 							model.nodeList = userInfo.groups = r.data;
@@ -320,7 +321,7 @@ model.clearStack = function() {
 };
 
 /**
- * Request permission if some type of node/edge is checked.
+ * Request permission for user edges.
  */
 model.checkPerm = function(index) {
 	//console.log(model.nodeType, model.nodeId, model.edgeLists[model.nodeType][index], model.edgeChecked[index]);
@@ -340,12 +341,10 @@ model.checkPerm = function(index) {
 			FB.getGrantedPermissions(function(gs){
 				if(gs.indexOf(perms[0]) != -1) return;
 				alert("This app cannot access some checked edge(s) if permission `" + perms[0] + "` is not granted.");
-				/*console.log("Now we have permissions:");
-				console.log(perms);*/
 			});
 		}, {scope: perms.toString(), auth_type: "rerequest"});
 	});
-}
+};
 
 return model;
 //--------
@@ -396,9 +395,22 @@ return model;
 				ng-model-options="{debounce: 500}"
 				placeholder="{{model.nodeType}} ID or search text"
 			>
+			<p ng-show="['page','event'].indexOf(model.nodeType)>=0">
+				Public {{model.nodeType}}s are available by searching either ID or name without any permission.
+				<br>
+				For non-public {{model.nodeType}}s which you are one manager, you shall grant permission
+				<button ng-click="FB.requestPermission({page:'manage_pages',event:'user_events'}[model.nodeType])">{{{page:'manage_pages',event:'user_events'}[model.nodeType]}}</button>
+				manually, and then search by ID.
+			</p>
 		</section>
 		<section ng-show="model.nodeList.length">
 			<h2>Choose which {{model.nodeType}} to crawl</h2>
+			<p ng-show="model.nodeType=='user'">Only your own data is accessible.</p>
+			<p ng-show="model.nodeType=='group'">
+				Only those in which you are one manager is accessible.
+				<br> (Crawling public groups are possible but not implemented yet.
+				Crawling non-public groups in which you are not a manager is not possible by Facebook API.)
+			</p>
 			<ul>
 				<li ng-repeat="node in model.nodeList" class="inlineBlock">
 					<label>
