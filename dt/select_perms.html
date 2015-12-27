@@ -7,6 +7,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script src="//connect.facebook.net/en_US/sdk.js"></script>
 	<script src="../js/fbsdk-config.js"></script>
+	<script src="../js/fbsdk-extend.js"></script>
 	<script>
 angular.module("myApp", []).controller("main", function($scope, $http, $window) {
 	$scope.status = {
@@ -42,7 +43,6 @@ angular.module("myApp", []).controller("main", function($scope, $http, $window) 
 		FB.init(FBConfig);
 		FB.getLoginStatus(checkResStatus);
 	};
-	$.getScript("../js/fbsdk-extend.js");
 
 	$scope.FBLogin = function() {
 		FB.login(checkResStatus);
@@ -55,7 +55,12 @@ angular.module("myApp", []).controller("main", function($scope, $http, $window) 
 			if(grantedPerms.indexOf(p) == -1) {
 				if(g) toRequest.push(p);
 			}
-			else if(!g) FB.revokePermission(p);
+			else if(!g) FB.revokePermission(p, function(){
+				var qq = p;
+				return function() {
+					console.log("Revoked permission " + qq);
+				}
+			}());
 		}
 		if(toRequest.length) {
 			FB.requestPermission(toRequest, loadGrantedPerms, loadGrantedPerms);
