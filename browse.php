@@ -90,12 +90,18 @@ return model;
 		h1, h2, h3, h4, h5, h6 {
 			margin: 0 .25em;
 		}
+		p {
+			margin: .5em 0;
+		}
 		fieldset {
 			clear: both;
 		}
 		article {
-			float: left;
+			display: inline-block;
+			vertical-align: top;
 			width: 360px;
+			margin: .5em;
+			padding: .5em 0;
 		}
 		header {
 			display: table;
@@ -107,10 +113,6 @@ return model;
 		}
 		a[href] {
 			text-decoration: none;
-		}
-		p {
-			margin: 0;
-			font-size: smaller;
 		}
 		ul {
 			margin: 0;
@@ -124,7 +126,13 @@ return model;
 </head>
 <body ng-controller="main">
 	<h1>Choose what to Download</h1>
-	<form action="export.php" method="post">
+	<details>
+		<p>A zip file will be downloaded after submit the form.</p>
+		<p>"albums" do not include "photos" automatically; "photos" do not include the source files themselves; "photo files" may cost much time.</p>
+		<p>"comments" are for posts, albums, and photos. Even if you select posts and comments, comments for photos will still be in the archive.</p>
+		<p>If you are a programmer, JSON files in `data/json` would help you to process the data for further usage.</p>
+	</details>
+	<form action="export.php" method="post" target="_blank">
 		<fieldset ng-repeat="(type,nodes) in model track by type" ng-if="'[]'!=(nodes|json)">
 			<legend><h2>{{type}}</h2></legend>
 			<article ng-repeat="(id,node) in nodes track by id">
@@ -140,6 +148,12 @@ return model;
 							<input type="checkbox" name="collections[{{type+'_'+id}}][]" value="{{edgeName}}">
 							{{edgeName}}
 							<span>({{info.count}})</span>
+						</label>
+					</li>
+					<li ng-if="node.edges.photos">
+						<label title="source files of the photos">
+							<input type="checkbox" name="collections[{{type+'_'+id}}][]" value="photoFiles">
+							photo files
 						</label>
 					</li>
 				</ul>
