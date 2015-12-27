@@ -1,6 +1,5 @@
 <?php
 	session_start();
-	require_once 'db.inc.php';
 
 	$data = $_REQUEST['data'];
 

@@ -60,12 +60,8 @@ model.interval = 3;
 	 * and the corresponding button.
 	 */
 	if(count($_SESSION['stack'])) {
-		echo 'model.showClearButton = true;';
 		echo 'model.stack = ' . json_encode($_SESSION['stack'], JSON_UNESCAPED_UNICODE) . ';';
-		printf('model.stackCount = %d;', count($_SESSION['stack']));
-		echo 'model.status = "crawling";';
 	}
-	else echo 'model.status = "setting";';
 ?>
 
 /**
@@ -194,7 +190,7 @@ model.nodeSelected = function() {
 		});
 		break;
 	case "event":
-		FB.apiwt(model.nodeId + "?fields=id,category,description,end_time,name,owner,parent_group,place,start_time,attending_count,picture", function(r) {
+		FB.apiwt(model.nodeId + "?fields=id,category,description,end_time,name,start_time,attending_count,picture", function(r) {
 			model.nodeInfo = r;
 			$scope.$apply();
 		});
@@ -230,6 +226,9 @@ model.isButtonDisabled = function() {
  * Add what to crawl to the deque.
  */
 model.enqueue = function() {
+	model.showForm = false;
+	model.message = "Enqueuing ...";
+
 	var nid = model.nodeId;
 	var nType = model.nodeType;
 	var edgeList = model.edgeLists[nType];
@@ -252,13 +251,15 @@ model.enqueue = function() {
 	}
 	/// Most server-side language does not support `$http.post` of AngularJS.
 	/// @see http://stackoverflow.com/questions/19254029
+	model.waitingResponse = true;
 	$.post("array_op.php", body, function(data) {
-		model.message = "";
+		model.message = "Sucessfully enqueued.";
 		model.stack = data.stack;
 		model.continue();
 		$scope.$apply();
 	}, "json").fail(function() {
 		model.message = JSON.stringify(arguments, undefined, 4);
+		model.waitingResponse = false;
 		$scope.$apply();
 	});
 }
@@ -269,24 +270,28 @@ model.enqueue = function() {
  * Recursive by `setTimeout`.
  */
 model.request = function() {
-	model.showClearButton = false;
-	model.status = "crawling";
-	model.lastExecute = (new Date).toISOString();
+	model.lastExecute = new Date;
+	model.waitingResponse = true;
 	$http.get("crawler.php").then(function(r) {
 		model.message = r.data.message;
-		model.stackCount = r.data.stackCount;
-		if(r.data.status == "success") {
-			if(r.data.stack)
-				model.stack = r.data.stack;
-			if(model.timerId)
-				model.timerId = setTimeout(model.request, model.interval * 1000);
+		model.waitingResponse = false;
+		if(r.data.stack) {
+			model.stack = r.data.stack;
+			if(!model.stack.length) {
+				model.stop();
+				setTimeout(function(){
+					model.message = "Queue clear. All crawled.";
+					$scope.$apply();
+				}, model.interval * 1000);
+			}
 		}
-		else {
-			model.stop();
-			model.status = "finished";
-		}
+		if(model.timerId)
+			model.timerId = setTimeout(model.request, model.interval * 1000);
 	}, function(r) {
-		model.message = JSON.stringify(r, undefined, 4);
+		model.waitingResponse = false;
+		model.message = r.statusText;
+		if(model.timerId)
+			model.timerId = setTimeout(model.request, model.interval * 1000);
 	});
 };
 
@@ -294,6 +299,7 @@ model.request = function() {
  * Set re-request automatically.
  */
 model.continue = function() {
+	if(model.timerId) return;
 	model.timerId = -1;
 	model.request();
 };
@@ -312,19 +318,18 @@ model.stop = function() {
  * Send "clear" message to the server to clear the stack.
  */
 model.clearStack = function() {
-	model.stack = [];
+	if(!window.confirm("Sure?")) return;
 	$http.get("array_op.php?op=clear").then(function(r) {
-		model.status = "setting";
+		model.stack = [];
 	}, function(r) {
 		model.message = JSON.stringify(r, undefined, 4);
 	});
 };
 
 /**
- * Request permission for user edges.
+ * Request permission for edges of user.
  */
 model.checkPerm = function(index) {
-	//console.log(model.nodeType, model.nodeId, model.edgeLists[model.nodeType][index], model.edgeChecked[index]);
 	if(!model.edgeChecked[index]) return;
 	if(model.nodeType != "user") return;
 	var perms = [];
@@ -346,6 +351,12 @@ model.checkPerm = function(index) {
 	});
 };
 
+/**
+ * Show different parts depending on whether the stack is empty while loading.
+ */
+if(model.stack) model.continue();
+else model.showForm = true;
+
 return model;
 //--------
 			};
@@ -366,6 +377,7 @@ return model;
 </head>
 <body ng-controller="main">
 	<h1>Backup from Facebook</h1>
+	<a style="float: right;" href="browse.php">Browse what has been crawled</a>
 	<?php
 		if(!$_SESSION['facebook_access_token']) {
 			printf('<a href="%s">Login with Facebook</a>', getFBLoginUrl());
@@ -374,122 +386,118 @@ return model;
 		}
 	?>
 	<div ng-if="!model">Loading ...</div>
-	<form ng-show="model && model.status=='setting'">
-		<section>
-			<h2>Choose what kind of node to crawl</h2>
-			<ul>
-				<li ng-repeat="(node, edges) in model.edgeLists" class="inlineBlock">
-					<label>
-						<input type="radio"
-							ng-model="model.nodeType" ng-value="node"
-							ng-click="model.typeSelected(node)"
-						>{{node}}
-					</label>
-				</li>
-			</ul>
-		</section>
-		<section ng-show="['page', 'event'].indexOf(model.nodeType) != -1">
-			<h2>Search for a {{model.nodeType}}</h2>
-			<input ng-model="model.q"
-				ng-change="model.search()"
-				ng-model-options="{debounce: 500}"
-				placeholder="{{model.nodeType}} ID or search text"
-			>
-			<p ng-show="['page','event'].indexOf(model.nodeType)>=0">
-				Public {{model.nodeType}}s are available by searching either ID or name without any permission.
-				<br>
-				For non-public {{model.nodeType}}s which you are one manager, you shall grant permission
-				<button ng-click="FB.requestPermission({page:'manage_pages',event:'user_events'}[model.nodeType])">{{{page:'manage_pages',event:'user_events'}[model.nodeType]}}</button>
-				manually, and then search by ID.
-			</p>
-		</section>
-		<section ng-show="model.nodeList.length">
-			<h2>Choose which {{model.nodeType}} to crawl</h2>
-			<p ng-show="model.nodeType=='user'">Only your own data is accessible.</p>
-			<p ng-show="model.nodeType=='group'">
-				Only those in which you are one manager is accessible.
-				<br> (Crawling public groups are possible but not implemented yet.
-				Crawling non-public groups in which you are not a manager is not possible by Facebook API.)
-			</p>
-			<ul>
-				<li ng-repeat="node in model.nodeList" class="inlineBlock">
-					<label>
-						<input type="radio" ng-model="model.nodeId" ng-value="node.id"
-							ng-click="model.nodeSelected(node.id)"
-						>{{node.name}}
-					</label>
-				</li>
-			</ul>
-		</section>
-		<section ng-show="model.nodeInfo" style="border: 1px solid #ccc; padding: 0.2em; margin: 0.2em;">
-			<header style="display: table;">
-				<img ng-if="model.nodeInfo.picture"
-					ng-src="{{model.nodeInfo.picture.data.url}}"
-					style="display: table-cell; padding: 0.2em; margin: 0.2em;"
+	<div ng-show="model">
+		<button ng-hide="model.showForm" ng-click="model.showForm=true">Enqueue something to crawl</button>
+		<form ng-show="model.showForm">
+			<section>
+				<header>
+					<h2 style="display: inline-block;">Choose what kind of node to crawl</h2>
+					<button ng-show="model.stack.length" ng-click="model.showForm=false">Hide this form</button>
+				</header>
+				<ul>
+					<li ng-repeat="(node, edges) in model.edgeLists" class="inlineBlock">
+						<label>
+							<input type="radio"
+								ng-model="model.nodeType" ng-value="node"
+								ng-click="model.typeSelected(node)"
+							>{{node}}
+						</label>
+					</li>
+				</ul>
+			</section>
+			<section ng-show="['page', 'event'].indexOf(model.nodeType) != -1">
+				<h2>Search for a {{model.nodeType}}</h2>
+				<input ng-model="model.q"
+					ng-change="model.search()"
+					ng-model-options="{debounce: 500}"
+					placeholder="{{model.nodeType}} ID or search text"
 				>
-				<div style="display: table-cell; vertical-align: top;">
-					<h3><a target="_blank" href="{{model.nodeInfo.link||('http://facebook.com/'+model.nodeInfo.id)}}" style="text-decoration: none;">{{model.nodeInfo.name}}</a></h3>
-					<span>{{model.nodeInfo.category}}</span>
-				</div>
-			</header>
-			ID: {{model.nodeInfo.id}}
+				<p ng-show="['page','event'].indexOf(model.nodeType)>=0">
+					Public {{model.nodeType}}s are available by searching either ID or name without any permission.
+					<br>
+					For non-public {{model.nodeType}}s which you are one manager, you shall grant permission
+					<button ng-click="FB.requestPermission({page:'manage_pages',event:'user_events'}[model.nodeType])">{{{page:'manage_pages',event:'user_events'}[model.nodeType]}}</button>
+					manually, and then search by ID.
+				</p>
+			</section>
+			<section ng-show="model.nodeList.length">
+				<h2>Choose which {{model.nodeType}} to crawl</h2>
+				<p ng-show="model.nodeType=='user'">Only your own data is accessible.</p>
+				<p ng-show="model.nodeType=='group'">
+					Only those in which you are one manager is accessible.
+					<br> (Crawling public groups are possible but not implemented yet.
+					Crawling non-public groups in which you are not a manager is not possible by Facebook API.)
+				</p>
+				<ul>
+					<li ng-repeat="node in model.nodeList" class="inlineBlock">
+						<label>
+							<input type="radio" ng-model="model.nodeId" ng-value="node.id"
+								ng-click="model.nodeSelected(node.id)"
+							>{{node.name}}
+						</label>
+					</li>
+				</ul>
+			</section>
+			<section ng-show="model.nodeInfo" style="border: 1px solid #ccc; padding: 0.2em; margin: 0.2em;">
+				<header style="display: table;">
+					<img ng-if="model.nodeInfo.picture"
+						ng-src="{{model.nodeInfo.picture.data.url}}"
+						style="display: table-cell; padding: 0.2em; margin: 0.2em;"
+					>
+					<div style="display: table-cell; vertical-align: top;">
+						<h3><a target="_blank" href="{{model.nodeInfo.link||('http://facebook.com/'+model.nodeInfo.id)}}" style="text-decoration: none;">{{model.nodeInfo.name}}</a></h3>
+						<span>{{model.nodeInfo.category}}</span>
+					</div>
+				</header>
+				ID: {{model.nodeInfo.id}}
 
-			<!-- For Pages -->
-			<p ng-if="model.nodeInfo.likes">{{model.nodeInfo.likes |number}} likes</p>
+				<!-- For Pages -->
+				<p ng-if="model.nodeInfo.likes">{{model.nodeInfo.likes |number}} likes</p>
 
-			<!-- For events -->
-			<p ng-if="model.nodeInfo.attending_count">{{model.nodeInfo.attending_count |number}} attendees</p>
-			<p ng-if="model.nodeInfo.start_time">From {{model.nodeInfo.start_time |date : 'yyyy-MM-dd HH:mm'}}</p>
-			<p ng-if="model.nodeInfo.end_time">To {{model.nodeInfo.end_time |date : 'yyyy-MM-dd HH:mm'}}</p>
-			<p ng-if="model.owner">Owner: <a href="http://facebook.com/{{node.owner.id}}">{{node.owner.name}}</a></p>
-			<p ng-if="model.parent_group">Parent group: <a href="http://facebook.com/{{node.parent_group.id}}">{{node.parent_group.name}}</a></p>
+				<!-- For events -->
+				<p ng-if="model.nodeInfo.attending_count">{{model.nodeInfo.attending_count |number}} attendees</p>
+				<p ng-if="model.nodeInfo.start_time">From {{model.nodeInfo.start_time |date : 'yyyy-MM-dd HH:mm'}}</p>
+				<p ng-if="model.nodeInfo.end_time">To {{model.nodeInfo.end_time |date : 'yyyy-MM-dd HH:mm'}}</p>
 
-			<div style="white-space: pre-wrap; max-height: 8em; overflow: auto; border-top: 1px dashed #ccc;">{{(
-				model.nodeInfo.description
-				? model.nodeInfo.description
-				: model.nodeInfo.about
-			)}}</div>
-		</section>
-		<section ng-show="model.nodeId">
-			<h2>Choose which edges to crawl</h2>
-			<ul>
-				<li ng-repeat="edgeInfo in model.edgeLists[model.nodeType]">
-					<label>
-						<input type="checkbox" ng-model="model.edgeChecked[$index]"
-							ng-click="model.checkPerm($index)"
-						>{{edgeInfo.desc}}
-						<code>({{edgeInfo.path}})</code>
-					</label>
-				</li>
-			</ul>
-		</section>
-		<button ng-disabled="model.isButtonDisabled()" ng-click="model.enqueue()">Start crawl</button>
-	</form>
-	<div ng-show="model && model.status!='setting'">
-		<div ng-if="model.showClearButton">
-			There are still {{model.stackCount}} elements in the stack.
-			You may continue or clear the stack for a new crawling.
-			<br>
-			<button ng-click="model.clearStack()">Clear Stack</button>
+				<div style="white-space: pre-wrap; max-height: 8em; overflow: auto; border-top: 1px dashed #ccc;">{{(
+					model.nodeInfo.description
+					? model.nodeInfo.description
+					: model.nodeInfo.about
+				)}}</div>
+			</section>
+			<section ng-show="model.nodeId">
+				<h2>Choose which edges to crawl</h2>
+				<ul>
+					<li ng-repeat="edgeInfo in model.edgeLists[model.nodeType]">
+						<label>
+							<input type="checkbox" ng-model="model.edgeChecked[$index]"
+								ng-click="model.checkPerm($index)"
+							>{{edgeInfo.desc}}
+							<code>({{edgeInfo.path}})</code>
+						</label>
+					</li>
+				</ul>
+			</section>
+			<button ng-disabled="model.isButtonDisabled()" ng-click="model.enqueue()">Enqueue and crawl</button>
+		</form>
+		<hr>
+		<div ng-show="model.lastExecute">
+			<h2>Crawling message</h2>
+			<button ng-click="model.continue()" ng-disabled="model.timerId">Continue</button>
+			<button ng-click="model.stop()" ng-disabled="!model.timerId">Stop</button>
+			<button ng-click="model.clearStack()"
+				ng-disabled="model.waitingResponse || model.timerId || !model.stack.length"
+			>Clear</button>
+			<p>Last execute: <time ng-bind="model.lastExecute |date :'HH:mm:ss.sss'"></time></p>
 		</div>
-		<button ng-click="model.continue()"
-			ng-disabled="model.timerId || model.status=='finished'"
-		>Continue</button>
-		<br>
-		<button ng-click="model.stop()" ng-disabled="!model.timerId">Stop</button>
-		<p>Last execute: <time ng-bind="model.lastExecute"></time></p>
-		<div ng-show="model.status=='finished'">
-			<a href="browse.php">Browse what to download</a>
-			<button ng-click="model.status='setting'">Crawl something else</button>
-		</div>
-		<details ng-show="model.stack">
-			<summary>{{model.stack.length}} in stack</summary>
-			<ol>
+		<div ng-show="model.stack">
+			<h2>{{model.stack.length}} in queue</h2>
+			<ol style="overflow: auto; height: 8em; resize: vertical;">
 				<li ng-repeat="ele in model.stack track by ele.path"
 				>{{ele.path}}</li>
 			</ol>
-		</details>
+		</div>
+		<div class="pre" ng-bind="model.message"></div>
 	</div>
-	<div class="pre" ng-bind="model.message"></div>
 </body>
 </html>
