@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/config.inc.php';
+
 try {
 	$dbCon = new MongoClient($config['mongodb_url']);
 } catch(MongoConnectionException $e) {

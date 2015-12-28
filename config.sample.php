@@ -11,6 +11,8 @@
 	
 	$config['mongodb_url'] = '';
 	$config['mongodb_dbname'] = 'facebook';
+	
+	$config['data_storage'] = __DIR__ . '/data';
 
 	$config['server_root'] = $_SERVER['REQUEST_SCHEME']
 		. '://'

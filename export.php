@@ -52,7 +52,7 @@
 	/**
 	 * Open a Zip file and add static files.
 	 */
-	$dir = __DIR__ . '/data/archives';
+	$dir = $config['data_storage'] . '/archives';
 	if(!is_dir($dir)) mkdir($dir, 0777, true);
 	$zipFile = "$dir/" . implode('-', array_keys($input)) . '.zip'; ///< a random generated file name would be needed.
 	$zip = new ZipArchive;
@@ -111,17 +111,16 @@
 		/**
 		 * Add image files belonging to the node if "photo files" are requested.
 		 */
-		if(in_array('photoFiles', $edges)) {
+		if($config['enable_photo_backup'] && in_array('photoFiles', $edges)) {
 			foreach($albums as $album) {
-				$dir = "data/photos/$album";
+				$dir = "{$config['enable_photo_backup']}/photos/$album";
 				if(!is_dir($dir)) continue;
 				foreach(scandir($dir) as $filename) {
 					if(in_array($filename, array('.', '..'))) continue;
-					$zip->addFile("$dir/$filename");
+					$zip->addFile("data/photos/$album/$filename");
 				}
 			}
 		}
-
 	}
 
 	$zip->close();

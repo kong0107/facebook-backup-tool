@@ -128,7 +128,7 @@ return model;
 	<h1>Choose what to Download</h1>
 	<details>
 		<p>A zip file will be downloaded after submit the form.</p>
-		<p>"albums" do not include "photos" automatically; "photos" do not include the source files themselves; "photo files" may cost much time.</p>
+		<p>"albums" do not include "photos" automatically; "photos" do not include the source files themselves.</p>
 		<p>"comments" are for posts, albums, and photos. Even if you select posts and comments, comments for photos will still be in the archive.</p>
 		<p>If you are a programmer, JSON files in `data/json` would help you to process the data for further usage.</p>
 	</details>
@@ -150,7 +150,7 @@ return model;
 							<span>({{info.count}})</span>
 						</label>
 					</li>
-					<li ng-if="node.edges.photos">
+					<li ng-if="<?=$config['enable_photo_backup']?'node.edges.photos':'false'?>">
 						<label title="source files of the photos">
 							<input type="checkbox" name="collections[{{type+'_'+id}}][]" value="photoFiles">
 							photo files

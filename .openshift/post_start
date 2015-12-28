@@ -1,0 +1,2 @@
+#!/bin/bash
+cp $OPENSHIFT_DATA_DIR/config.inc.php $OPENSHIFT_REPO_DIR

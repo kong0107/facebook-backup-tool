@@ -134,11 +134,11 @@
 		}
 		else $colName = $type . 's';
 
-		if($type == 'photo') {
+		if($config['enable_photo_backup'] && $type == 'photo') {
 			/// Download the photo.
 			$p = end($ancestors);
 			$source = $doc['images'][0]['source'];
-			$dir = __DIR__ . "/data/photos/{$p['type']}_{$p['id']}/";
+			$dir = "{$config['data_storage']}/photos/{$p['type']}_{$p['id']}/";
 			$dest = $dir . $doc['id'] . '.'
 				. pathinfo(parse_url($source, PHP_URL_PATH))['extension']
 			;
