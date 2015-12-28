@@ -100,6 +100,7 @@ html, body {
  */
 h1 {
 	display: inline-block;
+	vertical-align: top;
 	margin: .3em;
 }
 h2 {
@@ -113,6 +114,8 @@ h3,h4,h5,h6 {
 	display: inline-block;
 	white-space: pre-wrap;
 	font-size: smaller;
+	max-height: 4em;
+	overflow: hidden;
 }
 nav li {
 	cursor: pointer;
@@ -217,7 +220,7 @@ article nav {
 .displayingPhoto {
 	background-color: #ccc;
 	padding: 1em;
-	width: 100%;
+	width: 95%;
 }
 .photosContainer {
 	display: inline-block;

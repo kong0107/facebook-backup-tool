@@ -31,8 +31,6 @@
 		if(!$input[$nodeName]) exit('Error: no collections for the node.');
 	}
 	if(!$input || !count($input)) exit('Error: no data.');
-	/*print_r($input);
-	exit;*/
 
 	/**
 	 * Check permissions.
@@ -74,12 +72,13 @@
 		$dest = "data/js/{$nodeName}_info.js";
 		$nodeInfo['fbbk_type'] = $type;
 		$json = json_encode($nodeInfo, JSON_UNESCAPED_UNICODE);
-		$zip->addFromString("/data/json/{$nodeName}_info.json", $json);
+		$zip->addFromString("data/json/{$nodeName}_info.json", $json);
 		$zip->addFromString($dest, "node.info=$json;\n");
 		$jss = [$dest];	///< for inserting `SCRIPT` tags in `index.html`
 		$albums = [$nodeName]; ///< for adding image files.
 
 		foreach($edges as $edge) {
+			if($edge == 'photoFiles') continue;
 			$colName = $nodeName . '_' . $edge;
 			$col = $db->selectCollection($colName);
 			$dest = "data/js/$colName.js";
@@ -110,9 +109,9 @@
 		));
 
 		/**
-		 * Add image files belonging to the node if "photos" are requested.
+		 * Add image files belonging to the node if "photo files" are requested.
 		 */
-		if(in_array('photos', $edges)) {
+		if(in_array('photoFiles', $edges)) {
 			foreach($albums as $album) {
 				$dir = "data/photos/$album";
 				if(!is_dir($dir)) continue;
