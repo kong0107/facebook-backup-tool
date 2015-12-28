@@ -1,6 +1,6 @@
 <?php
 try {
-	$dbCon = new MongoClient();
+	$dbCon = new MongoClient($config['mongodb_url']);
 } catch(MongoConnectionException $e) {
 	header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
 	$result = array(
@@ -12,7 +12,7 @@ try {
 	);
 	exit(json_encode($result));
 }
-$db = $dbCon->facebook;
+$db = $dbCon->selectDB($config['mongodb_dbname']);
 
 /**
  * Remove null, '' and [] in an array recursively.

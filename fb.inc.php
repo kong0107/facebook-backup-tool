@@ -8,10 +8,10 @@
 			session_start();
 		case PHP_SESSION_ACTIVE: // sessions are enabled, and one exists.
 	}
-	require_once __DIR__ . '/vendor/autoload.php';
+	require_once $config['facebook_autoload'];
 
 	try {
-		$fb = new Facebook\Facebook($config['app']);
+		$fb = new Facebook\Facebook($config['facebook_app']);
 	} catch(Facebook\Exceptions\FacebookResponseException $e) {
 		exit('Graph returned an error: ' . $e->getMessage());
 	} catch(Facebook\Exceptions\FacebookSDKException $e) {

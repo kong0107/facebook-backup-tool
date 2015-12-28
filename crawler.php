@@ -28,7 +28,7 @@
 	$sleepTime = 1e+5;
 	p(sprintf('Time limit: %.2f seconds.', $maxExeTime));
 	p(sprintf('Sleep time setting: %d milliseconds.', $sleepTime / 1000));
-	p(sprintf("Already %.2f seconds passed.\n", microtime(true) - $config['startTime']));
+	p(sprintf("Already %.2f seconds passed.\n", microtime(true) - $config['start_time']));
 
 	/**
 	 * Main algorithm.
@@ -83,7 +83,7 @@
 			save($res, $type, $ancestors);
 		}
 
-		$elapsedTime = microtime(true) - $config['startTime'];
+		$elapsedTime = microtime(true) - $config['start_time'];
 		p(sprintf("%.2f seconds have passed.\n", $elapsedTime));
 		if($elapsedTime >= $maxExeTime) break;
 		usleep($sleepTime);
