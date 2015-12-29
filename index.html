@@ -360,7 +360,9 @@
 				<li ng-repeat="m in ret.months[t]"
 					ng-click="ret.month[t] = m; ret.skip = 0;"
 					ng-class="(ret.month[t] == m)?'focus':''"
-				>{{m}}</li>
+				>{{m}} 
+					<span class="count">({{(ret[t]|filter:{created_time:m}).length}})</span>
+				</li>
 			</ul>
 		</nav>
 	</script>

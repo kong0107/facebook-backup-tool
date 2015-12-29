@@ -1,0 +1,64 @@
+/**
+ * For the whole page
+ *
+ * @see http://cssreset.com/how-to-keep-footer-at-bottom-of-page-with-css/
+ */
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+#wrapper {
+	min-height: 100%;
+	position: relative;
+}
+#wrapper > header:before {
+	content: "";
+	display: block;
+	overflow: auto;
+	/**
+	 * Hacked by hit1205 to avoid collapsing margins.
+	 * For other solutions, see chming's article:
+	 * @see http://www.chming.tw/blog/2014/09/03/collapsing-margins/
+	 */
+}
+#wrapper > section {
+	padding-bottom: 3em;
+}
+#wrapper > footer {
+	width: 100%;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+}
+
+/**
+ * For table-like styling
+ */
+.clear { clear: both; }
+.inlineBlock { display: inline-block; }
+.rawdata {
+	white-space: pre-wrap;
+	font-family: monospace;
+}
+
+.table,
+.dlTable {
+	display: table;
+}
+.table > header,
+.table > footer,
+.dlTable > header,
+.dlTable > footer {
+	display: table-caption;
+}
+.tableRow,
+.dlTable > dl {
+	display: table-row;
+}
+.tableCell,
+.dlTable > dl > dt,
+.dlTable > dl > dd {
+	display: table-cell;
+	vertical-align: top;
+}

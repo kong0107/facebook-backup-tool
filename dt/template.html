@@ -39,10 +39,24 @@
 			};
 		});
 	</script>
-	<style></style>
+	<link rel="stylesheet" href="../styles/std.css">
+	<style>
+		#wrapper > footer {
+			background: #ccc;
+			border-top: 1px solid #888;
+			text-align: center;
+		}
+	</style>
 </head>
 <body ng-controller="main">
-	<h1>Template</h1>
-	<pre>{{model|json}}</pre>
+	<div id="wrapper">
+		<header>
+			<h1>Template</h1>
+		</header>
+		<section>
+			<pre>{{model|json}}</pre>
+		</section>
+		<footer>Footer</footer>
+	</div>
 </body>
 </html>
