@@ -396,7 +396,7 @@ return model;
 					<button ng-show="model.stack.length" ng-click="model.showForm=false">Hide this form</button>
 				</header>
 				<ul>
-					<li ng-repeat="(node, edges) in model.edgeLists" class="inlineBlock">
+					<li ng-repeat="(node, edges) in model.edgeLists track by node" class="inlineBlock">
 						<label>
 							<input type="radio"
 								ng-model="model.nodeType" ng-value="node"
@@ -430,7 +430,7 @@ return model;
 					Crawling non-public groups in which you are not a manager is not possible by Facebook API.)
 				</p>
 				<ul>
-					<li ng-repeat="node in model.nodeList" class="inlineBlock">
+					<li ng-repeat="node in model.nodeList track by node.id" class="inlineBlock">
 						<label>
 							<input type="radio" ng-model="model.nodeId" ng-value="node.id"
 								ng-click="model.nodeSelected(node.id)"
@@ -469,7 +469,7 @@ return model;
 			<section ng-show="model.nodeId">
 				<h2>Choose which edges to crawl</h2>
 				<ul>
-					<li ng-repeat="edgeInfo in model.edgeLists[model.nodeType]">
+					<li ng-repeat="edgeInfo in model.edgeLists[model.nodeType] track by $index">
 						<label>
 							<input type="checkbox" ng-model="model.edgeChecked[$index]"
 								ng-click="model.checkPerm($index)"
