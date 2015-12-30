@@ -1,5 +1,6 @@
 <?php
 	require_once 'fb.inc.php';
+	if(!is_array($_SESSION['stack'])) $_SESSION['stack'] = [];
 ?>
 <!DOCTYPE HTML>
 <html ng-app="myApp">
@@ -13,37 +14,21 @@
 	<script src="js/fbsdk-config.js"></script>
 	<script src="js/fbsdk-extend.js"></script>
 	<script>
+		FB.init(FBConfig);
 		angular.module("myApp", []).controller("main", function($scope, $http) {
-			$scope.FB = window.FB;
-			window.fbAsyncInit = function() {
-				FB.init(FBConfig);
-				FB.getLoginStatus(function(r) {
-					$scope.model = main(r.authResponse ? r.authResponse.userID : "");
-					$scope.$apply();
-				});
-			};
+			FB.getLoginStatus(function(r) {
+				$scope.model = main(r.authResponse ? r.authResponse.userID : "");
+				$scope.$apply();
+			});
 
 			var main = function(userID) {
 //--------
 if(!userID) return {};
 
 /**
- * Initialization.
- *
- * Load user info and adminned groups.
- * Permission "user_managed_groups" would be requested in `model.typeSelected`
- * if it hasn't been granted.
- */
-var userInfo = {};
-FB.apiwt(userID + "?fields=id,name,groups{id,name,description}", function(r) {
-	if(r.groups) r.groups = r.groups.data;
-	userInfo = r;
-});
-
-/**
  * Define binding data and functions.
  *
- * Return `model` to be `$scope.model`. Thus programmers can
+ * Return `model` to be `$scope.model`. Thus we can
  * use same names here and in HTML.
  */
 var model = {};
@@ -53,18 +38,6 @@ var model = {};
  */
 model.interval = 3;
 
-<?php
-	/**
-	 * Different settings depending on whether stack is empty.
-	 *
-	 * Show "Do you wanna continue crawling or clear the stack" message
-	 * and the corresponding button.
-	 */
-	if(count($_SESSION['stack'])) {
-		echo 'model.stack = ' . json_encode($_SESSION['stack'], JSON_UNESCAPED_UNICODE) . ';';
-	}
-?>
-
 /**
  * ID returned by `window.setTimeout`.
  *
@@ -72,6 +45,25 @@ model.interval = 3;
  * if there's no timer but we want one later.
  */
 model.timerId = null;
+
+/**
+ * Check if there's unfinished crawling.
+ */
+model.stack = <?=json_encode($_SESSION['stack'], JSON_UNESCAPED_UNICODE)?>;
+
+/**
+ * Initialization.
+ *
+ * Load user info and adminned groups.
+ * Permission "user_managed_groups" would be requested in `model.typeSelected`
+ * if it hasn't been granted.
+ */
+model.userInfo = {id: userID};
+FB.apiwt(userID + "?fields=id,name,groups{id,name,description}", function(r) {
+	if(r.groups) r.groups = r.groups.data;
+	model.userInfo = r;
+	$scope.$apply();
+});
 
 /**
  * Edges available for each type of node.
@@ -122,17 +114,17 @@ model.typeSelected = function(nodeType) {
 	model.edgeChecked = [];
 	switch(nodeType) {
 	case "user":
-		model.nodeList.push(userInfo);
+		model.nodeList.push(model.userInfo);
 		model.nodeId = userID;
 		break;
 	case "group":
-		if(!userInfo.groups) {
+		if(!model.userInfo.groups) {
 			FB.ifPermitted("user_managed_groups", 0, function() {
 				FB.requestPermission(
 					"user_managed_groups",
 					function() {
 						FB.apiwt("me/groups", function(r) {
-							model.nodeList = userInfo.groups = r.data;
+							model.nodeList = model.userInfo.groups = r.data;
 							$scope.$apply();
 						});
 					},
@@ -142,7 +134,7 @@ model.typeSelected = function(nodeType) {
 				);
 			});
 		}
-		model.nodeList = userInfo.groups;
+		model.nodeList = model.userInfo.groups;
 		break;
 	}
 };
@@ -196,9 +188,9 @@ model.nodeSelected = function() {
 			$scope.$apply();
 		});
 	case "group":
-		for(var i = 0; i < userInfo.groups.length; ++i) {
-			if(userInfo.groups[i].id == model.nodeId) {
-				model.nodeInfo = userInfo.groups[i];
+		for(var i = 0; i < model.userInfo.groups.length; ++i) {
+			if(model.userInfo.groups[i].id == model.nodeId) {
+				model.nodeInfo = model.userInfo.groups[i];
 				break;
 			}
 		}
@@ -211,7 +203,7 @@ model.nodeSelected = function() {
  *
  * Available only if there are more than one edge checked.
  */
-model.isButtonDisabled = function() {
+model.isEnqueueButtonDisabled = function() {
 	if(!model.nodeId) return true;
 	var hasCheckedEdge = false;
 	for(var i = 0; i < model.edgeChecked.length; ++i) {
@@ -224,7 +216,7 @@ model.isButtonDisabled = function() {
 };
 
 /**
- * Add what to crawl to the deque.
+ * Add what to crawl to the list.
  */
 model.enqueue = function() {
 	model.showForm = false;
@@ -355,7 +347,7 @@ model.checkPerm = function(index) {
 /**
  * Show different parts depending on whether the stack is empty while loading.
  */
-if(model.stack) model.continue();
+if(model.stack.length) model.continue();
 else model.showForm = true;
 
 return model;
@@ -380,16 +372,12 @@ return model;
 		<section>
 <!-- -->
 
-<a style="float: right;" href="browse.php">Browse what has been crawled</a>
-<?php
-	if(!$_SESSION['facebook_access_token']) {
-		printf('<a href="%s">Login with Facebook</a>', getFBLoginUrl());
-		echo '</body></html>';
-		exit;
-	}
-?>
 <div ng-if="!model">Loading ...</div>
-<div ng-show="model">
+<div ng-show="model && !model.userInfo">
+	<a href="<?=getFBLoginUrl()?>">Login with Facebook</a>
+</div>
+<div ng-show="model.userInfo">
+	<p>Hi, {{model.userInfo.name}}</p>
 	<button ng-hide="model.showForm" ng-click="model.showForm=true">Enqueue something to crawl</button>
 	<form ng-show="model.showForm">
 		<section>
@@ -481,7 +469,7 @@ return model;
 				</li>
 			</ul>
 		</section>
-		<button ng-disabled="model.isButtonDisabled()" ng-click="model.enqueue()">Enqueue and crawl</button>
+		<button ng-disabled="model.isEnqueueButtonDisabled()" ng-click="model.enqueue()">Enqueue and crawl</button>
 	</form>
 	<hr>
 	<div ng-show="model.lastExecute">
@@ -493,8 +481,8 @@ return model;
 		>Clear</button>
 		<p>Last execute: <time ng-bind="model.lastExecute |date :'HH:mm:ss.sss'"></time></p>
 	</div>
-	<div ng-show="model.stack">
-		<h2>{{model.stack.length}} in queue</h2>
+	<div ng-show="model.stack.length">
+		<h2>{{model.stack.length}} in list</h2>
 		<ol style="overflow: auto; height: 8em; resize: vertical;">
 			<li ng-repeat="ele in model.stack track by ele.path"
 			>{{ele.path}}</li>

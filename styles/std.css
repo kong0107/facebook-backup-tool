@@ -3,9 +3,11 @@
  *
  * @see http://cssreset.com/how-to-keep-footer-at-bottom-of-page-with-css/
  */
-html, body {
+* {
 	margin: 0;
 	padding: 0;
+}
+html, body {
 	height: 100%;
 }
 #wrapper {

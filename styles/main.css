@@ -11,3 +11,10 @@ h1, h2, h3, h4, h5, h6 {
 p {
 	margin: .5em 0;
 }
+
+#wrapper > footer nav li {
+	display: inline-block;
+	border-left: 1px solid #888;
+	padding: 0 .2em;
+	margin: .4em 0;
+}

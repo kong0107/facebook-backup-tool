@@ -7,20 +7,18 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script src="//connect.facebook.net/en_US/sdk.js"></script>
 	<script src="../js/fbsdk-config.js"></script>
+	<script src="../js/fbsdk-extend.js"></script>
 	<script>
 angular.module("myApp", []).controller("main",
 function($scope, $http, $window) {
+	FB.init(FBConfig);
+
 	$scope.metadata = {};
 	$scope.message = "Loading files ...";
-	window.fbAsyncInit = function() {
-		FB.init(FBConfig);
-	};
-	$.getScript("../js/fbsdk-extend.js");
 	$http.get("../metadata/v2.5.json").then(function(r) {
 		$scope.metadata = r.data;
 		$scope.message = " ";
 	}, function(r) { $scope.requestMD(); });
-
 
 	$scope.requestMD = function() {
 		var nodes = {

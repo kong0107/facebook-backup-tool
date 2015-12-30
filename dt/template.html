@@ -10,12 +10,10 @@
 	<script src="../js/fbsdk-config.js"></script>
 	<script src="../js/fbsdk-extend.js"></script>
 	<script>
-		/**
-		 * Auto-load Facebook SDK in AngularJS initialization.
-		 *
+		/*
 		 * Just modify `main` to what you want. The return value of `main`
 		 * is assgined to `$scope.model` to let AngularJS bind data to.
-		 * `main` can be defined elsewhere, but note that you shall 
+		 * `main` can be defined elsewhere, but note that you shall
 		 * call `$scope.$apply` manually after async functions return,
 		 * which means you have to access `$scope.$apply` in `main`.
 		 *
@@ -25,17 +23,25 @@
 		 * you don't have to make user login twice even if you're working
 		 * on a site using both SDKs for PHP and JS.
 		 */
+		FB.init(FBConfig);
 		angular.module("myApp", []).controller("main", function($scope) {
-			window.fbAsyncInit = function() {
-				FB.init(FBConfig);
-				FB.getLoginStatus(function(r) {
-					$scope.model = main(r.authResponse ? r.authResponse.userID : "");
-					$scope.$apply();
-				});
-			};
+			FB.getLoginStatus(function(r) {
+				$scope.model = main(r.authResponse ? r.authResponse.userID : "");
+				$scope.$apply();
+			});
 			var main = function(userID) {
-				if(!userID) return {}
-				return {userID: userID};
+				var model = {};
+
+				model.title = "Template";
+				model.foo = function(){ return "bar"; };
+				if(userID) {
+					FB.apiwt("/me", function(res) {
+						model.userInfo = res;
+						$scope.$apply();
+					});
+				}
+
+				return model;
 			};
 		});
 	</script>
@@ -51,7 +57,8 @@
 <body ng-controller="main">
 	<div id="wrapper">
 		<header>
-			<h1>Template</h1>
+			<h1>{{model.title}}</h1>
+			<p>{{model.foo()}}</p>
 		</header>
 		<section>
 			<pre>{{model|json}}</pre>

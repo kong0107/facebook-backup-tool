@@ -39,10 +39,8 @@ angular.module("myApp", []).controller("main", function($scope, $http, $window) 
 		$scope.message = "Error while loading permission list.";
 	});
 
-	$window.fbAsyncInit = function() {
-		FB.init(FBConfig);
-		FB.getLoginStatus(checkResStatus);
-	};
+	FB.init(FBConfig);
+	FB.getLoginStatus(checkResStatus);
 
 	$scope.FBLogin = function() {
 		FB.login(checkResStatus);
