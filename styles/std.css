@@ -22,7 +22,7 @@ html, body {
 	 * @see http://www.chming.tw/blog/2014/09/03/collapsing-margins/
 	 */
 }
-#wrapper > section {
+#wrapper > section:last-of-type {
 	padding-bottom: 3em;
 }
 #wrapper > footer {

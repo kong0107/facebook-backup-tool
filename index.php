@@ -363,142 +363,149 @@ return model;
 			};
 		});
 	</script>
+	<link rel="stylesheet" href="styles/std.css">
+	<link rel="stylesheet" href="styles/main.css">
 	<style>
-		h1, h2, h3, p { margin: 0.2em; 0; }
 		ul { list-style-type: none; }
 		label { transition: all 1s; }
 		label:hover { background-color: yellow; }
-		.inlineBlock { display: inline-block; }
 		li.inlineBlock { margin; 0.2em; padding: 0.2em; }
-		.pre {
-			white-space: pre-wrap;
-			font-family: monospace;
-		}
 	</style>
 </head>
 <body ng-controller="main">
-	<h1>Backup from Facebook</h1>
-	<a style="float: right;" href="browse.php">Browse what has been crawled</a>
-	<?php
-		if(!$_SESSION['facebook_access_token']) {
-			printf('<a href="%s">Login with Facebook</a>', getFBLoginUrl());
-			echo '</body></html>';
-			exit;
-		}
-	?>
-	<div ng-if="!model">Loading ...</div>
-	<div ng-show="model">
-		<button ng-hide="model.showForm" ng-click="model.showForm=true">Enqueue something to crawl</button>
-		<form ng-show="model.showForm">
-			<section>
-				<header>
-					<h2 style="display: inline-block;">Choose what kind of node to crawl</h2>
-					<button ng-show="model.stack.length" ng-click="model.showForm=false">Hide this form</button>
-				</header>
-				<ul>
-					<li ng-repeat="(node, edges) in model.edgeLists track by node" class="inlineBlock">
-						<label>
-							<input type="radio"
-								ng-model="model.nodeType" ng-value="node"
-								ng-click="model.typeSelected(node)"
-							>{{node}}
-						</label>
-					</li>
-				</ul>
-			</section>
-			<section ng-show="['page', 'event'].indexOf(model.nodeType) != -1">
-				<h2>Search for a {{model.nodeType}}</h2>
-				<input ng-model="model.q"
-					ng-change="model.search()"
-					ng-model-options="{debounce: 500}"
-					placeholder="{{model.nodeType}} ID or search text"
+	<div id="wrapper">
+		<header>
+			<h1>Backup from Facebook</h1>
+		</header>
+		<section>
+<!-- -->
+
+<a style="float: right;" href="browse.php">Browse what has been crawled</a>
+<?php
+	if(!$_SESSION['facebook_access_token']) {
+		printf('<a href="%s">Login with Facebook</a>', getFBLoginUrl());
+		echo '</body></html>';
+		exit;
+	}
+?>
+<div ng-if="!model">Loading ...</div>
+<div ng-show="model">
+	<button ng-hide="model.showForm" ng-click="model.showForm=true">Enqueue something to crawl</button>
+	<form ng-show="model.showForm">
+		<section>
+			<header>
+				<h2 style="display: inline-block;">Choose what kind of node to crawl</h2>
+				<button ng-show="model.stack.length" ng-click="model.showForm=false">Hide this form</button>
+			</header>
+			<ul>
+				<li ng-repeat="(node, edges) in model.edgeLists track by node" class="inlineBlock">
+					<label>
+						<input type="radio"
+							ng-model="model.nodeType" ng-value="node"
+							ng-click="model.typeSelected(node)"
+						>{{node}}
+					</label>
+				</li>
+			</ul>
+		</section>
+		<section ng-show="['page', 'event'].indexOf(model.nodeType) != -1">
+			<h2>Search for a {{model.nodeType}}</h2>
+			<input ng-model="model.q"
+				ng-change="model.search()"
+				ng-model-options="{debounce: 500}"
+				placeholder="{{model.nodeType}} ID or search text"
+			>
+			<p ng-show="['page','event'].indexOf(model.nodeType)>=0">
+				Public {{model.nodeType}}s are available by searching either ID or name without any permission.
+				<br>
+				For non-public {{model.nodeType}}s which you are one manager, you shall grant permission
+				<button ng-click="FB.requestPermission({page:'manage_pages',event:'user_events'}[model.nodeType])">{{{page:'manage_pages',event:'user_events'}[model.nodeType]}}</button>
+				manually, and then search by ID.
+			</p>
+		</section>
+		<section ng-show="model.nodeList.length">
+			<h2>Choose which {{model.nodeType}} to crawl</h2>
+			<p ng-show="model.nodeType=='user'">Only your own data is accessible.</p>
+			<p ng-show="model.nodeType=='group'">
+				Only those in which you are one manager is accessible.
+				<br> (Crawling public groups are possible but not implemented yet.
+				Crawling non-public groups in which you are not a manager is not possible by Facebook API.)
+			</p>
+			<ul>
+				<li ng-repeat="node in model.nodeList track by node.id" class="inlineBlock">
+					<label>
+						<input type="radio" ng-model="model.nodeId" ng-value="node.id"
+							ng-click="model.nodeSelected(node.id)"
+						>{{node.name}}
+					</label>
+				</li>
+			</ul>
+		</section>
+		<section ng-show="model.nodeInfo" style="border: 1px solid #ccc; padding: 0.2em; margin: 0.2em;">
+			<header style="display: table;">
+				<img ng-if="model.nodeInfo.picture"
+					ng-src="{{model.nodeInfo.picture.data.url}}"
+					style="display: table-cell; padding: 0.2em; margin: 0.2em;"
 				>
-				<p ng-show="['page','event'].indexOf(model.nodeType)>=0">
-					Public {{model.nodeType}}s are available by searching either ID or name without any permission.
-					<br>
-					For non-public {{model.nodeType}}s which you are one manager, you shall grant permission
-					<button ng-click="FB.requestPermission({page:'manage_pages',event:'user_events'}[model.nodeType])">{{{page:'manage_pages',event:'user_events'}[model.nodeType]}}</button>
-					manually, and then search by ID.
-				</p>
-			</section>
-			<section ng-show="model.nodeList.length">
-				<h2>Choose which {{model.nodeType}} to crawl</h2>
-				<p ng-show="model.nodeType=='user'">Only your own data is accessible.</p>
-				<p ng-show="model.nodeType=='group'">
-					Only those in which you are one manager is accessible.
-					<br> (Crawling public groups are possible but not implemented yet.
-					Crawling non-public groups in which you are not a manager is not possible by Facebook API.)
-				</p>
-				<ul>
-					<li ng-repeat="node in model.nodeList track by node.id" class="inlineBlock">
-						<label>
-							<input type="radio" ng-model="model.nodeId" ng-value="node.id"
-								ng-click="model.nodeSelected(node.id)"
-							>{{node.name}}
-						</label>
-					</li>
-				</ul>
-			</section>
-			<section ng-show="model.nodeInfo" style="border: 1px solid #ccc; padding: 0.2em; margin: 0.2em;">
-				<header style="display: table;">
-					<img ng-if="model.nodeInfo.picture"
-						ng-src="{{model.nodeInfo.picture.data.url}}"
-						style="display: table-cell; padding: 0.2em; margin: 0.2em;"
-					>
-					<div style="display: table-cell; vertical-align: top;">
-						<h3><a target="_blank" href="{{model.nodeInfo.link||('http://facebook.com/'+model.nodeInfo.id)}}" style="text-decoration: none;">{{model.nodeInfo.name}}</a></h3>
-						<span>{{model.nodeInfo.category}}</span>
-					</div>
-				</header>
-				ID: {{model.nodeInfo.id}}
+				<div style="display: table-cell; vertical-align: top;">
+					<h3><a target="_blank" href="{{model.nodeInfo.link||('http://facebook.com/'+model.nodeInfo.id)}}" style="text-decoration: none;">{{model.nodeInfo.name}}</a></h3>
+					<span>{{model.nodeInfo.category}}</span>
+				</div>
+			</header>
+			ID: {{model.nodeInfo.id}}
 
-				<!-- For Pages -->
-				<p ng-if="model.nodeInfo.likes">{{model.nodeInfo.likes |number}} likes</p>
+			<!-- For Pages -->
+			<p ng-if="model.nodeInfo.likes">{{model.nodeInfo.likes |number}} likes</p>
 
-				<!-- For events -->
-				<p ng-if="model.nodeInfo.attending_count">{{model.nodeInfo.attending_count |number}} attendees</p>
-				<p ng-if="model.nodeInfo.start_time">From {{model.nodeInfo.start_time |date : 'yyyy-MM-dd HH:mm'}}</p>
-				<p ng-if="model.nodeInfo.end_time">To {{model.nodeInfo.end_time |date : 'yyyy-MM-dd HH:mm'}}</p>
+			<!-- For events -->
+			<p ng-if="model.nodeInfo.attending_count">{{model.nodeInfo.attending_count |number}} attendees</p>
+			<p ng-if="model.nodeInfo.start_time">From {{model.nodeInfo.start_time |date : 'yyyy-MM-dd HH:mm'}}</p>
+			<p ng-if="model.nodeInfo.end_time">To {{model.nodeInfo.end_time |date : 'yyyy-MM-dd HH:mm'}}</p>
 
-				<div style="white-space: pre-wrap; max-height: 8em; overflow: auto; border-top: 1px dashed #ccc;">{{(
-					model.nodeInfo.description
-					? model.nodeInfo.description
-					: model.nodeInfo.about
-				)}}</div>
-			</section>
-			<section ng-show="model.nodeId">
-				<h2>Choose which edges to crawl</h2>
-				<ul>
-					<li ng-repeat="edgeInfo in model.edgeLists[model.nodeType] track by $index">
-						<label>
-							<input type="checkbox" ng-model="model.edgeChecked[$index]"
-								ng-click="model.checkPerm($index)"
-							>{{edgeInfo.desc}}
-							<code>({{edgeInfo.path}})</code>
-						</label>
-					</li>
-				</ul>
-			</section>
-			<button ng-disabled="model.isButtonDisabled()" ng-click="model.enqueue()">Enqueue and crawl</button>
-		</form>
-		<hr>
-		<div ng-show="model.lastExecute">
-			<h2>Crawling message</h2>
-			<button ng-click="model.continue()" ng-disabled="model.timerId">Continue</button>
-			<button ng-click="model.stop()" ng-disabled="!model.timerId">Stop</button>
-			<button ng-click="model.clearStack()"
-				ng-disabled="model.waitingResponse || model.timerId || !model.stack.length"
-			>Clear</button>
-			<p>Last execute: <time ng-bind="model.lastExecute |date :'HH:mm:ss.sss'"></time></p>
-		</div>
-		<div ng-show="model.stack">
-			<h2>{{model.stack.length}} in queue</h2>
-			<ol style="overflow: auto; height: 8em; resize: vertical;">
-				<li ng-repeat="ele in model.stack track by ele.path"
-				>{{ele.path}}</li>
-			</ol>
-		</div>
-		<div class="pre" ng-bind="model.message"></div>
+			<div style="white-space: pre-wrap; max-height: 8em; overflow: auto; border-top: 1px dashed #ccc;">{{(
+				model.nodeInfo.description
+				? model.nodeInfo.description
+				: model.nodeInfo.about
+			)}}</div>
+		</section>
+		<section ng-show="model.nodeId">
+			<h2>Choose which edges to crawl</h2>
+			<ul>
+				<li ng-repeat="edgeInfo in model.edgeLists[model.nodeType] track by $index">
+					<label>
+						<input type="checkbox" ng-model="model.edgeChecked[$index]"
+							ng-click="model.checkPerm($index)"
+						>{{edgeInfo.desc}}
+						<code>({{edgeInfo.path}})</code>
+					</label>
+				</li>
+			</ul>
+		</section>
+		<button ng-disabled="model.isButtonDisabled()" ng-click="model.enqueue()">Enqueue and crawl</button>
+	</form>
+	<hr>
+	<div ng-show="model.lastExecute">
+		<h2>Crawling message</h2>
+		<button ng-click="model.continue()" ng-disabled="model.timerId">Continue</button>
+		<button ng-click="model.stop()" ng-disabled="!model.timerId">Stop</button>
+		<button ng-click="model.clearStack()"
+			ng-disabled="model.waitingResponse || model.timerId || !model.stack.length"
+		>Clear</button>
+		<p>Last execute: <time ng-bind="model.lastExecute |date :'HH:mm:ss.sss'"></time></p>
+	</div>
+	<div ng-show="model.stack">
+		<h2>{{model.stack.length}} in queue</h2>
+		<ol style="overflow: auto; height: 8em; resize: vertical;">
+			<li ng-repeat="ele in model.stack track by ele.path"
+			>{{ele.path}}</li>
+		</ol>
+	</div>
+	<div class="rawdata" ng-bind="model.message"></div>
+</div>
+
+<!-- -->
+		</section>
+		<footer ng-include="'templates/footer.html'"></footer>
 	</div>
 </body>
 </html>

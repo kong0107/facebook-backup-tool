@@ -73,6 +73,7 @@
 <html ng-app="myApp">
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Browse what to export</title>
 	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
@@ -86,13 +87,9 @@ return model;
 			}();
 		});
 	</script>
+	<link rel="stylesheet" href="styles/std.css">
+	<link rel="stylesheet" href="styles/main.css">
 	<style>
-		h1, h2, h3, h4, h5, h6 {
-			margin: 0 .25em;
-		}
-		p {
-			margin: .5em 0;
-		}
 		fieldset {
 			clear: both;
 		}
@@ -103,63 +100,66 @@ return model;
 			margin: .5em;
 			padding: .5em 0;
 		}
-		header {
-			display: table;
-		}
-		header > * {
-			display: table-cell;
-			vertical-align: top;
-			margin: .2em;
-		}
-		a[href] {
+		section a[href] {
 			text-decoration: none;
 		}
-		ul {
+		section ul {
 			margin: 0;
 			padding: 0;
 			list-style-type: none;
 		}
-		span {
+		section span {
 			font-size: smaller;
 		}
 	</style>
 </head>
 <body ng-controller="main">
-	<h1>Choose what to Download</h1>
-	<details>
-		<p>A zip file will be downloaded after submit the form.</p>
-		<p>"albums" do not include "photos" automatically; "photos" do not include the source files themselves.</p>
-		<p>"comments" are for posts, albums, and photos. Even if you select posts and comments, comments for photos will still be in the archive.</p>
-		<p>If you are a programmer, JSON files in `data/json` would help you to process the data for further usage.</p>
-	</details>
-	<form action="export.php" method="post" target="_blank">
-		<fieldset ng-repeat="(type,nodes) in model track by type" ng-if="'[]'!=(nodes|json)">
-			<legend><h2>{{type}}</h2></legend>
-			<article ng-repeat="(id,node) in nodes track by id">
-				<header>
-					<img ng-src="{{node.picture.data.url}}">
-					<h3 title="{{node.bio||node.about}}">
-						<a target="_blank" href="http://facebook.com/{{node.username||id}}">{{node.name}}</a>
-					</h3>
-				</header>
-				<ul>
-					<li ng-repeat="(edgeName,info) in node.edges track by $index">
-						<label title="crawled from {{info.first |date: 'yyyy-MM-dd HH:mm'}} to {{info.last |date: 'yyyy-MM-dd HH:mm'}}">
-							<input type="checkbox" name="collections[{{type+'_'+id}}][]" value="{{edgeName}}">
-							{{edgeName}}
-							<span>({{info.count}})</span>
-						</label>
-					</li>
-					<li ng-if="<?=$config['enable_photo_backup']?'node.edges.photos':'false'?>">
-						<label title="source files of the photos">
-							<input type="checkbox" name="collections[{{type+'_'+id}}][]" value="photoFiles">
-							photo files
-						</label>
-					</li>
-				</ul>
-			</article>
-		</fieldset>
-		<input type="submit">
-	</form>
+	<div id="wrapper">
+	<header>
+		<h1>Choose what to Download</h1>
+	</header>
+	<section>
+<!-- -->
+
+<details>
+	<p>A zip file will be downloaded after submit the form.</p>
+	<p>"albums" do not include "photos" automatically; "photos" do not include the source files themselves.</p>
+	<p>"comments" are for posts, albums, and photos. Even if you select posts and comments, comments for photos will still be in the archive.</p>
+	<p>If you are a programmer, JSON files in `data/json` would help you to process the data for further usage.</p>
+</details>
+<form action="export.php" method="post" target="_blank">
+	<fieldset ng-repeat="(type,nodes) in model track by type" ng-if="'[]'!=(nodes|json)">
+		<legend><h2>{{type}}</h2></legend>
+		<article ng-repeat="(id,node) in nodes track by id">
+			<header class="table">
+				<img class="tableCell" ng-src="{{node.picture.data.url}}">
+				<h3 class="tableCell" title="{{node.bio||node.about}}">
+					<a target="_blank" href="http://facebook.com/{{node.username||id}}">{{node.name}}</a>
+				</h3>
+			</header>
+			<ul>
+				<li ng-repeat="(edgeName,info) in node.edges track by $index">
+					<label title="crawled from {{info.first |date: 'yyyy-MM-dd HH:mm'}} to {{info.last |date: 'yyyy-MM-dd HH:mm'}}">
+						<input type="checkbox" name="collections[{{type+'_'+id}}][]" value="{{edgeName}}">
+						{{edgeName}}
+						<span>({{info.count}})</span>
+					</label>
+				</li>
+				<li ng-if="<?=$config['enable_photo_backup']?'node.edges.photos':'false'?>">
+					<label title="source files of the photos">
+						<input type="checkbox" name="collections[{{type+'_'+id}}][]" value="photoFiles">
+						photo files
+					</label>
+				</li>
+			</ul>
+		</article>
+	</fieldset>
+	<input type="submit">
+</form>
+
+<!-- -->
+		</section>
+		<footer ng-include="'templates/footer.html'"></footer>
+	</div>
 </body>
 </html>
