@@ -13,6 +13,8 @@
 	$config['mongodb_dbname'] = 'facebook';
 	
 	$config['data_storage'] = __DIR__ . '/data';
+	
+	$config['site_name'] = 'Timeline Crawler';
 
 	$config['server_root'] = $_SERVER['REQUEST_SCHEME']
 		. '://'

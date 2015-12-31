@@ -1,13 +1,15 @@
 <?php
 	require_once 'fb.inc.php';
-	if(!$_SESSION['stack'] || !is_array($_SESSION['stack'])) $_SESSION['stack'] = [];
+	if(!isset($_SESSION['stack']) 
+		|| !is_array($_SESSION['stack'])
+	) $_SESSION['stack'] = [];
 ?>
 <!DOCTYPE HTML>
 <html ng-app="myApp">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Backup Facebook</title>
+	<title><?=$config['site_name']?></title>
 	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script src="//connect.facebook.net/zh_TW/sdk.js" id="facebook-jssdk"></script>
@@ -367,7 +369,7 @@ return model;
 <body ng-controller="main">
 	<div id="wrapper">
 		<header>
-			<h1>Backup from Facebook</h1>
+			<h1><?=$config['site_name']?></h1>
 		</header>
 		<section>
 <!-- -->
