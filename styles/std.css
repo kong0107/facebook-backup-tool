@@ -1,20 +1,28 @@
 /**
- * For the whole page
- *
- * @see http://cssreset.com/how-to-keep-footer-at-bottom-of-page-with-css/
+ * Initialization.
  */
 * {
 	margin: 0;
 	padding: 0;
 }
+nav > ul {
+	list-style-type: none;
+}
+nav > ul > li {
+	display: inline-block;
+}
+
+ 
+/**
+ * Put footer at the bottom of the page.
+ *
+ * Divide the whole page into 3 parts: header, main, footer.
+ * @see http://cssreset.com/how-to-keep-footer-at-bottom-of-page-with-css/
+ */
 html, body {
 	height: 100%;
 }
-#wrapper {
-	min-height: 100%;
-	position: relative;
-}
-#wrapper > header:before {
+#wrapper:before {
 	content: "";
 	display: block;
 	overflow: auto;
@@ -23,6 +31,10 @@ html, body {
 	 * For other solutions, see chming's article:
 	 * @see http://www.chming.tw/blog/2014/09/03/collapsing-margins/
 	 */
+}
+#wrapper {
+	min-height: 100%;
+	position: relative;
 }
 #wrapper > section:last-of-type {
 	padding-bottom: 3em;
@@ -34,8 +46,28 @@ html, body {
 	left: 0;
 }
 
+
 /**
- * For table-like styling
+ * Divide header of page into 3 columns: site name, nav tabs, search bar.
+ */
+#wrapper > header:after {
+	clear: both;
+	content: "";
+	display: block;
+}
+#brand {
+	display: inline-block;
+}
+#wrapper > header > nav {
+	display: inline-block;
+}
+#wrapper > header > .searchBar {
+	float: right;
+}
+ 
+ 
+/**
+ * For table-like styling.
  */
 .clear { clear: both; }
 .inlineBlock { display: inline-block; }

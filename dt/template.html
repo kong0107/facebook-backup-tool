@@ -25,14 +25,20 @@
 		 */
 		FB.init(FBConfig);
 		angular.module("myApp", []).controller("main", function($scope) {
+		
+			// This shall be replaced when the next line returns.
+			// Leave it here to check whether FB SDK loads successfully.
+			$scope.model = {message: "Facebook SDK for JavaScript hasn't loaded."};
+			
 			FB.getLoginStatus(function(r) {
 				$scope.model = main(r.authResponse ? r.authResponse.userID : "");
 				$scope.$apply();
 			});
+			
 			var main = function(userID) {
 				var model = {};
 
-				model.title = "Template";
+				model.title = "Page Title";
 				model.foo = function(){ return "bar"; };
 				if(userID) {
 					FB.apiwt("/me", function(res) {
@@ -46,21 +52,34 @@
 		});
 	</script>
 	<link rel="stylesheet" href="../styles/std.css">
-	<style>
-		#wrapper > footer {
-			background: #ccc;
-			border-top: 1px solid #888;
-			text-align: center;
-		}
-	</style>
+	<link rel="stylesheet" href="../styles/main.css">
 </head>
 <body ng-controller="main">
 	<div id="wrapper">
 		<header>
-			<h1>{{model.title}}</h1>
-			<p>{{model.foo()}}</p>
+			<span id="brand">Site Name</span>
+			<nav>
+				<ul class="navList">
+					<li>Tab 1</li>
+					<li>Tab 2</li>
+					<li>Tab 3</li>
+					<li>Tab 4</li>
+					<li>Tab 5</li>
+				</ul>
+			</nav>
+			<form class="searchBar">
+				<input type="name">
+				<input type="submit">
+			</form>
 		</header>
 		<section>
+			<h1>{{model.title}}</h1>
+			<p>{{model.foo()}}</p>
+			<div class="dlTable">
+				<dl><dt>OK</dt><dd>200</dd></dl>
+				<dl><dt>Not Found</dt><dd>404</dd></dl>
+				<dl><dt>Internal Server Error</dt><dd>500</dd></dl>
+			</div>
 			<pre>{{model|json}}</pre>
 		</section>
 		<footer>Footer</footer>
