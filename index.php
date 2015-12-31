@@ -1,6 +1,6 @@
 <?php
 	require_once 'fb.inc.php';
-	if(!is_array($_SESSION['stack'])) $_SESSION['stack'] = [];
+	if(!$_SESSION['stack'] || !is_array($_SESSION['stack'])) $_SESSION['stack'] = [];
 ?>
 <!DOCTYPE HTML>
 <html ng-app="myApp">
