@@ -22,6 +22,14 @@ Facebook does have a "Download a copy of your Facebook data." link in [General A
 5. Download the ZIP file and extract it.
 6. Browse `index.html`.
 
+## PHP Settings
+For PHP to drive MongoDB, there are two extensions: old [`mongo`](https://pecl.php.net/package/mongo) and new [`mongodb`](https://pecl.php.net/package/mongodb).
+
+Though `mongo` (which uses classes such as `MongoClient` and `MongoCollection`) is announced deprecated and not supported for PHP 7, but it's still maintained for PHP 5.3 to 5.6.
+On the other hand, `mongodb` (which uses classes such as `MongoDB\Driver\Manager` and `MongoDB\Collection`) works fine with PHP 7.x, but does not support PHP older than 5.5.
+
+Since OpenShift, in which PaaS I decide to implement [an instance of this project](http://fbbk-kong0107.rhcloud.com), has only PHP 5.3 and 5.4 to choose, I can only use the deprecated `mongo`.
+
 # Disclaimer
 I don't guarantee anything.
 
@@ -36,7 +44,7 @@ With post/photo data of the target node and their comments downloaded, you can:
 * `js`:
   * `fbsdk-extend.js`: functions based on [Facebook SDK for JavaScript](https://developers.facebook.com/docs/javascript).
 * `dt`: developer tool, only for development.
-  * `browser.html`: Log in Facebook and then browse it by client-side JavaScript. (No server needed)
+  * `browser.html`: Log in Facebook and then browse it by client-side JavaScript.
   * `dbBrowse.php`: Browse MongoDB database on localhost.
   * `metadata.html`: Gets what's in folder `metadata`.
   * `template.html`: a template for new page.
