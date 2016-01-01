@@ -29,7 +29,7 @@ html, body {
 	min-height: 100%;
 	position: relative;
 }
-#wrapper > section:last-of-type:after {
+#wrapper > section:last-of-type {
 	padding-bottom: 2em; /* reserved for height of footer */
 }
 #wrapper > footer {
@@ -80,12 +80,15 @@ html, body {
  * General classes.
  */
 .clear { clear: both; }
-.inlineBlock { display: inline-block; }
 .clickable { cursor: pointer; }
 .rawdata {
 	white-space: pre-wrap;
 	font-family: monospace;
 }
+.inlineBlock { display: inline-block; }
+
+.inlineList { list-style-type: none; }
+.inlineList > li { display: inline-block; }
 
 .table,
 .dlTable {

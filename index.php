@@ -18,6 +18,7 @@
 	<script>
 		FB.init(FBConfig);
 		angular.module("myApp", []).controller("main", function($scope, $http) {
+			$scope.siteName = "<?=$config['site_name']?>";
 			FB.getLoginStatus(function(r) {
 				$scope.model = main(r.authResponse ? r.authResponse.userID : "");
 				$scope.$apply();
@@ -359,18 +360,10 @@ return model;
 	</script>
 	<link rel="stylesheet" href="styles/std.css">
 	<link rel="stylesheet" href="styles/main.css">
-	<style>
-		ul { list-style-type: none; }
-		label { transition: all 1s; }
-		label:hover { background-color: yellow; }
-		li.inlineBlock { margin; 0.2em; padding: 0.2em; }
-	</style>
 </head>
 <body ng-controller="main">
 	<div id="wrapper">
-		<header>
-			<h1><?=$config['site_name']?></h1>
-		</header>
+		<header ng-include="'templates/header.html'"></header>
 		<section>
 <!-- -->
 
@@ -387,7 +380,7 @@ return model;
 				<h2 style="display: inline-block;">Choose what kind of node to crawl</h2>
 				<button ng-show="model.stack.length" ng-click="model.showForm=false">Hide this form</button>
 			</header>
-			<ul>
+			<ul class="inlineList">
 				<li ng-repeat="(node, edges) in model.edgeLists track by node" class="inlineBlock">
 					<label>
 						<input type="radio"
@@ -421,7 +414,7 @@ return model;
 				<br> (Crawling public groups are possible but not implemented yet.
 				Crawling non-public groups in which you are not a manager is not possible by Facebook API.)
 			</p>
-			<ul>
+			<ul class="inlineList">
 				<li ng-repeat="node in model.nodeList track by node.id" class="inlineBlock">
 					<label>
 						<input type="radio" ng-model="model.nodeId" ng-value="node.id"
