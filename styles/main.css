@@ -1,10 +1,12 @@
 /**
- * General
+ * General settings.
  */
+* {
+	transition: all 1s;
+}
 h1, h2, h3, h4, h5, h6 {
 	margin: 0 .25em;
 }
-
 p {
 	margin: .5em 0;
 }
@@ -16,23 +18,32 @@ p {
 #wrapper > header {
 	background: #444;
 	color: #ccc;
-	padding-bottom: .5em;
 }
 #brand {
-	font-size: xx-large;
+	font-size: x-large;
+	margin: .4em 1em;
 }
 .navList > li {
-	margin: .2em;
-	padding: .2em;
-	border: 1px solid #ccc;
-	transition: all 1s;
+	padding: .2em .5em;
+	border: 1px solid #888;
 }
 .navList > li:hover {
 	background-color: #000;
-	color: fff;
+	color: #fff;
 }
 .searchBar {
-	margin-top: 1em;
+	margin: .6em;
+	position: relative;
+}
+.searchBar > input[type=text] {
+	padding: .3em 3em .3em .3em;
+}
+.searchBar > input[type=submit],
+.searchBar > input[type=image] {
+	position: absolute;
+	right: 0;
+	top: 0;
+	margin: .2em;
 }
 
 
@@ -51,11 +62,4 @@ p {
 	background: #ccc;
 	border-top: 1px solid #888;
 	text-align: center;
-}
-
-#wrapper > footer nav li {
-	display: inline-block;
-	border-left: 1px solid #888;
-	padding: 0 .2em;
-	margin: .4em 0;
 }

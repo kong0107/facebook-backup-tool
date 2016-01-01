@@ -1,5 +1,5 @@
 /**
- * Initialization.
+ * General settings.
  */
 * {
 	margin: 0;
@@ -11,8 +11,11 @@ nav > ul {
 nav > ul > li {
 	display: inline-block;
 }
+summary {
+	cursor: pointer;
+}
 
- 
+
 /**
  * Put footer at the bottom of the page.
  *
@@ -22,6 +25,25 @@ nav > ul > li {
 html, body {
 	height: 100%;
 }
+#wrapper {
+	min-height: 100%;
+	position: relative;
+}
+#wrapper > section:last-of-type:after {
+	padding-bottom: 2em; /* reserved for height of footer */
+}
+#wrapper > footer {
+	width: 100%;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+}
+
+/**
+ * Adjustment of the above.
+ *
+ * Clear collapsing margins and floating elements.
+ */
 #wrapper:before {
 	content: "";
 	display: block;
@@ -32,45 +54,34 @@ html, body {
 	 * @see http://www.chming.tw/blog/2014/09/03/collapsing-margins/
 	 */
 }
-#wrapper {
-	min-height: 100%;
-	position: relative;
-}
-#wrapper > section:last-of-type {
-	padding-bottom: 3em;
-}
-#wrapper > footer {
-	width: 100%;
-	position: absolute;
-	bottom: 0;
-	left: 0;
+#wrapper > header:after,
+#wrapper > section:after {
+	content: "";
+	display: block;
+	clear: both;
 }
 
 
 /**
  * Divide header of page into 3 columns: site name, nav tabs, search bar.
+ *
+ * Using `display: table` would not be a good idea for RWD.
  */
-#wrapper > header:after {
-	clear: both;
-	content: "";
-	display: block;
-}
-#brand {
-	display: inline-block;
-}
+#brand,
 #wrapper > header > nav {
 	display: inline-block;
 }
 #wrapper > header > .searchBar {
-	float: right;
+	float: right; /* cleared by `header:after` */
 }
- 
- 
+
+
 /**
- * For table-like styling.
+ * General classes.
  */
 .clear { clear: both; }
 .inlineBlock { display: inline-block; }
+.clickable { cursor: pointer; }
 .rawdata {
 	white-space: pre-wrap;
 	font-family: monospace;
