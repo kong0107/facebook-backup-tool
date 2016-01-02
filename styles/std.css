@@ -1,94 +1,55 @@
 /**
- * General settings.
+ * This file shall apply to every site.
  */
-* {
-	margin: 0;
-	padding: 0;
-}
-nav > ul {
-	list-style-type: none;
-}
-nav > ul > li {
-	display: inline-block;
-}
-summary {
-	cursor: pointer;
-}
 
+* { margin: 0; padding: 0; }
 
 /**
  * Put footer at the bottom of the page.
  *
  * Divide the whole page into 3 parts: header, main, footer.
  * @see http://cssreset.com/how-to-keep-footer-at-bottom-of-page-with-css/
+ * @see http://www.chming.tw/blog/2014/09/03/collapsing-margins/
  */
-html, body {
-	height: 100%;
-}
-#wrapper {
+html { height: 100%; }
+body {
 	min-height: 100%;
 	position: relative;
 }
-#wrapper > section:last-of-type {
-	padding-bottom: 2em; /* reserved for height of footer */
-}
-#wrapper > footer {
-	width: 100%;
-	position: absolute;
-	bottom: 0;
-	left: 0;
-}
-
-/**
- * Adjustment of the above.
- *
- * Clear collapsing margins and floating elements.
- */
-#wrapper:before {
-	content: "";
-	display: block;
-	overflow: auto;
-	/**
-	 * Hacked by hit1205 to avoid collapsing margins.
-	 * For other solutions, see chming's article:
-	 * @see http://www.chming.tw/blog/2014/09/03/collapsing-margins/
-	 */
-}
-#wrapper > header:after,
-#wrapper > section:after {
+body > header { overflow: hidden; }
+body > header:after,
+body > section:after {
 	content: "";
 	display: block;
 	clear: both;
 }
-
-
-/**
- * Divide header of page into 3 columns: site name, nav tabs, search bar.
- *
- * Using `display: table` would not be a good idea for RWD.
- */
-#brand,
-#wrapper > header > nav {
-	display: inline-block;
-}
-#wrapper > header > .searchBar {
-	float: right; /* cleared by `header:after` */
+body > section:after { padding-bottom: 2em; }
+body > footer {
+	width: 100%;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	box-sizing: border-box;
 }
 
 
 /**
  * General classes.
  */
-.clear { clear: both; }
 .clickable { cursor: pointer; }
+.clear { clear: both; }
+.inlineBlock { display: inline-block; }
+.inlineList { list-style-type: none; }
+.inlineList > li { display: inline-block; }
 .rawdata {
 	white-space: pre-wrap;
 	font-family: monospace;
 }
-.inlineBlock { display: inline-block; }
-
-.inlineList { list-style-type: none; }
-.inlineList > li { display: inline-block; }
+.clearAfter {
+	content: "";
+	display: block;
+	clear: both;
+}
 
 .table,
 .dlTable {

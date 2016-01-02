@@ -8,60 +8,54 @@ h1, h2, h3, h4, h5, h6 {
 p { margin: .5em 0; }
 label:hover { background-color: #ff0; }
 
-
 /**
  * Header
  */
-#wrapper > header {
-	background: #444;
+body > header {
+	background-color: #444;
 	color: #ccc;
+}
+body > header > * { display: inline-block; }
+body > header a {
+	color: inherit;
+	text-decoration: none;
 }
 #brand {
 	font-size: x-large;
 	font-weight: bold;
-	margin: .4em 1em;
+	margin: .5em 1em;
 }
-.navList > li {
-	padding: .2em .5em;
-	border: 1px solid #888;
+#siteNav {
+	margin: .3em .5em .3em 3em;
 }
-.navList > li:hover {
+#siteNav li {
+	list-style-type: none;
+	display: inline-block;
+	margin: .5em;
+	padding: .3em .5em;
+	border: 1px solid #ccc;
+}
+#siteNav li:hover {
 	background-color: #000;
 	color: #fff;
 }
-#wrapper > header a {
-	color: inherit;
-	text-decoration: none;
-}
-.searchBar {
-	margin: .6em;
-	position: relative;
-}
-.searchBar > input[type=text] {
-	padding: .3em 3em .3em .3em;
-}
-.searchBar > input[type=submit],
-.searchBar > input[type=image] {
-	position: absolute;
-	right: 0;
-	top: 0;
-	margin: .2em;
-}
-
 
 /**
  * Content
  */
-#wrapper > section {
+body > section {
 	padding: .5em;
 }
-
 
 /**
  * Footer
  */
-#wrapper > footer {
+body > footer {
 	background: #ccc;
 	border-top: 1px solid #888;
 	text-align: center;
+}
+body > footer li {
+	margin: .2em;
+	padding: .2em;
 }

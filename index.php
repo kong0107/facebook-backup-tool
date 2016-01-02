@@ -362,11 +362,9 @@ return model;
 	<link rel="stylesheet" href="styles/main.css">
 </head>
 <body ng-controller="main">
-	<div id="wrapper">
-		<header ng-include="'templates/header.html'"></header>
-		<section>
+<header ng-include="'templates/header.html'"></header>
+<section>
 <!-- -->
-
 <div ng-if="!model">Loading ...</div>
 <div ng-show="model && !model.userInfo">
 	<a href="<?=getFBLoginUrl()?>">Login with Facebook</a>
@@ -487,8 +485,7 @@ return model;
 </div>
 
 <!-- -->
-		</section>
-		<footer ng-include="'templates/footer.html'"></footer>
-	</div>
+</section>
+<footer ng-include="'templates/footer.html'"></footer>
 </body>
 </html>

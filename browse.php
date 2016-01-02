@@ -79,6 +79,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script>
 		angular.module("myApp", []).controller("main", function($scope) {
+			$scope.siteName = "<?=$config['site_name']?>";
 			$scope.model = function() {
 //--------
 var model = <?=json_encode($data,JSON_UNESCAPED_UNICODE)?>;
@@ -114,13 +115,9 @@ return model;
 	</style>
 </head>
 <body ng-controller="main">
-	<div id="wrapper">
-	<header>
-		<h1>Choose what to Download</h1>
-	</header>
-	<section>
+<header ng-include="'templates/header.html'"></header>
+<section>
 <!-- -->
-
 <details>
 	<p>A zip file will be downloaded after submit the form.</p>
 	<p>"albums" do not include "photos" automatically; "photos" do not include the source files themselves.</p>
@@ -158,8 +155,7 @@ return model;
 </form>
 
 <!-- -->
-		</section>
-		<footer ng-include="'templates/footer.html'"></footer>
-	</div>
+</section>
+<footer ng-include="'templates/footer.html'"></footer>
 </body>
 </html>
