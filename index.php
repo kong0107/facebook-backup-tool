@@ -62,7 +62,7 @@ model.stack = <?=json_encode($_SESSION['stack'], JSON_UNESCAPED_UNICODE)?>;
  * if it hasn't been granted.
  */
 model.userInfo = {id: userID};
-FB.apiwt(userID + "?fields=id,name,groups{id,name,description}", function(r) {
+FB.apiwt(userID + "?fields=id,name,link,groups{id,name,description},picture{url}", function(r) {
 	if(r.groups) r.groups = r.groups.data;
 	model.userInfo = r;
 	$scope.$apply();
@@ -360,6 +360,11 @@ return model;
 	</script>
 	<link rel="stylesheet" href="styles/std.css">
 	<link rel="stylesheet" href="styles/main.css">
+	<style>
+		div section {
+			padding: .5em;
+		}
+	</style>
 </head>
 <body ng-controller="main">
 <header ng-include="'templates/header.html'"></header>
@@ -370,7 +375,6 @@ return model;
 	<a href="<?=getFBLoginUrl()?>">Login with Facebook</a>
 </div>
 <div ng-show="model.userInfo">
-	<p>Hi, {{model.userInfo.name}}</p>
 	<button ng-hide="model.showForm" ng-click="model.showForm=true">Enqueue something to crawl</button>
 	<form ng-show="model.showForm">
 		<section>
@@ -451,7 +455,7 @@ return model;
 		</section>
 		<section ng-show="model.nodeId">
 			<h2>Choose which edges to crawl</h2>
-			<ul>
+			<ul style="list-style-type: none;">
 				<li ng-repeat="edgeInfo in model.edgeLists[model.nodeType] track by $index">
 					<label>
 						<input type="checkbox" ng-model="model.edgeChecked[$index]"

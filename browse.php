@@ -80,12 +80,7 @@
 	<script>
 		angular.module("myApp", []).controller("main", function($scope) {
 			$scope.siteName = "<?=$config['site_name']?>";
-			$scope.model = function() {
-//--------
-var model = <?=json_encode($data,JSON_UNESCAPED_UNICODE)?>;
-return model;
-//--------
-			}();
+			$scope.model = <?=json_encode($data,JSON_UNESCAPED_UNICODE)?>;
 		});
 	</script>
 	<link rel="stylesheet" href="styles/std.css">

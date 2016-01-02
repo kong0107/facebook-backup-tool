@@ -42,8 +42,10 @@ body > footer {
 .inlineList { list-style-type: none; }
 .inlineList > li { display: inline-block; }
 .rawdata {
-	white-space: pre-wrap;
 	font-family: monospace;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	word-break: break-word;
 }
 .clearAfter {
 	content: "";
