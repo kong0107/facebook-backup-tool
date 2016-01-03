@@ -46,7 +46,7 @@
 	/**
 	 * Prepare template for HTML files.
 	 */
-	$html = file_get_contents('index.html');
+	$html = file_get_contents('static.html');
 	$html = str_replace('<!--EXPORT_TIME-->', date(DATE_ISO8601), $html);
 
 	/**
@@ -74,7 +74,7 @@
 		$json = json_encode($nodeInfo, JSON_UNESCAPED_UNICODE);
 		$zip->addFromString("data/json/{$nodeName}_info.json", $json);
 		$zip->addFromString($dest, "node.info=$json;\n");
-		$jss = [$dest];	///< for inserting `SCRIPT` tags in `index.html`
+		$jss = [$dest];	///< for inserting `SCRIPT` tags in the HTML file
 		$albums = [$nodeName]; ///< for adding image files.
 
 		foreach($edges as $edge) {
