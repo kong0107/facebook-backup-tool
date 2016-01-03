@@ -67,7 +67,8 @@
 				]);
 
 				/// Add comments.
-				if(in_array('comments', $metadata[$type]['connections'])
+				if($config['enable_comment_crawl']
+					&& in_array('comments', $metadata[$type]['connections'])
 					&& $doc['comment_count'] !== 0
 				) push("/{$doc['id']}/comments", "comment", $newAnc);
 
@@ -75,7 +76,7 @@
 				if($type == 'album')
 					push("/{$doc['id']}/photos", "photo", $newAnc);
 
-				/// What about photo in comment?
+				/// What about photos in comments?
 			}
 		}
 		else {
@@ -124,7 +125,7 @@
 		return count($_SESSION['stack']);
 	}
 	function save($doc, $type, $ancestors) {
-		global $db;
+		global $db, $config;
 		$doc['fbbk_updated_time'] = date(DATE_ISO8601);
 		if(count($ancestors)) {
 			$r = $ancestors[0];
@@ -134,7 +135,7 @@
 		}
 		else $colName = $type . 's';
 
-		if($config['enable_photo_backup'] && $type == 'photo') {
+		if($config['enable_photo_download'] && $type == 'photo') {
 			/// Download the photo.
 			$p = end($ancestors);
 			$source = $doc['images'][0]['source'];
@@ -149,6 +150,7 @@
 				else p("Warning: Failed downloading $source to $dest");
 				usleep(1000);
 			}
+			else p("$dest already exists.");
 			unset($doc['images']);
 		}
 

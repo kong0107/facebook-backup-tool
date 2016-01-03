@@ -111,9 +111,11 @@
 		/**
 		 * Add image files belonging to the node if "photo files" are requested.
 		 */
-		if($config['enable_photo_backup'] && in_array('photoFiles', $edges)) {
+		if($config['enable_photo_download']
+			&& in_array('photoFiles', $edges)
+		) {
 			foreach($albums as $album) {
-				$dir = "{$config['enable_photo_backup']}/photos/$album";
+				$dir = "{$config['data_storage']}/photos/$album";
 				if(!is_dir($dir)) continue;
 				foreach(scandir($dir) as $filename) {
 					if(in_array($filename, array('.', '..'))) continue;

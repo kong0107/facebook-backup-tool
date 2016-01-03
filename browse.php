@@ -2,24 +2,13 @@
 	require_once 'fb.inc.php';
 	require_once 'db.inc.php';
 
-	/**
-	 * User must login to browse/download data.
-	 */
-	if(!$_SESSION['facebook_access_token']) {
-		printf('<a href="%s">Login with Facebook</a>', getFBLoginUrl());
-		exit;
-	}
-
-	$userId = $fb->get('/me?fields=id')->getDecodedBody()['id'];
-
-	/**
-	 * Get groups where user is an admin.
-	 *
-	 * 未來若要開放公開社團給無權限者下載，下載前應確認原社團是否仍處於公開狀態。
-	 */
 	$adminnedGroups = [];
-	$groups = $fb->get('/me/groups')->getDecodedBody()['data'];
-	foreach($groups as $g) $adminnedGroups[] = $g['id'];
+	if($_SESSION['facebook_access_token']) {
+		$userInfo = $fb->get('/me?fields=id,name,link,groups{id},picture{url}')->getDecodedBody();
+		if($userInfo['groups'])
+			foreach($userInfo['groups']['data'] as $g)
+				$adminnedGroups[] = $g['id'];
+	}
 
 	/**
 	 * Get info of collections.
@@ -28,7 +17,7 @@
 	 */
 	$data = [
 		'user' => iterator_to_array($db->users->find(
-			['_id' => $userId],
+			['_id' => $userInfo['id']],
 			['name' => 1, 'bio' => 1, 'picture.data.url' => 1]
 		)),
 		'page' => iterator_to_array($db->pages->find(
@@ -50,7 +39,9 @@
 		if(!array_key_exists($id, $data[$type])) continue;
 		$col = $db->selectCollection($colName);
 		$count = $col->count();
+
 		if($count) {
+			/// Get the time the oldest and newest document is updated.
 			$last = $col->aggregate([['$group' => [
 				'_id' => null,
 				'last' => ['$max' => '$fbbk_updated_time']
@@ -113,12 +104,14 @@
 <header ng-include="'templates/header.html'"></header>
 <section>
 <!-- -->
+<h1>Choose what you wanna export</h1>
 <details>
 	<p>A zip file will be downloaded after submit the form.</p>
 	<p>"albums" do not include "photos" automatically; "photos" do not include the source files themselves.</p>
-	<p>"comments" are for posts, albums, and photos. Even if you select posts and comments, comments for photos will still be in the archive.</p>
+	<p>"comments" (if exists) are for posts, albums, and photos. Even if you select posts and comments, comments for photos will still be in the archive.</p>
 	<p>If you are a programmer, JSON files in `data/json` would help you to process the data for further usage.</p>
 </details>
+<p style="font-weight: bold; color: red;">Copyright belongs to the origin authors. You shall not publish things without permission.</p>
 <form action="export.php" method="post" target="_blank">
 	<fieldset ng-repeat="(type,nodes) in model track by type" ng-if="'[]'!=(nodes|json)">
 		<legend><h2>{{type}}</h2></legend>
@@ -137,7 +130,7 @@
 						<span>({{info.count}})</span>
 					</label>
 				</li>
-				<li ng-if="<?=$config['enable_photo_backup']?'node.edges.photos':'false'?>">
+				<li ng-if="<?=$config['enable_photo_download']?'node.edges.photos':'false'?>">
 					<label title="source files of the photos">
 						<input type="checkbox" name="collections[{{type+'_'+id}}][]" value="photoFiles">
 						photo files
@@ -148,7 +141,6 @@
 	</fieldset>
 	<input type="submit">
 </form>
-
 <!-- -->
 </section>
 <footer ng-include="'templates/footer.html'"></footer>
