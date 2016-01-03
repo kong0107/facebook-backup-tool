@@ -54,8 +54,11 @@ body > header a {
 /**
  * Content
  */
-body > section {
+body section {
 	padding: .5em;
+}
+section li {
+	padding: .1em .3em;
 }
 
 /**
