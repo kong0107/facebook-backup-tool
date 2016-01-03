@@ -1,6 +1,6 @@
 <?php
 	require_once 'fb.inc.php';
-	if(!isset($_SESSION['stack']) 
+	if(!isset($_SESSION['stack'])
 		|| !is_array($_SESSION['stack'])
 	) $_SESSION['stack'] = [];
 ?>
@@ -405,9 +405,12 @@ return model;
 		</section>
 		<section ng-show="model.nodeList.length">
 			<h2>Choose which {{model.nodeType}} to crawl</h2>
-			<p ng-show="model.nodeType=='user'">Only your own data is accessible.</p>
+			<p ng-show="model.nodeType=='user'">
+				Only your own data is accessible.
+				Note that private posts are also downloaded. Check before you publish them.
+			</p>
 			<p ng-show="model.nodeType=='group'">
-				Only those in which you are one manager is accessible.
+				Only groups in which you are one manager is accessible.
 				<br> (Crawling public groups are possible but not implemented yet.
 				Crawling non-public groups in which you are not a manager is not possible by Facebook API.)
 			</p>

@@ -2,21 +2,13 @@
 	require_once 'fb.inc.php';
 	require_once 'db.inc.php';
 
-	/**
-	 * User must login to browse/download data.
-	 */
-	if(!$_SESSION['facebook_access_token']) {
-		printf('<a href="%s">Login with Facebook</a>', getFBLoginUrl());
-		exit;
-	}
-
-	/**
-	 * Load user info for later permission check
-	 */
-	$userId = $fb->get('/me?fields=id')->getDecodedBody()['id'];
 	$adminnedGroups = [];
-	$groups = $fb->get('/me/groups')->getDecodedBody()['data'];
-	foreach($groups as $g) $adminnedGroups[] = $g['id'];
+	if($_SESSION['facebook_access_token']) {
+		$userInfo = $fb->get('/me?fields=id,name,link,groups{id},picture{url}')->getDecodedBody();
+		if($userInfo['groups'])
+			foreach($userInfo['groups']['data'] as $g)
+				$adminnedGroups[] = $g['id'];
+	}
 
 	/**
 	 * Input from $_GET['nodeName'] or $_POST['collections']
@@ -37,7 +29,7 @@
 	 */
 	foreach(array_keys($input) as $nodeName) {
 		list($type, $id) = split('_', $nodeName);
-		if($type == 'user' && $id != $userId)
+		if($type == 'user' && $id != $userInfo['id'])
 			exit('Error: you cannot download other user\'s data.');
 		if($type == 'group' && !in_array($id, $adminnedGroups))
 			exit('Error: you can only download groups adminned by you.');
