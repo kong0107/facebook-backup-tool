@@ -360,11 +360,6 @@ return model;
 	</script>
 	<link rel="stylesheet" href="styles/std.css">
 	<link rel="stylesheet" href="styles/main.css">
-	<style>
-		div section {
-			padding: .5em;
-		}
-	</style>
 </head>
 <body ng-controller="main">
 <header ng-include="'templates/header.html'"></header>
