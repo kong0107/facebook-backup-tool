@@ -70,7 +70,6 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script>
 		angular.module("myApp", []).controller("main", function($scope) {
-			$scope.siteName = "<?=$config['site_name']?>";
 			$scope.model = <?=json_encode($data,JSON_UNESCAPED_UNICODE)?>;
 		});
 	</script>
@@ -96,7 +95,7 @@
 			list-style-type: none;
 		}
 		section span {
-			font-size: smaller;
+			font-size: small;
 		}
 	</style>
 </head>

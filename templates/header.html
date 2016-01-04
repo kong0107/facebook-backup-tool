@@ -1,12 +1,13 @@
-<a id="brand" ng-bind="siteName" href="./"></a>
-<nav id="siteNav">
-	<ul>
-		<li><a href="index.php">Crawl</a></li>
-		<li><a href="browse.php">Export</a></li>
-		<li><a href="help.php">Help</a></li>
-	</ul>
-</nav>
+<a id="brand" href="./">Time Crawler</a>
 <div id="userMenu" ng-if="model.userInfo">
 	<img ng-src="{{model.userInfo.picture.data.url}}">
 	<a target="_blank" href="model.userInfo.link">{{model.userInfo.name}}</a>
 </div>
+<nav id="siteNav">
+	<ul>
+		<li><a href="index.php">Crawl</a></li>
+		<li><a href="browse.php">Export</a></li>
+		<li><a href="delete.php">Delete</a></li>
+		<li><a href="help.php">Help</a></li>
+	</ul>
+</nav>

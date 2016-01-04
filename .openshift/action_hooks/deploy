@@ -1,4 +1,3 @@
 #!/bin/bash
 cp ${OPENSHIFT_DATA_DIR}config.inc.php ${OPENSHIFT_REPO_DIR}
 cp ${OPENSHIFT_DATA_DIR}fbsdk-config.js ${OPENSHIFT_REPO_DIR}js
-rm ${OPENSHIFT_REPO_DIR}dbStart.bat

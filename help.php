@@ -10,7 +10,6 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script>
 		angular.module("myApp", []).controller("main", function($scope) {
-			$scope.siteName = "<?=$config['site_name']?>";
 		});
 	</script>
 	<link rel="stylesheet" href="styles/std.css">
