@@ -60,6 +60,16 @@ body section {
 section li {
 	padding: .1em .3em;
 }
+button, 
+input[type=submit],
+input[type=reset],
+.button {
+	padding: .3em;
+	cursor: pointer;
+	border: 1px solid #000;
+	border-radius: .3em;
+	background: linear-gradient(#eee, #ccc);
+}
 
 /**
  * Footer

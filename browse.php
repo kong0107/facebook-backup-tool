@@ -69,8 +69,18 @@
 	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script>
-		angular.module("myApp", []).controller("main", function($scope) {
+		angular.module("myApp", []).controller("main", function($scope, $http) {
 			$scope.model = <?=json_encode($data,JSON_UNESCAPED_UNICODE)?>;
+			$scope.confirmDelete = function(type, id) {
+				if(!window.confirm('Sure to delete node ' + id + '?')) return;
+				$http.get("delete.php?type=" + type + "&id=" + id).then(function(r) {
+					console.log(r);
+					delete($scope.model[type][id]);
+					if(!$scope.model[type].length) delete($scope.model[type]);
+				}, function(r) {
+					console.log(r);
+				});
+			}
 		});
 	</script>
 	<link rel="stylesheet" href="styles/std.css">
@@ -111,15 +121,21 @@
 	<p>If you are a programmer, JSON files in `data/json` would help you to process the data for further usage.</p>
 </details>
 <p style="font-weight: bold; color: red;">Copyright belongs to the origin authors. You shall not publish things without permission.</p>
-<form action="export.php" method="post" target="_blank">
+<form action="export.php" method="post">
 	<fieldset ng-repeat="(type,nodes) in model track by type" ng-if="'[]'!=(nodes|json)">
 		<legend><h2>{{type}}</h2></legend>
 		<article ng-repeat="(id,node) in nodes track by id">
 			<header class="table">
 				<img class="tableCell" ng-src="{{node.picture.data.url}}">
-				<h3 class="tableCell" title="{{node.bio||node.about}}">
-					<a target="_blank" href="http://facebook.com/{{node.username||id}}">{{node.name}}</a>
-				</h3>
+				<div class="tableCell">
+					<h3 class="tableCell" title="{{node.bio||node.about}}">
+						<a target="_blank" href="http://facebook.com/{{node.username||id}}">{{node.name}}</a>
+					</h3>
+					<span class="button"
+						ng-if="type=='user' || type=='group'"
+						ng-click="confirmDelete(type, id)"
+					>Delete</span>
+				</div>
 			</header>
 			<ul>
 				<li ng-repeat="(edgeName,info) in node.edges track by $index">
@@ -138,7 +154,7 @@
 			</ul>
 		</article>
 	</fieldset>
-	<input type="submit">
+	<input type="submit" value="Download">
 </form>
 <!-- -->
 </section>

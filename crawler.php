@@ -95,7 +95,7 @@
 	$output['status'] = 'success';
 	$output['stackCount'] = count($_SESSION['stack']);
 	$output['stack'] = $_SESSION['stack'];
-	echo json_encode($output);
+	echo json_encode($output, JSON_UNESCAPED_UNICODE);
 
 	/**
 	 * Functions
