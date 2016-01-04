@@ -18,10 +18,17 @@
 	<script>
 		FB.init(FBConfig);
 		angular.module("myApp", []).controller("main", function($scope, $http) {
-			FB.getLoginStatus(function(r) {
-				$scope.model = main(r.authResponse ? r.authResponse.userID : "");
-				$scope.$apply();
-			});
+			<?php
+				if(isset($_SESSION['facebook_access_token'])) {
+					?>
+					FB.getLoginStatus(function(r) {
+						$scope.model = main(r.authResponse ? r.authResponse.userID : "");
+						$scope.$apply();
+					});
+					<?php
+				}
+				else echo '$scope.model = {};'
+			?>
 
 			var main = function(userID) {
 //--------
