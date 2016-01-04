@@ -111,7 +111,7 @@
 				if(!is_dir($dir)) continue;
 				foreach(scandir($dir) as $filename) {
 					if(in_array($filename, array('.', '..'))) continue;
-					$zip->addFile("data/photos/$album/$filename");
+					$zip->addFile("$dir/$filename", "data/photos/$album/$filename");
 				}
 			}
 		}
@@ -123,4 +123,5 @@
 	header('Content-disposition: attachment; filename=' . basename($zipFile));
 	header('Content-Length: ' . filesize($zipFile));
 	readfile($zipFile);
+	if(!$config['reserve_archive_after_download']) unlink($zipFile);
 ?>

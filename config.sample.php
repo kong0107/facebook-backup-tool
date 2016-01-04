@@ -26,4 +26,5 @@
 
 	$config['enable_photo_download'] = true;
 	$config['enable_comment_crawl'] = true;
+	$config['reserve_archive_after_download'] = false;
 ?>
