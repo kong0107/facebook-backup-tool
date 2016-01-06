@@ -34,7 +34,7 @@
 		))
 	];
 	foreach($db->getCollectionNames() as $colName) {
-		list($type, $id, $edge) = explode('_', $colName);
+		@ list($type, $id, $edge) = explode('_', $colName);
 		if(!$id) continue;
 		if(!array_key_exists($id, $data[$type])) continue;
 		$col = $db->selectCollection($colName);
@@ -68,19 +68,38 @@
 	<title>Browse what to export</title>
 	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+	<script src="//connect.facebook.net/zh_TW/sdk.js" id="facebook-jssdk"></script>
+	<script src="js/fbsdk-config.js"></script>
+	<script src="js/fbsdk-extend.js"></script>
 	<script>
+		FB.init(FBConfig);
 		angular.module("myApp", []).controller("main", function($scope, $http) {
-			$scope.model = <?=json_encode($data,JSON_UNESCAPED_UNICODE)?>;
+			$scope.nodeData = <?=json_encode($data,JSON_UNESCAPED_UNICODE)?>;
 			$scope.confirmDelete = function(type, id) {
 				if(!window.confirm('Sure to delete node ' + id + '?')) return;
 				$http.get("delete.php?type=" + type + "&id=" + id).then(function(r) {
 					console.log(r);
-					delete($scope.model[type][id]);
-					if(!$scope.model[type].length) delete($scope.model[type]);
+					delete($scope.nodeData[type][id]);
+					if(!$scope.nodeData[type].length) delete($scope.nodeData[type]);
 				}, function(r) {
 					console.log(r);
 				});
 			}
+				
+			<?php
+				if(isset($_SESSION['facebook_access_token'])) {
+					?>
+					FB.getLoginStatus(function(r) {
+						console.log("FB.getLoginStatus");
+						FB.apiwt("/me?fields=id,name,link,picture{url}", function(res) {
+							console.log(res);
+							$scope.model = {userInfo: res};
+							$scope.$apply();
+						})
+					});
+					<?php
+				}
+			?>
 		});
 	</script>
 	<link rel="stylesheet" href="styles/std.css">
@@ -122,7 +141,7 @@
 </details>
 <p style="font-weight: bold; color: red;">Copyright belongs to the origin authors. You shall not publish things without permission.</p>
 <form action="export.php" method="post">
-	<fieldset ng-repeat="(type,nodes) in model track by type" ng-if="'[]'!=(nodes|json)">
+	<fieldset ng-repeat="(type,nodes) in nodeData track by type" ng-if="'[]'!=(nodes|json)">
 		<legend><h2>{{type}}</h2></legend>
 		<article ng-repeat="(id,node) in nodes track by id">
 			<header class="table">
