@@ -1,1 +1,13 @@
-Homepage
+<h1>Homepage</h1>
+
+<section>
+	<h2>Usage</h2>
+	<p>This tool can download Facebook data.</p>
+	<p>Go to <a href="crawl.php">crawl</a> what you want the app to backup, or <a href="browse.php">browse to download</a> what has been backed up.</p>
+</section>
+
+<section class="dlTable">
+	<header><h2>Status</h2></header>
+	<dl><dt>Photo Download</dt><dd>{{config.enable_photo_download?"Enabled":"Disabled"}}</dd></dl>
+	<dl><dt>Crawl Comment</dt><dd>{{config.enable_comment_crawl?"Yes":"No"}}</dd></dl>
+</section>

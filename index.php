@@ -1,8 +1,5 @@
 <?php
 	require_once 'fb.inc.php';
-	if(!isset($_SESSION['stack'])
-		|| !is_array($_SESSION['stack'])
-	) $_SESSION['stack'] = [];
 ?>
 <!DOCTYPE HTML>
 <html ng-app="myApp">
@@ -30,23 +27,33 @@
 						return "templates/" + path + ".html";
 					},
 					controller: function($scope, $routeParams) {
-						$scope.QQ = $routeParams.path;
+						$scope.config = {
+							enable_photo_download: <?=json_encode($config['enable_photo_download'])?>,
+							enable_comment_crawl: <?=json_encode($config['enable_comment_crawl'])?>
+						};
 					}
 				})
 				.otherwise({
 					redirectTo: "/index"
 				})
 			;
+		})
+		.controller("header", function($scope) {
+			FB.getLoginStatus(function(r) {
+				FB.apiwt("/me?fields=id,name,link,picture{url}", function(res) {
+					$scope.model = {userInfo: res};
+					$scope.$apply();
+				})
+			});
 		});
 	</script>
 	<link rel="stylesheet" href="styles/std.css">
 	<link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
-<header ng-include="'templates/header.html'"></header>
-<section ng-view>
+<header ng-controller="header" ng-include="'templates/header.html'"></header>
+<section ng-view style="max-width: 720px;">
 <!-- -->
-!?
 <!-- -->
 </section>
 <footer ng-include="'templates/footer.html'"></footer>
