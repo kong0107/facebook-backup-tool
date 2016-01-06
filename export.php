@@ -14,7 +14,7 @@
 	 * Input from $_GET['nodeName'] or $_POST['collections']
 	 */
 	$input = $_POST['collections'];
-	if($nodeName = $_GET['nodeName']) {
+	if(isset($_GET['nodeName']) && $nodeName = $_GET['nodeName']) {
 		foreach($db->getCollectionNames() as $colName) {
 			if(strpos($colName, $nodeName) !== 0) continue;
 			list( , , $edge) = explode('_', $colName);
