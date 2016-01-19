@@ -201,6 +201,7 @@ var post = html
 	.substr(html.indexOf("<!--FBBKTemplateEnd") + 22)
 	.replace("<" + 'script src="js/controller.js">', "<" + "script>" + js)
 	.replace('<link rel="stylesheet" href="styles/style.css">', "<style>" + css + "</style>")
+	.replace("<!--EXPORT_TIME-" + "->", (new Date).toISOString())
 ;
 
 var script = "<" + "script> type = 'user';";
@@ -238,8 +239,16 @@ a.click();
 		<section>
 			<section>
 				<h2>Notice</h2>
-				<p>Not for mobiles. Not for IE browser.</p>
-				<p>Image files are NOT saved. But with the links, you can use other tools to download them.</p>
+				<p>
+					不支援行動裝置（手機或平板）。不支援 IE 瀏覽器。建議使用 Chrome 。
+					<br>
+					Not for mobiles. Not for IE browser. Chrome is recommended.
+				</p>
+				<p>
+					不會下載圖片檔，僅有照片的說明文字。
+					<br>
+					Image files are NOT saved. But with the links, you can use other tools to download them.
+				</p>
 			</section>
 			<table border="1">
 				<tbody>

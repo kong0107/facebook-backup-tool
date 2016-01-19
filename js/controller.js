@@ -15,7 +15,7 @@ angular.module("myApp", [])
 			throw new Error('`window.node` must be defined.');
 			return;
 		}
-		var id = node.info._id;
+		var id = node.info._id || node.info.id;
 		var type = $window.type;
 
 		var ret = {
@@ -152,7 +152,7 @@ angular.module("myApp", [])
 					var node = ret[ret.tabs[i]][j];
 					node.comments = $filter('filter')(
 						ret.comments,
-						{fbbk_parent: {id: node._id}},
+						{fbbk_parent: {id: node._id || node.id}},
 						function(a, b) {return a==b;}
 					);
 				}
@@ -213,7 +213,7 @@ angular.module("myApp", [])
 			if(!dir) dir = "album_" + photoNode.album.id;
 			var p = photoNode.picture;
 			var suffix = p.substr(p.indexOf('?') - 4, 4);
-			return "data/photos/" + dir + "/" + photoNode._id + suffix;
+			return "data/photos/" + dir + "/" + (photoNode._id||photoNode.id) + suffix;
 		};
 
 		if($window.debug_startTime)

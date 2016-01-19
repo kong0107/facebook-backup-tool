@@ -26,7 +26,7 @@
 	<base target="_blank">
 
 	<script type="text/ng-template" id="templateMetadata">
-		<li title="ID">{{node._id}}</li>
+		<li title="ID">{{node._id||node.id}}</li>
 		<li ng-if="node.revision" title="Revision ID">{{node.revision}}</li>
 		<li ng-repeat="time in [node.created_time, node.backdated_time] track by $index"
 			ng-if="time" ng-include="'templateTime'"
@@ -116,10 +116,10 @@
 				<li><address ng-if="node.place" ng-include="'templatePlace'" onload="place=node.place"></address></li>
 			</ul>
 		</nav>
-		<div ng-repeat="node in node.photos track by node._id"
+		<div ng-repeat="node in node.photos track by (node._id||node.id)"
 			ng-include="'templatePhoto'"
 			onload="dir = 'album_' + node.album.id;"
-			ng-class="(node._id==ret.displayingPhoto)?'displayingPhoto':'inlineBlock'"
+			ng-class="((node._id||node.id)==ret.displayingPhoto)?'displayingPhoto':'inlineBlock'"
 		></div>
 	</script>
 
@@ -155,7 +155,7 @@
 
 		<nav>
 			<ul>
-				<li title="Original webpage of this on facebook"><a href="{{ret.createLink(node._id)}}">Facebook</a></li>
+				<li title="Original webpage of this on facebook"><a href="{{ret.createLink(node._id||node.id)}}">Facebook</a></li>
 				<li ng-repeat="a in node.actions track by $index" ng-if="['Comment','Like','Share'].indexOf(a.name)==-1">
 					<a href="{{a.link}}">{{a.name}}</a>
 				</li>
@@ -187,7 +187,7 @@
 			ng-include="'templateAttachment'" class="table attachment"
 		></section>
 		<div class="cc" ng-include="'templateComment'"
-			ng-repeat="node in (node.comments |orderBy: 'created_time') track by node._id"
+			ng-repeat="node in (node.comments |orderBy: 'created_time') track by (node._id||node.id)"
 		></div>
 		<div style="clear: both;"></div>
 	</script>
@@ -206,14 +206,14 @@
 		<div ng-class="">
 			<img ng-src="{{node.picture}}"
 				title="{{node.name |truncate: 32}}"
-				ng-click="ret.displayingPhoto = (ret.displayingPhoto == node._id) ? 0 : node._id;"
+				ng-click="ret.displayingPhoto = (ret.displayingPhoto == (node._id||node.id)) ? 0 : (node._id||node.id);"
 				style="cursor: pointer;"
 			>
-			<div ng-show="ret.displayingPhoto==node._id">
+			<div ng-show="ret.displayingPhoto==(node._id||node.id)">
 				<ul class="metadata" ng-include="'templateMetadata'"></ul>
 				<img ng-src="{{ret.getSourcePhoto(node, dir)}}"
 					style="max-width: 100%;"
-					ng-if="node._id==ret.displayingPhoto"
+					ng-if="(node._id||node.id)==ret.displayingPhoto"
 				>
 				<p class="description">{{node.name}}</p>
 				<ul class="tags">
@@ -232,7 +232,7 @@
 					<h4>Comments</h4>
 					{{node.comments.length|number}} comment(s)
 					<section class="comment" ng-include="'templateComment'"
-						ng-repeat="node in (node.comments |orderBy: 'created_time') track by node._id"
+						ng-repeat="node in (node.comments |orderBy: 'created_time') track by (node._id||node.id)"
 					></section>
 				</section>
 			</div>
@@ -240,7 +240,7 @@
 	</script>
 
 	<script type="text/ng-template" id="templateEvent">
-		<header><h3><a href="https://www.facebook.com/events/{{node._id}}">{{node.name}}</a></h3></header>
+		<header><h3><a href="https://www.facebook.com/events/{{node._id||node.id}}">{{node.name}}</a></h3></header>
 		<ul class="metadata" ng-include="'templateMetadata'"></ul>
 		<nav>
 			<ul>
@@ -411,7 +411,7 @@
 			<div ng-include="'templateSearch'"></div>
 			<div ng-if="ret.months[t]" ng-include="'templateMonthSelector'"></div>
 			<nav ng-include="'templatePagination'"></nav>
-			<article ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))|limitTo :ret.itemsPerPage :ret.skip track by node._id">
+			<article ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))|limitTo :ret.itemsPerPage :ret.skip track by (node._id||node.id)">
 				<div ng-include="'template'+({
 					posts: 'Post',
 					albums: 'Album',
@@ -424,7 +424,7 @@
 						{{node.comments.length|number}} comment(s)
 					</summary>
 					<section class="comment" ng-include="'templateComment'"
-						ng-repeat="node in (node.comments |orderBy: 'created_time') track by node._id"
+						ng-repeat="node in (node.comments |orderBy: 'created_time') track by (node._id||node.id)"
 					></section>
 				</details>
 				<!--details class="rawdata"><summary>JSON</summary>{{node|json}}</details-->
@@ -435,8 +435,8 @@
 			<h2>Tagged Photos</h2>
 			<div ng-include="'templateSearch'" ng-repeat="t in ['photos']"></div>
 			<nav ng-include="'templatePagination'"></nav>
-			<article ng-repeat="node in filtered=(ret.photos|filter:ret.search.photos)|limitTo :ret.itemsPerPage :ret.skip track by node._id"
-				ng-class="(node._id==ret.displayingPhoto)?'displayingPhoto':'inlineBlock'"
+			<article ng-repeat="node in filtered=(ret.photos|filter:ret.search.photos)|limitTo :ret.itemsPerPage :ret.skip track by (node._id||node.id)"
+				ng-class="((node._id||node.id)==ret.displayingPhoto)?'displayingPhoto':'inlineBlock'"
 				ng-include="'templatePhoto'"
 				onload="dir = ret.type + '_' + ret.id;"
 				style="border: none;"
