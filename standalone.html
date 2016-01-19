@@ -76,11 +76,12 @@ angular.module("myApp", [])
 			permission: "user_photos"
 		}
 	];
-	$scope.setCrawl = function(index, withComment) {
+	$scope.setCrawl = function(index, withComments) {
 		var target = $scope.crawlables[index];
 		var edges = target.edges || [];
+		withComments = withComments ? true : false;
 		$scope.message = "Crawling ";
-		if(withComment) {
+		if(withComments) {
 			var c = {
 				name: "comments", type: "comment", edges: [{
 					name: "comments", type: "comment"
@@ -97,7 +98,7 @@ angular.module("myApp", [])
 		var callback = function() {
 			//console.log("crawl() finished.");
 			$scope.running = false;
-			target.status = withComment ? "withComments" : "noComments";
+			target.status = withComments ? "withComments" : "noComments";
 			target.href = URL.createObjectURL(
 				new Blob(
 					[JSON.stringify(window.dataset[index], null, "\t")],
