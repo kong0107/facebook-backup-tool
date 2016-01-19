@@ -187,17 +187,6 @@ function crawlEdge(storage, index, edge, callback) {
 	);
 }
 
-/*function downloadHTML() {
-	$.get("static.html", function(html) {
-		console.log(html.length);
-		var a = document.createElement("a");
-		var blob = new Blob([html], {type: "text/html"});
-		a.href = URL.createObjectURL(blob);
-		a.download = "static.html";
-		a.click();
-	});
-}*/
-
 </script>
 
 	</head>
@@ -231,7 +220,6 @@ function crawlEdge(storage, index, edge, callback) {
 					</tr>
 				</tbody>
 			</table>
-			<!--button ng-click="downloadHTML()">Download HTML</button-->
 			<p>{{message}}</p>
 			<div class="dlTable" ng-show="status.last">
 				<dl>
