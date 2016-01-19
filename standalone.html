@@ -34,15 +34,25 @@ $.getJSON("metadata/v2.5.json", function(metadata) {
 	});
 });
 
-angular.module("myApp", []).controller("main", function($scope) {
+angular.module("myApp", [])
+.config([
+    '$compileProvider',
+    function($compileProvider) {
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob):/);
+    }
+])
+.controller("main", function($scope) {
+	$scope.running = false;
 	$scope.message = "";
 	$scope.crawlables = [
 		{	name: "Posts I published",
+			alias: "posts",
 			path: "/me/posts",
 			type: "post",
 			permission: "user_posts"
 		},
 		{	name: "Albums and photos I published",
+			alias: "albums_and_photos",
 			path: "/me/albums",
 			type: "album",
 			permission: "user_photos",
@@ -54,11 +64,13 @@ angular.module("myApp", []).controller("main", function($scope) {
 			permission: "user_likes"
 		},*/
 		{	name: "Posts I was tagged in",
+			alias: "tagged_posts",
 			path: "/me/tagged",
 			type: "post",
 			permission: "user_posts"
 		},
 		{	name: "Photos I was tagged in",
+			alias: "tagged_photos",
 			path: "/me/photos?type=tagged",
 			type: "photo",
 			permission: "user_photos"
@@ -67,7 +79,6 @@ angular.module("myApp", []).controller("main", function($scope) {
 	$scope.setCrawl = function(index, withComment) {
 		var target = $scope.crawlables[index];
 		var edges = target.edges || [];
-		window.dataset[index] = [];
 		$scope.message = "Crawling ";
 		if(withComment) {
 			var c = {
@@ -82,15 +93,38 @@ angular.module("myApp", []).controller("main", function($scope) {
 			edges.push(c);
 			$scope.message += "(comments included) ";
 		}
-		FB.requestPermissionIfNotPermitted(target.permission, function() {
-			window.crawl(window.dataset[index], target.path, target.type, edges, function() {
-				console.log("crawl() finished.");
+		$scope.running = true;
+		var callback = function() {
+			//console.log("crawl() finished.");
+			$scope.running = false;
+			target.status = withComment ? "withComments" : "noComments";
+			target.href = URL.createObjectURL(
+				new Blob(
+					[JSON.stringify(window.dataset[index], null, "\t")],
+					{type: "application/json"}
+				)
+			);
+			$scope.message = "Finished crawling " + target.name;
+			if(withComments) $scope.message += " with comments";
+			console.log(target.href);
+			$scope.$apply();
+		};
+
+		if(window.dataset[index] && window.dataset[index].length)
+			crawlEdges(window.dataset[index], edges, 0, callback);
+		else {
+			window.dataset[index] = [];
+			FB.requestPermissionIfNotPermitted(target.permission, function() {
+				window.crawl(window.dataset[index], target.path, target.type, edges, callback);
+			}, function() {
+				console.error("Permission denied:", target.permission);
+				alert("Permission denied.");
+				$scope.running = false;
+				$scope.$apply();
 			});
-		}, function() {
-			console.error("Permission denied:", target.permission);
-		});
+		}
 	};
-	
+
 	window.setStatus = function(status) {
 		$scope.status = status;
 		$scope.$apply();
@@ -99,6 +133,8 @@ angular.module("myApp", []).controller("main", function($scope) {
 		$scope.message += str;
 		$scope.$apply();
 	}
+
+	$scope.downloadHTML = window.downloadHTML;
 });
 
 function crawl(storage, path, type, edges, callback) {
@@ -151,13 +187,15 @@ function crawlEdge(storage, index, edge, callback) {
 	);
 }
 
-/*
-URL.createObjectURL(
-	new Blob(
-		[JSON.stringify(dataset, null, "\t")],
-		{type: "application/json"}
-	)
-)
+/*function downloadHTML() {
+	$.get("static.html", function(html) {
+		console.log(html.length);
+		var a = document.createElement("a");
+		var blob = new Blob([html], {type: "text/html"});
+		a.href = URL.createObjectURL(blob);
+		a.download = "static.html";
+		a.click();
+	});
 }*/
 
 </script>
@@ -178,16 +216,23 @@ URL.createObjectURL(
 					<tr ng-repeat="row in crawlables">
 						<td>{{row.name}}</td>
 						<td>
-							<button ng-click="setCrawl($index)">Crawl</button>
-							<a ng-show="false" class="button" download>Export without comments</a>
-							<button ng-click="setCrawl($index, true)">Crawl with comments</button>
-							<a ng-show="false" download>Export with comments</a>
-							<button ng-show="false">Crawl comments</button>
+							<a ng-show="row.href" download="{{row.alias}}.json" href="{{row.href}}">
+								Export
+								with<span ng-show="row.status=='noComments'">out</span>
+								comments
+							</a>
+							<button ng-disabled="running" ng-hide="row.href" ng-click="setCrawl($index)">Crawl</button>
+							<button ng-disabled="running" ng-hide="row.status=='withComments'" ng-click="setCrawl($index, true)">
+								Crawl
+								<span ng-hide="row.href">with</span>
+								comments
+							</button>
 						</td>
 					</tr>
 				</tbody>
 			</table>
-			<div class="rawdata">{{message}}</div>
+			<!--button ng-click="downloadHTML()">Download HTML</button-->
+			<p>{{message}}</p>
 			<div class="dlTable" ng-show="status.last">
 				<dl>
 					<dt>Last<br>request</dt>
