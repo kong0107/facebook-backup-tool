@@ -30,11 +30,12 @@ $.getJSON("metadata/v2.5.json", function(metadata) {
 			});
 			window.neededFields[nodeType] = typeInfo.neededFields;
 		}
-		console.log(window.neededFields);
+		//console.log(window.neededFields);
 	});
 });
 
 angular.module("myApp", []).controller("main", function($scope) {
+	$scope.message = "";
 	$scope.crawlables = [
 		{	name: "Posts I published",
 			path: "/me/posts",
@@ -63,66 +64,91 @@ angular.module("myApp", []).controller("main", function($scope) {
 			permission: "user_photos"
 		}
 	];
-	$scope.setCrawl = function(index) {
+	$scope.setCrawl = function(index, withComment) {
 		var target = $scope.crawlables[index];
 		var edges = target.edges || [];
 		window.dataset[index] = [];
+		$scope.message = "Crawling ";
+		if(withComment) {
+			var c = {
+				name: "comments", type: "comment", edges: [{
+					name: "comments", type: "comment"
+				}]
+			};
+			for(var i = 0; i < edges.length; ++i) {
+				if(!edges[i].edges) edges[i].edges = [];
+				edges[i].edges.push(c);
+			}
+			edges.push(c);
+			$scope.message += "(comments included) ";
+		}
 		FB.requestPermissionIfNotPermitted(target.permission, function() {
-			window.crawl(window.dataset[index], target.path, target.type, edges);
+			window.crawl(window.dataset[index], target.path, target.type, edges, function() {
+				console.log("crawl() finished.");
+			});
 		}, function() {
 			console.error("Permission denied:", target.permission);
 		});
 	};
+	
 	window.setStatus = function(status) {
 		$scope.status = status;
+		$scope.$apply();
+	}
+	window.addMessage = function(str) {
+		$scope.message += str;
 		$scope.$apply();
 	}
 });
 
 function crawl(storage, path, type, edges, callback) {
+	console.log(path);
 	if(path.indexOf("fields=") == -1) {
 		path += (path.indexOf("?") == -1) ? "?" : "&";
 		path += "fields=" + neededFields[type].join(",");
 	}
-	if(!callback) callback = function() {
-		endCrawl(storage, edges);
-	};
-
-	FB.apiwt(path, function(r) {
-		if(!r.data) return callback();
-		for(var i = 0; i < r.data.length; ++i) storage.push(r.data[i]);
-		setStatus({
-			amount: storage.length,
-			last: storage[storage.length - 1]
+	setTimeout(function() {
+		addMessage(".");
+		FB.apiwt(path, function(r) {
+			if(r.data) {
+				for(var i = 0; i < r.data.length; ++i) storage.push(r.data[i]);
+				setStatus({
+					path: path,
+					last: storage.length ? storage[storage.length - 1] : {}
+				});
+				if(r.paging && r.paging.next) {
+					crawl(storage, r.paging.next, type, edges, callback);
+					return;
+				}
+			}
+			if(edges && edges.length) crawlEdges(storage, edges, 0, callback);
+			else callback();
 		});
-		if(r.paging && r.paging.next) {
-			setTimeout(function() {
-				crawl(storage, r.paging.next, type, edges);
-			}, 1000);
+	}, 500);
+}
+
+function crawlEdges(storage, edges, index, callback) {
+	if(index == edges.length) return callback();
+	crawlEdge(storage, 0, edges[index], function() {
+		crawlEdges(storage, edges, index + 1, callback);
+	});
+}
+
+function crawlEdge(storage, index, edge, callback) {
+	if(index == storage.length) return callback();
+	if(edge.name == "comments" && storage[index].comment_count === 0)
+		return crawlEdge(storage, index + 1, edge, callback);
+
+	storage[index][edge.name] = [];
+	crawl(
+		storage[index][edge.name],
+		"/" + storage[index].id + "/" + edge.name,
+		edge.type,
+		edge.edges,
+		function() {
+			crawlEdge(storage, index + 1, edge, callback);
 		}
-		else callback();
-	});
-}
-
-function endCrawl(storage, edges) {
-	if(!edges || edges.length == 0)
-		console.log("endCrawl");
-	else crawlEdge(storage, edges);//console.error("endCrawl");
-}
-
-function crawlEdge(storage, edges, index) {
-	if(!index) index = 0;
-	var edge = edges[0];
-	if(index == storage.length) return endCrawlEdge();
-	var path = "/" + storage[index].id + "/" + edge.name;
-	if(!index && !Array.isArray(storage[index][edge.name])) 
-		storage[index][edge.name] = [];
-	crawl(storage[index][edge.name], path, edge.type, edge.edges, function() {
-		crawlEdge(storage, edges, index + 1);
-	});
-}
-function endCrawlEdge() {
-	console.log("endXxx");
+	);
 }
 
 /*
@@ -154,20 +180,21 @@ URL.createObjectURL(
 						<td>
 							<button ng-click="setCrawl($index)">Crawl</button>
 							<a ng-show="false" class="button" download>Export without comments</a>
-							<button>Crawl with comments</button>
+							<button ng-click="setCrawl($index, true)">Crawl with comments</button>
 							<a ng-show="false" download>Export with comments</a>
 							<button ng-show="false">Crawl comments</button>
 						</td>
 					</tr>
 				</tbody>
 			</table>
+			<div class="rawdata">{{message}}</div>
 			<div class="dlTable" ng-show="status.last">
 				<dl>
-					<dt>Amount achieved</dt>
-					<dd>{{status.amount}}</dd>
+					<dt>Last<br>request</dt>
+					<dd>{{status.path}}</dd>
 				</dl>
 				<dl>
-					<dt>Last one</dt>
+					<dt>Last<br>document</dt>
 					<dd>
 						<div class="dlTable">
 							<dl>
@@ -175,7 +202,7 @@ URL.createObjectURL(
 								<dd>{{status.last.created_time}}</dd>
 							</dl>
 							<dl>
-								<dt>message/name</dt>
+								<dt>message</dt>
 								<dd class="rawdata">{{status.last.message || status.last.name}}</dd>
 							</dl>
 							<dl>
