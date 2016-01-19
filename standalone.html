@@ -1,0 +1,192 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Timeline Crawler Standalone</title>
+		<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+		<script src="//connect.facebook.net/zh_TW/sdk.js" id="facebook-jssdk"></script>
+		<script src="js/fbsdk-config.js"></script>
+		<script src="js/fbsdk-extend.js"></script>
+		<link rel="stylesheet" href="styles/std.css">
+		<link rel="stylesheet" href="styles/main.css">
+
+<script>
+var neededFields = {};
+var dataset = [];
+
+FB.init(FBConfig);
+$.getJSON("metadata/v2.5.json", function(metadata) {
+	$.getJSON("metadata/excludedFields.json", function(excludedFields) {
+		for(var nodeType in metadata) {
+			var typeInfo = metadata[nodeType];
+			typeInfo.neededFields = [];
+			if(!Array.isArray(typeInfo.fields)) continue;
+			typeInfo.fields.forEach(function(field) {
+				if(!Array.isArray(excludedFields[nodeType])
+					|| excludedFields[nodeType].indexOf(field.name) == -1
+				) typeInfo.neededFields.push(field.name);
+			});
+			window.neededFields[nodeType] = typeInfo.neededFields;
+		}
+		console.log(window.neededFields);
+	});
+});
+
+angular.module("myApp", []).controller("main", function($scope) {
+	$scope.crawlables = [
+		{	name: "Posts I published",
+			path: "/me/posts",
+			type: "post",
+			permission: "user_posts"
+		},
+		{	name: "Albums and photos I published",
+			path: "/me/albums",
+			type: "album",
+			permission: "user_photos",
+			edges: [{name: "photos", type: "photo"}]
+		},
+		/*{	name: "Pages I liked",
+			path: "/me/likes",
+			type: "page",
+			permission: "user_likes"
+		},*/
+		{	name: "Posts I was tagged in",
+			path: "/me/tagged",
+			type: "post",
+			permission: "user_posts"
+		},
+		{	name: "Photos I was tagged in",
+			path: "/me/photos?type=tagged",
+			type: "photo",
+			permission: "user_photos"
+		}
+	];
+	$scope.setCrawl = function(index) {
+		var target = $scope.crawlables[index];
+		var edges = target.edges || [];
+		window.dataset[index] = [];
+		FB.requestPermissionIfNotPermitted(target.permission, function() {
+			window.crawl(window.dataset[index], target.path, target.type, edges);
+		}, function() {
+			console.error("Permission denied:", target.permission);
+		});
+	};
+	window.setStatus = function(status) {
+		$scope.status = status;
+		$scope.$apply();
+	}
+});
+
+function crawl(storage, path, type, edges, callback) {
+	if(path.indexOf("fields=") == -1) {
+		path += (path.indexOf("?") == -1) ? "?" : "&";
+		path += "fields=" + neededFields[type].join(",");
+	}
+	if(!callback) callback = function() {
+		endCrawl(storage, edges);
+	};
+
+	FB.apiwt(path, function(r) {
+		if(!r.data) return callback();
+		for(var i = 0; i < r.data.length; ++i) storage.push(r.data[i]);
+		setStatus({
+			amount: storage.length,
+			last: storage[storage.length - 1]
+		});
+		if(r.paging && r.paging.next) {
+			setTimeout(function() {
+				crawl(storage, r.paging.next, type, edges);
+			}, 1000);
+		}
+		else callback();
+	});
+}
+
+function endCrawl(storage, edges) {
+	if(!edges || edges.length == 0)
+		console.log("endCrawl");
+	else crawlEdge(storage, edges);//console.error("endCrawl");
+}
+
+function crawlEdge(storage, edges, index) {
+	if(!index) index = 0;
+	var edge = edges[0];
+	if(index == storage.length) return endCrawlEdge();
+	var path = "/" + storage[index].id + "/" + edge.name;
+	if(!index && !Array.isArray(storage[index][edge.name])) 
+		storage[index][edge.name] = [];
+	crawl(storage[index][edge.name], path, edge.type, edge.edges, function() {
+		crawlEdge(storage, edges, index + 1);
+	});
+}
+function endCrawlEdge() {
+	console.log("endXxx");
+}
+
+/*
+URL.createObjectURL(
+	new Blob(
+		[JSON.stringify(dataset, null, "\t")],
+		{type: "application/json"}
+	)
+)
+}*/
+
+</script>
+
+	</head>
+	<body ng-app="myApp" ng-controller="main">
+		<header>
+			<span id="brand">Timeline Crawler</span>
+		</header>
+		<section>
+			<section>
+				<h2>Notice</h2>
+				<p>Not for mobiles. Not for IE browser.</p>
+				<p>Image files are NOT saved. But with the links, you can use other tools to download them.</p>
+			</section>
+			<table border="1">
+				<tbody>
+					<tr ng-repeat="row in crawlables">
+						<td>{{row.name}}</td>
+						<td>
+							<button ng-click="setCrawl($index)">Crawl</button>
+							<a ng-show="false" class="button" download>Export without comments</a>
+							<button>Crawl with comments</button>
+							<a ng-show="false" download>Export with comments</a>
+							<button ng-show="false">Crawl comments</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<div class="dlTable" ng-show="status.last">
+				<dl>
+					<dt>Amount achieved</dt>
+					<dd>{{status.amount}}</dd>
+				</dl>
+				<dl>
+					<dt>Last one</dt>
+					<dd>
+						<div class="dlTable">
+							<dl>
+								<dt>created_time</dt>
+								<dd>{{status.last.created_time}}</dd>
+							</dl>
+							<dl>
+								<dt>message/name</dt>
+								<dd class="rawdata">{{status.last.message || status.last.name}}</dd>
+							</dl>
+							<dl>
+								<dt>details</dt>
+								<dd><details class="rawdata">{{status.last|json}}</details></dd>
+							</dl>
+						</div>
+					</dd>
+				</dl>
+			</div>
+		</section>
+		<footer></footer>
+	</body>
+</html>
