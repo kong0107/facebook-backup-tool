@@ -193,15 +193,16 @@ function crawlEdge(storage, index, edge, callback) {
 
 function downloadHTML() {
 	FB.apiwt("/me?fields=" + neededFields.user.join(","), function(userInfo) {
-		$.get("static.html", function(html) {
-			$.get("js/controller.js", function(js) {
-				$.get("styles/style.css", function(css) {
+		var now = new Date;
+		$.get("static.html?" + now.getTime(), function(html) {
+			$.get("js/controller.js?" + now.getTime(), function(js) {
+				$.get("styles/style.css?" + now.getTime(), function(css) {
 var pre = html.substr(0, html.indexOf("<!--FBBKTemplateStart"));
 var post = html
 	.substr(html.indexOf("<!--FBBKTemplateEnd") + 22)
 	.replace("<" + 'script src="js/controller.js">', "<" + "script>" + js)
 	.replace('<link rel="stylesheet" href="styles/style.css">', "<style>" + css + "</style>")
-	.replace("<!--EXPORT_TIME-" + "->", (new Date).toISOString())
+	.replace("<!--EXPORT_TIME-" + "->", now.toISOString())
 ;
 
 var script = "<" + "script> type = 'user';";
