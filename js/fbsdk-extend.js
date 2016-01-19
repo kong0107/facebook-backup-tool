@@ -105,6 +105,16 @@ FB.requestPermission = function(perms, allGranted, notAll) {
 };
 
 /**
+ * Request if the permission(s) are not permitted yet.
+ */
+FB.requestPermissionIfNotPermitted = function(perms, allGranted, notAll) {
+	if(typeof notAll != 'function') notAll = function(){};
+	FB.ifPermitted(perms, allGranted, function() {
+		FB.requestPermission(perms, allGranted, notAll);
+	});
+};
+
+/**
  * Keep asking for the designated permission(s) until all granted.
  *
  * This function may annoy the user.
