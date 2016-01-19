@@ -15,6 +15,38 @@
 <script>
 var neededFields = {};
 var dataset = [];
+var crawlables = [
+	{	name: "Posts I published",
+		alias: "posts",
+		path: "/me/posts",
+		type: "post",
+		permission: "user_posts"
+	},
+	{	name: "Albums and photos I published",
+		alias: "albums_and_photos",
+		path: "/me/albums",
+		type: "album",
+		permission: "user_photos",
+		edges: [{name: "photos", type: "photo"}]
+	},
+	/*{	name: "Pages I liked",
+		path: "/me/likes",
+		type: "page",
+		permission: "user_likes"
+	},*/
+	{	name: "Posts I was tagged in",
+		alias: "tagged_posts",
+		path: "/me/tagged",
+		type: "post",
+		permission: "user_posts"
+	},
+	{	name: "Photos I was tagged in",
+		alias: "tagged_photos",
+		path: "/me/photos?type=tagged",
+		type: "photo",
+		permission: "user_photos"
+	}
+];
 
 FB.init(FBConfig);
 $.getJSON("metadata/v2.5.json", function(metadata) {
@@ -44,40 +76,10 @@ angular.module("myApp", [])
 .controller("main", function($scope) {
 	$scope.running = false;
 	$scope.message = "";
-	$scope.crawlables = [
-		{	name: "Posts I published",
-			alias: "posts",
-			path: "/me/posts",
-			type: "post",
-			permission: "user_posts"
-		},
-		{	name: "Albums and photos I published",
-			alias: "albums_and_photos",
-			path: "/me/albums",
-			type: "album",
-			permission: "user_photos",
-			edges: [{name: "photos", type: "photo"}]
-		},
-		/*{	name: "Pages I liked",
-			path: "/me/likes",
-			type: "page",
-			permission: "user_likes"
-		},*/
-		{	name: "Posts I was tagged in",
-			alias: "tagged_posts",
-			path: "/me/tagged",
-			type: "post",
-			permission: "user_posts"
-		},
-		{	name: "Photos I was tagged in",
-			alias: "tagged_photos",
-			path: "/me/photos?type=tagged",
-			type: "photo",
-			permission: "user_photos"
-		}
-	];
+	$scope.crawlables = window.crawlables;
+	$scope.downloadable = false;
 	$scope.setCrawl = function(index, withComments) {
-		var target = $scope.crawlables[index];
+		var target = window.crawlables[index];
 		var edges = target.edges || [];
 		withComments = withComments ? true : false;
 		$scope.message = "Crawling ";
@@ -107,6 +109,7 @@ angular.module("myApp", [])
 			);
 			$scope.message = "Finished crawling " + target.name;
 			if(withComments) $scope.message += " with comments";
+			$scope.downloadable = true;
 			console.log(target.href);
 			$scope.$apply();
 		};
@@ -188,6 +191,43 @@ function crawlEdge(storage, index, edge, callback) {
 	);
 }
 
+function downloadHTML() {
+	FB.apiwt("/me?fields=" + neededFields.user.join(","), function(userInfo) {
+		$.get("static.html", function(html) {
+			$.get("js/controller.js", function(js) {
+				$.get("styles/style.css", function(css) {
+var pre = html.substr(0, html.indexOf("<!--FBBKTemplateStart"));
+var post = html
+	.substr(html.indexOf("<!--FBBKTemplateEnd") + 22)
+	.replace("<" + 'script src="js/controller.js">', "<" + "script>" + js)
+	.replace('<link rel="stylesheet" href="styles/style.css">', "<style>" + css + "</style>")
+;
+
+var script = "<" + "script> type = 'user';";
+var node = {info: userInfo};
+for(var i = 0; i < dataset.length; ++i) {
+	if(!dataset[i] || !dataset[i].length) continue;
+	var tab = crawlables[i].type + "s";
+	if(!node[tab]) node[tab] = [];
+	node[tab] = node[tab].concat(dataset[i]);
+}
+script += "node = " + JSON.stringify(node) + ";";
+script += "</" + "script>";
+
+html = pre + script + post;
+
+window.html = html;
+var a = document.createElement("a");
+var blob = new Blob([html], {type: "text/html"});
+a.href = URL.createObjectURL(blob);
+a.download = "static.html";
+a.click();
+				});
+			});
+		});
+	});
+}
+
 </script>
 
 	</head>
@@ -221,6 +261,7 @@ function crawlEdge(storage, index, edge, callback) {
 					</tr>
 				</tbody>
 			</table>
+			<button ng-disabled="!downloadable" ng-click="downloadHTML()">Download HTML</button>
 			<p>{{message}}</p>
 			<div class="dlTable" ng-show="status.last">
 				<dl>
