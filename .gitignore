@@ -1,0 +1,5 @@
+vendor/
+composer.lock
+data/*
+!data/.htaccess
+config.inc.php

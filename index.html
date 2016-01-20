@@ -1,0 +1,121 @@
+<!DOCTYPE HTML>
+<html ng-app="myApp">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Timeline Crawler</title>
+	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-route.min.js"></script>
+	<script src="//connect.facebook.net/zh_TW/sdk.js" id="facebook-jssdk"></script>
+	<script src="js/fbsdk-config.js"></script>
+	<script src="js/fbsdk-extend.js"></script>
+	<script>
+		FB.init(FBConfig);
+		myApp = angular.module("myApp", ["ngRoute"])
+		.config(function($routeProvider) {
+			$routeProvider
+				.when("/:path", {
+					templateUrl: function(params){
+						var path = params.path;
+						if(["help", "about", "terms", "privacy"].indexOf(path) == -1)
+							path = "index";
+						return "templates/" + path + ".html";
+					},
+					controller: function($scope, $routeParams) {
+$scope.running = false;
+$scope.message = "";
+$scope.crawlables = window.crawlables;
+$scope.downloadable = false;
+$scope.setCrawl = function(index, withComments) {
+	var target = window.crawlables[index];
+	var edges = target.edges || [];
+	withComments = withComments ? true : false;
+	$scope.message = "Crawling ";
+	if(withComments) {
+		var c = {
+			name: "comments", type: "comment", edges: [{
+				name: "comments", type: "comment"
+			}]
+		};
+		for(var i = 0; i < edges.length; ++i) {
+			if(!edges[i].edges) edges[i].edges = [];
+			edges[i].edges.push(c);
+		}
+		edges.push(c);
+		$scope.message += "(comments included) ";
+	}
+	$scope.running = true;
+	var callback = function() {
+		//console.log("crawl() finished.");
+		$scope.running = false;
+		target.status = withComments ? "withComments" : "noComments";
+		target.href = URL.createObjectURL(
+			new Blob(
+				[JSON.stringify(window.dataset[index], null, "\t")],
+				{type: "application/json"}
+			)
+		);
+		$scope.message = "Finished crawling " + target.name;
+		if(withComments) $scope.message += " with comments";
+		$scope.downloadable = true;
+		console.log(target.href);
+		$scope.$apply();
+	};
+
+	if(window.dataset[index] && window.dataset[index].length)
+		crawlEdges(window.dataset[index], edges, 0, callback);
+	else {
+		window.dataset[index] = [];
+		FB.requestPermissionIfNotPermitted(target.permission, function() {
+			window.crawl(window.dataset[index], target.path, target.type, edges, callback);
+		}, function() {
+			console.error("Permission denied:", target.permission);
+			alert("Permission denied.");
+			$scope.running = false;
+			$scope.$apply();
+		});
+	}
+};
+
+window.setStatus = function(status) {
+	$scope.status = status;
+	$scope.$apply();
+}
+window.addMessage = function(str) {
+	$scope.message += str;
+	$scope.$apply();
+}
+
+$scope.downloadHTML = window.downloadHTML;
+					}
+				})
+				.otherwise({
+					redirectTo: "/index"
+				})
+			;
+		})
+		.config(function($compileProvider) {
+			$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob):/);
+		})
+		.controller("header", function($scope) {
+			FB.getLoginStatus(function(r) {
+				FB.apiwt("/me?fields=id,name,link,picture{url}", function(res) {
+					$scope.model = {userInfo: res};
+					$scope.$apply();
+				})
+			});
+		});
+	</script>
+	<link rel="stylesheet" href="styles/std.css">
+	<link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+<header ng-controller="header" ng-include="'templates/header.html'"></header>
+<section ng-view>
+<!-- -->
+<!-- -->
+</section>
+<footer ng-include="'templates/footer.html'"></footer>
+</body>
+</html>

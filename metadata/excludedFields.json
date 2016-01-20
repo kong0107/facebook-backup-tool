@@ -1,0 +1,78 @@
+{
+	"user": [
+		"token_for_business",
+
+		"currency",
+		"device",
+		"payment_pricepoints",
+		"viewer_can_send_gift",
+		"age_range",
+		"devices",
+
+		"context",
+		"favorite_athletes",
+		"favorite_teams",
+		"installed",
+		"is_shared_login"
+	],
+	"page": [
+		"ad_campaign",
+		"promotion_eligible",
+		"owner_business",
+
+		"access_token",
+		"business",
+		"promotion_ineligible_reason",
+		"unread_message_count",
+		"unread_notif_count",
+		"unseen_message_count",
+
+		"context",
+		"can_checkin",
+		"can_post",
+		"leadgen_tos_accepted",
+		"last_used_time",
+		"new_like_count",
+		"is_published",
+		"voip_info"
+	],
+	"post": [
+		"allowed_advertising_objectives",
+		"is_app_share",
+
+		"caption",
+		"icon",
+		"is_hidden",
+		"is_instagram_eligible",
+		"is_popular",
+		"is_published",
+		"is_expired",
+		"is_spherical"
+	],
+	"comment": [
+		"can_comment",
+		"can_hide",
+		"can_like",
+		"can_remove",
+		"is_private",
+		"is_hidden",
+		"object",
+		"parent",
+		"user_likes"
+	],
+	"album": [
+		"can_upload"
+	],
+	"photo": [
+		"can_delete",
+		"can_tag",
+		"icon"
+	],
+	"event": [
+		"is_viewer_admin"
+	],
+	"doc": [
+		"can_delete",
+		"can_edit"
+	]
+}

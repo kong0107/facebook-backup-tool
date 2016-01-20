@@ -1,0 +1,286 @@
+/**
+ * General for all sites.
+ */
+.table,
+.dlWrapper {
+	display: table;
+}
+.table > header,
+.table > footer,
+.dlWrapper > header,
+.dlWrapper > footer {
+	display: table-caption;
+}
+.tableRow,
+.dlWrapper > dl {
+	display: table-row;
+}
+.tableCell,
+.dlWrapper > dl > dt,
+.dlWrapper > dl > dd {
+	display: table-cell;
+	vertical-align: top;
+}
+.rawdata {
+	white-space: pre-wrap;
+	font-family: monospace;
+}
+.inlineBlock {
+	display: inline-block;
+}
+ul, ol, dl {
+	margin: 0;
+	padding: 0;
+}
+ul {
+	list-style-type: none;
+}
+nav > ul > li {
+	display: inline-block;
+}
+summary {
+	cursor: pointer;
+}
+
+/**
+ * General for this site.
+ */
+p {
+	margin: 0.2em 0;
+}
+dt {
+	padding: 0.2em;
+	font-weight: bold;
+}
+dd {
+	padding: 0.2em;
+}
+img {
+	margin: 0.2em;
+	padding: 0.2em;
+	border: 1px solid #ccc;
+}
+a[href] {
+	text-decoration: none;
+}
+a[href]:hover {
+	text-decoration: underline;
+}
+
+/**
+ * Main parts
+ */
+html, body {
+	margin:0;
+	padding:0;
+	height:100%;
+}
+#wrapper {
+	min-height:100%;
+	position:relative;
+}
+#wrapper > header {
+	padding: .5em;
+}
+#wrapper > section {
+	padding: 0 .5em 3em .5em;
+}
+#wrapper > footer {
+	width: 100%;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	
+	background: #ccc;
+	border-top: 1px solid #888;
+	text-align: center;
+}
+
+/**
+ * Header
+ */
+h1 {
+	display: inline-block;
+	vertical-align: top;
+	margin: .3em;
+}
+h2 {
+	margin: 0.3em 0;
+}
+h3,h4,h5,h6 {
+	margin: .2em 0;
+	white-space: pre;
+}
+.about {
+	display: inline-block;
+	white-space: pre-wrap;
+	font-size: smaller;
+	max-height: 4em;
+	overflow: hidden;
+}
+nav li {
+	cursor: pointer;
+	display: inline-block;
+	border-left: 1px solid #ccc;
+	padding: .2em;
+	margin: .2em 0;
+	transition: all 1s;
+}
+nav li:hover {
+	background-color: #ff0;
+	color: #000;
+}
+.focus {
+	font-weight: bold;
+}
+.count {
+	font-size: smaller;
+	font-weight: normal;
+	text-decoration: none;
+	color: #888;
+}
+
+/**
+ * Content
+ */
+article {
+	border-top: 1px solid #888;
+	margin-top: 1em;
+	padding: .5em;
+	line-height: 125%;
+	clear: both;
+}
+article header {
+	display: inline-table;
+}
+article header > * {
+	display: table-cell;
+	vertical-align: top;
+}
+article header img {
+	max-width: 100px;
+	max-height: 100px;
+}
+.metadata {
+	float: right;
+	font-size: smaller;
+	padding: 0 0 .3em .3em;
+	margin: 0 0 .3em .3em;
+	opacity: 0.5;
+}
+.metadata:hover {
+	opacity: 1;
+}
+article nav {
+	font-size: smaller;
+}
+
+.message {
+	white-space: pre-wrap;
+}
+.link_container {
+	border-left: 2px solid #888;
+	margin: .5em 0 0 1em;
+	padding: 0 .5em;
+}
+.link_container > h4 {
+	margin-bottom: 0;
+}
+.full_picture {
+	max-width: 640px;
+	max-height: 360px;
+}
+.description {
+	white-space: pre-wrap;
+	font-weight: normal;
+	margin: 0;
+}
+.tags {
+	margin: .5em 0 0 0;
+	padding: 0;
+	list-style-type: none;
+}
+.tags li {
+	display: inline-block;
+	margin: .2em;
+	padding: .2em;
+	border-left: 1px solid #ccc;
+}
+
+/**
+ * Posts
+ */
+.story {
+	font-style: italic;
+	display: inline-block;
+}
+
+/**
+ * Albums and photos
+ */
+.displayingPhoto {
+	background-color: #ccc;
+	padding: 1em;
+	width: 95%;
+}
+.photosContainer {
+	display: inline-block;
+	border: none;
+}
+
+/**
+ * Comments
+ */
+.comments {
+	margin-top: 1em;
+}
+.comment {
+	clear: both;
+	padding: .5em;
+	width: 600px;
+}
+.comment:nth-child(odd) {
+	background-color: #bbb;
+}
+.comment:nth-child(even) {
+	background-color: #ddd;
+}
+.comment_id {
+	float: right;
+}
+.cc {
+	clear: both;
+	margin: .25em .25em .25em 2em;
+	padding: .25em;
+}
+.comment:nth-child(even) .cc:nth-child(even) {
+	background-color: #ccc;
+}
+.comment:nth-child(even) .cc:nth-child(odd) {
+	background-color: #bbb;
+}
+.comment:nth-child(odd) .cc:nth-child(even) {
+	background-color: #ddd;
+}
+.comment:nth-child(odd) .cc:nth-child(odd) {
+	background-color: #ccc;
+}
+.author {
+	font-weight: bold;
+	margin-bottom: .2em;
+}
+
+/**
+ * Attachment
+ */
+.attachment {
+	/*margin: .5em 0 0 1em;
+	padding: 0 .5em;*/
+}
+.attachment img {
+	max-width: 200px;
+	max-height: 150px;
+}
+.attachment .description {
+	font-size: smaller;
+}
