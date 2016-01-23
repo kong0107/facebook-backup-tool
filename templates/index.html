@@ -15,23 +15,48 @@
 	<button class="FBButton" ng-click="FBLogin()">Facebook Login</button>
 </div>
 <section ng-show="FBAuth">
-	<!--section>
+	<section ng-hide="type">
 		<h2>What do you wanna crawl?</h2>
-		<button>My data</button>
-		<button>Some Fan Page</button>
+		<button ng-click="setType('user')">My data</button>
+		<button ng-click="setType('page')">Some Fan Page</button>
 	</section>
-	<section>
+	<section ng-show="type && !idDecided">
 		<h2>Craw some fan page</h2>
 		Enter the name or ID of the page.
 		<br>
-		<input placeholder="search">
+		<input ng-model="searchText"
+			ng-change="search()"
+			ng-model-options="{debounce: 500}"
+			placeholder="ID or search Text"
+		>
 		<ul class="inlineList">
-			<li><label><input type="radio" ng-model="nodeId" value="sadfsdf">dsf</label></li>
-			<li><label><input type="radio" ng-model="nodeId" value="sadfsdaf">dsf</label></li>
+			<li ng-repeat="node in searchResult" class="inlineBlock">
+				<label>
+					<input type="radio" ng-model="$parent.nodeId" ng-value="node.id"
+						ng-click="preview(node.id)"
+					>{{node.name}}
+				</label>
+			</li>
 		</ul>
-		<button>Next step</button>
-	</section-->
-	<section>
+		<button ng-disabled="!nodeId" ng-click="decideID(nodeId)" ng-class="nodeId?'FBButton':''">Next step</button>
+	</section>
+	<section ng-show="nodeInfo" style="border: 1px solid #888; padding: .5em;">
+		<header style="display: table;">
+			<img ng-if="nodeInfo.picture"
+				ng-src="{{nodeInfo.picture.data.url}}"
+				style="display: table-cell; padding: 0.2em; margin: 0.2em;"
+			>
+			<div style="display: table-cell; vertical-align: top;">
+				<h3><a target="_blank" href="{{nodeInfo.link||('http://facebook.com/'+nodeInfo.id)}}" style="text-decoration: none;">{{nodeInfo.name}}</a></h3>
+				<span>{{nodeInfo.category}}</span>
+			</div>
+		</header>
+		ID: {{nodeInfo.id}}
+		<p ng-if="nodeInfo.likes">{{nodeInfo.likes |number}} likes</p>
+		<div style="white-space: pre-wrap; max-height: 8em; overflow: auto; border-top: 1px dashed #ccc;"
+		>{{(nodeInfo.description || nodeInfo.about)}}</div>
+	</section>
+	<section ng-show="idDecided">
 	<table border="1">
 		<tbody>
 			<tr ng-repeat="row in crawlables">

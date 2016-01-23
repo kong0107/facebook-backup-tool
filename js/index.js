@@ -16,6 +16,8 @@ myApp = angular.module("myApp", ["ngRoute"])
 .controller("index", function($scope, $routeParams) {
 	FB.getLoginStatus(function(res) {
 		$scope.FBAuth = res.authResponse;
+		$scope.setType("user");	///< remove this line to enable page crawling
+		$scope.$apply();
 	});
 
 	$scope.running = false;
@@ -46,7 +48,7 @@ myApp = angular.module("myApp", ["ngRoute"])
 			target.status = withComments ? "withComments" : "noComments";
 			target.href = URL.createObjectURL(
 				new Blob(
-					[JSON.stringify(window.dataset[index], null, "\t")],
+					[JSON.stringify(removeEmpty(window.dataset[index]), null, "\t")],
 					{type: "application/json"}
 				)
 			);
@@ -76,6 +78,89 @@ myApp = angular.module("myApp", ["ngRoute"])
 			$scope.FBAuth = res.authResponse;
 			$scope.$apply();
 		}, {scope: "user_posts,user_photos"});
+	};
+	$scope.setType = function(type) {
+		window.nodeType = $scope.type = type;
+		if(type == "user") {
+			FB.apiwt("/me?fields=" + neededFields.user.join(",") + ",picture{url}", function(res) {
+				$scope.nodeInfo = res;
+				$scope.decideID(res.id);
+				$scope.$apply();
+			})
+		}
+	};
+	$scope.search = function() {
+		$scope.searchResult = [];
+		delete $scope.nodeId;
+		delete $scope.nodeInfo;
+		delete $scope.idDecided;
+		var q = $scope.searchText.trim();
+		if(!q) return;
+		if($.isNumeric(q)) {
+			FB.api(q + "?metadata=1", function(r){
+				if(r.error) { console.log(r.error); return; }
+				if(r.metadata.type != "page") {
+					console.log("page is expected but here's a " + r.metadata.type);
+					return;
+				}
+				$scope.searchResult.push(r);
+				$scope.$apply();
+			});
+		}
+		else {
+			FB.apiwt("search?type=page&q=" + q, function(r) {
+				$scope.searchResult = r.data;
+				$scope.$apply();
+			});
+		}
+	};
+	$scope.preview = function(id) {
+		FB.apiwt(id + "?fields=" + neededFields.page.join(",") + ",picture{url}", function(r) {
+			$scope.nodeInfo = r;
+			$scope.$apply();
+		});
+	};
+	$scope.decideID = function(id) {
+		$scope.idDecided = id;
+		window.nodeInfo = $scope.nodeInfo;
+		var isUser = ($scope.type == "user");
+		var subject = isUser ? "I" : "the page";
+		var cs = [];
+
+		cs.push({
+			name: "Posts " + subject + " published",
+			alias: "posts",
+			path: "/" + id + "/posts",
+			type: "post",
+			permission: isUser ? "user_posts" : ""
+		});
+
+		cs.push({
+			name: "Albums and photos " + subject + " published",
+			alias: "albums_and_photos",
+			path: "/" + id + "/albums",
+			type: "album",
+			permission: isUser ? "user_photos" : "",
+			edges: [{name: "photos", type: "photo"}]
+		});
+
+		if(isUser) cs.push({
+			name: "Posts " + subject + " was tagged in",
+			alias: "tagged_posts",
+			path: "/" + id + "/tagged",
+			type: "post",
+			permission: isUser ? "user_posts" : ""
+		});
+
+		cs.push({
+			name: "Photos " + subject + " was tagged in",
+			alias: "tagged_photos",
+			path: "/" + id + "/photos?type=tagged",
+			type: "photo",
+			permission: isUser ? "user_photos" : ""
+		});
+
+		$scope.crawlables = window.crawlables = cs;
 	};
 
 	window.setStatus = function(status) {
@@ -170,7 +255,12 @@ function crawl(storage, path, type, edges, callback) {
 	}
 	setTimeout(function() {
 		addMessage(".");
-		FB.apiwt(path, function(r) {
+		FB.api(path, function(r) {
+			if(r.error) {
+				console.error(r.error);
+				crawl(storage, path, type, edges, callback);
+				return;
+			}
 			if(r.data) {
 				for(var i = 0; i < r.data.length; ++i) storage.push(r.data[i]);
 				setStatus({
@@ -213,11 +303,10 @@ function crawlEdge(storage, index, edge, callback) {
 }
 
 function downloadHTML() {
-	FB.apiwt("/me?fields=" + neededFields.user.join(","), function(userInfo) {
-		var now = new Date;
-		$.get("static.html?" + now.getTime(), function(html) {
-			$.get("js/controller.js?" + now.getTime(), function(js) {
-				$.get("styles/style.css?" + now.getTime(), function(css) {
+	var now = new Date;
+	$.get("static.html?" + now.getTime(), function(html) {
+		$.get("js/controller.js?" + now.getTime(), function(js) {
+			$.get("styles/style.css?" + now.getTime(), function(css) {
 //---------------------
 var pre = html.substr(0, html.indexOf("<!--FBBKTemplateStart"));
 var post = html
@@ -227,15 +316,15 @@ var post = html
 	.replace("<!--EXPORT_TIME-" + "->", now.toISOString())
 ;
 
-var script = "<" + "script> type = 'user';";
-var node = {info: userInfo};
+var script = "<" + "script> type = '" + window.nodeType + "';";
+var node = {info: window.nodeInfo};
 for(var i = 0; i < dataset.length; ++i) {
 	if(!dataset[i] || !dataset[i].length) continue;
 	var tab = crawlables[i].type + "s";
 	if(!node[tab]) node[tab] = [];
 	node[tab] = node[tab].concat(dataset[i]);
 }
-script += "node = " + JSON.stringify(node) + ";";
+script += "node = " + JSON.stringify(removeEmpty(node)) + ";";
 script += "</" + "script>";
 
 html = pre + script + post;
@@ -252,8 +341,39 @@ evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, fal
 a.dispatchEvent(evt);
 
 //---------------------
-				});
 			});
 		});
 	});
+}
+
+function isEmptyObj(obj) {
+	if(obj === null) return true;
+	for(var i in obj) return false;
+	return true;
+}
+
+function removeEmpty(obj) {
+	if(typeof obj != "object" || obj === null) return obj;
+	if(Array.isArray(obj)) {
+		for(var i = 0; i < obj.length; ++i)
+			obj[i] = removeEmpty(obj[i]);
+	}
+	else {
+		for(var i in obj) {
+			if(Array.isArray(obj[i])) {
+				if(obj[i].length) obj[i] = removeEmpty(obj[i]);
+				else delete obj[i];
+			}
+			else if(typeof obj[i] === "object") {
+				obj[i] = removeEmpty(obj[i]);
+				if(isEmptyObj(obj[i])) delete obj[i];
+			}
+			else if(typeof obj[i] === "undefined" || obj[i] === "")
+				delete obj[i];
+
+			obj[i] = removeEmpty(obj[i]);
+			var isEmpty = true;
+		}
+	}
+	return obj;
 }
