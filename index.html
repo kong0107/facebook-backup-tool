@@ -7,7 +7,7 @@
 	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-route.min.js"></script>
-	<script src="//connect.facebook.net/zh_TW/sdk.js" id="facebook-jssdk"></script>
+	<script src="//connect.facebook.net/zh_TW/sdk.js#xfbml=1&version=v2.5" id="facebook-jssdk"></script>
 	<script src="js/fbsdk-config.js"></script>
 	<script src="js/fbsdk-extend.js"></script>
 	<script>
@@ -15,14 +15,13 @@
 		myApp = angular.module("myApp", ["ngRoute"])
 		.config(function($routeProvider) {
 			$routeProvider
-				.when("/:path", {
-					templateUrl: function(params){
-						var path = params.path;
-						if(["help", "about", "terms", "privacy"].indexOf(path) == -1)
-							path = "index";
-						return "templates/" + path + ".html";
-					},
+				.when("/index", {
+					templateUrl: "templates/index.html",
 					controller: function($scope, $routeParams) {
+FB.getLoginStatus(function(res) {
+	$scope.FBAuth = res.authResponse;
+});
+
 $scope.running = false;
 $scope.message = "";
 $scope.crawlables = window.crawlables;
@@ -47,7 +46,6 @@ $scope.setCrawl = function(index, withComments) {
 	}
 	$scope.running = true;
 	var callback = function() {
-		//console.log("crawl() finished.");
 		$scope.running = false;
 		target.status = withComments ? "withComments" : "noComments";
 		target.href = URL.createObjectURL(
@@ -88,6 +86,14 @@ window.addMessage = function(str) {
 }
 
 $scope.downloadHTML = window.downloadHTML;
+					}
+				})
+				.when("/:path", {
+					templateUrl: function(params){
+						var path = params.path;
+						if(["help", "about", "terms", "privacy"].indexOf(path) == -1)
+							path = "about";
+						return "templates/" + path + ".html";
 					}
 				})
 				.otherwise({

@@ -155,52 +155,57 @@ a.click();
 			Image files are NOT saved. But with the links, you can use other tools to download them.
 		</p>
 	</section>
-	<table border="1">
-		<tbody>
-			<tr ng-repeat="row in crawlables">
-				<td>{{row.name}}</td>
-				<td>
-					<a ng-show="row.href" download="{{row.alias}}.json" href="{{row.href}}">
-						Export
-						with<span ng-show="row.status=='noComments'">out</span>
-						comments
-					</a>
-					<button ng-disabled="running" ng-hide="row.href" ng-click="setCrawl($index)">Crawl</button>
-					<button ng-disabled="running" ng-hide="row.status=='withComments'" ng-click="setCrawl($index, true)">
-						Crawl
-						<span ng-hide="row.href">with</span>
-						comments
-					</button>
-				</td>
-			</tr>
-		</tbody>
-	</table>
-	<button ng-disabled="!downloadable" ng-click="downloadHTML()">Download HTML</button>
-	<p>{{message}}</p>
-	<div class="dlTable" ng-show="status.last">
-		<dl>
-			<dt>Last<br>request</dt>
-			<dd>{{status.path}}</dd>
-		</dl>
-		<dl>
-			<dt>Last<br>document</dt>
-			<dd>
-				<div class="dlTable">
-					<dl>
-						<dt>created_time</dt>
-						<dd>{{status.last.created_time}}</dd>
-					</dl>
-					<dl>
-						<dt>message</dt>
-						<dd class="rawdata">{{status.last.message || status.last.name}}</dd>
-					</dl>
-					<dl>
-						<dt>details</dt>
-						<dd><details class="rawdata">{{status.last|json}}</details></dd>
-					</dl>
-				</div>
-			</dd>
-		</dl>
-	</div>
+	<div ng-hide="FBAuth" class="fb-login-button"
+		data-max-rows="1" data-size="xlarge" data-show-faces="false" data-auto-logout-link="false"
+		onlogin="location.reload()"
+	></div>
+	<section ng-show="FBAuth">
+		<table border="1">
+			<tbody>
+				<tr ng-repeat="row in crawlables">
+					<td>{{row.name}}</td>
+					<td>
+						<a ng-show="row.href" download="{{row.alias}}.json" href="{{row.href}}">
+							Export
+							with<span ng-show="row.status=='noComments'">out</span>
+							comments
+						</a>
+						<button ng-disabled="running" ng-hide="row.href" ng-click="setCrawl($index)">Crawl</button>
+						<button ng-disabled="running" ng-hide="row.status=='withComments'" ng-click="setCrawl($index, true)">
+							Crawl
+							<span ng-hide="row.href">with</span>
+							comments
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<button ng-disabled="!downloadable" ng-click="downloadHTML()">Download HTML</button>
+		<p>{{message}}</p>
+		<div class="dlTable" ng-show="status.last">
+			<dl>
+				<dt>Last<br>request</dt>
+				<dd>{{status.path}}</dd>
+			</dl>
+			<dl>
+				<dt>Last<br>document</dt>
+				<dd>
+					<div class="dlTable">
+						<dl>
+							<dt>created_time</dt>
+							<dd>{{status.last.created_time}}</dd>
+						</dl>
+						<dl>
+							<dt>message</dt>
+							<dd class="rawdata">{{status.last.message || status.last.name}}</dd>
+						</dl>
+						<dl>
+							<dt>details</dt>
+							<dd><details class="rawdata">{{status.last|json}}</details></dd>
+						</dl>
+					</div>
+				</dd>
+			</dl>
+		</div>
+	</sction>
 </section>
-		

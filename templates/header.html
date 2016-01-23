@@ -1,5 +1,11 @@
 <a id="brand" href="./#/index">Time Crawler</a>
-<div id="userMenu" ng-if="model.userInfo">
-	<img ng-src="{{model.userInfo.picture.data.url}}">
-	<a target="_blank" href="{{model.userInfo.link}}">{{model.userInfo.name}}</a>
+<div id="userMenu">
+	<div ng-show="model.userInfo">
+		<img ng-src="{{model.userInfo.picture.data.url}}">
+		<a target="_blank" href="{{model.userInfo.link}}">{{model.userInfo.name}}</a>
+	</div>
+	<div ng-hide="model.userInfo" class="fb-login-button"
+		data-max-rows="1" data-size="medium" data-show-faces="false" data-auto-logout-link="false"
+		onlogin="location.reload()"
+	></div>
 </div>
