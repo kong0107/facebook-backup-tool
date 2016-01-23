@@ -133,7 +133,11 @@ var a = document.createElement("a");
 var blob = new Blob([html], {type: "text/html"});
 a.href = URL.createObjectURL(blob);
 a.download = "static.html";
-a.click();
+
+/// @see https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Creating_and_triggering_events
+var evt = document.createEvent("MouseEvents");
+evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+a.dispatchEvent(evt);
 				});
 			});
 		});
@@ -155,10 +159,11 @@ a.click();
 			Image files are NOT saved. But with the links, you can use other tools to download them.
 		</p>
 	</section>
-	<div ng-hide="FBAuth" class="fb-login-button"
-		data-max-rows="1" data-size="xlarge" data-show-faces="false" data-auto-logout-link="false"
-		onlogin="location.reload()"
-	></div>
+	<div ng-hide="FBAuth">
+		<button style="background: rgb(53,76,140); font-family: helvetica, arial, sans-serif; color: #fff; padding: 1em; font-weight: bold; border: none;"
+			ng-click="FBLogin()"
+		>Facebook Login</button>
+	</div>
 	<section ng-show="FBAuth">
 		<table border="1">
 			<tbody>

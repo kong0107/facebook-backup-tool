@@ -7,7 +7,7 @@
 	<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-route.min.js"></script>
-	<script src="//connect.facebook.net/zh_TW/sdk.js#xfbml=1&version=v2.5" id="facebook-jssdk"></script>
+	<script src="//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5" id="facebook-jssdk"></script>
 	<script src="js/fbsdk-config.js"></script>
 	<script src="js/fbsdk-extend.js"></script>
 	<script>
@@ -75,6 +75,12 @@ $scope.setCrawl = function(index, withComments) {
 		});
 	}
 };
+$scope.FBLogin = function() {
+	FB.login(function(res) {
+		$scope.FBAuth = res.authResponse;
+		$scope.$apply();
+	}, {scope: "user_posts,user_photos"});
+};
 
 window.setStatus = function(status) {
 	$scope.status = status;
@@ -106,6 +112,7 @@ $scope.downloadHTML = window.downloadHTML;
 		})
 		.controller("header", function($scope) {
 			FB.getLoginStatus(function(r) {
+				if(!r.authResponse) return;
 				FB.apiwt("/me?fields=id,name,link,picture{url}", function(res) {
 					$scope.model = {userInfo: res};
 					$scope.$apply();
