@@ -16,16 +16,16 @@
 		$dbs[] = $dbArr['name'];
 
 	$cols = array();
-	if($_GET['db']) {
+	if(isset($_GET['db']) && $_GET['db']) {
 		$db = $dbCon->selectDB($_GET['db']);
 		foreach($db->listCollections() as $colObj)
 			$cols[] = $colObj->getName();
 
-		if($_GET['col']) {
+		if(isset($_GET['col'])) {
 			$col = $db->selectCollection($_GET['col']);
-			$skip = (int) $_GET['skip'];
+			$skip = (int) isset($_GET['skip']) ? $_GET['skip'] : 0;
 			if($skip < 0 || $skip > $col->count()) $skip = 0;
-			$limit = (int) $_GET['limit'];
+			$limit = (int) isset($_GET['limit']) ? $_GET['limit'] : 0;
 			if($limit <= 0) $limit = 10;
 
 			$docs = iterator_to_array($col->find()->skip($skip)->limit($limit));
@@ -34,6 +34,11 @@
 				$fields = array_unique(array_merge($fields, array_keys($doc)));
 			}
 		}
+		else $_GET['col'] = '';
+	}
+	else {
+		$_GET['db'] = '';
+		$_GET['col'] = '';
 	}
 ?>
 <!DOCTYPE HTML>
@@ -46,9 +51,9 @@
 			angular.module("myApp", []).controller("main", function($scope) {
 				$scope.dbs = <?=json_encode($dbs)?>;
 				$scope.cols = <?=json_encode($cols)?>;
-				$scope.db = "<?=$_GET['db']?>";
+				$scope.db = "<?=isset($_GET['db'])?$_GET['db']:""?>";
 
-				<?php if($col) { ?>
+				<?php if(isset($col)) { ?>
 					$scope.col = "<?=$_GET['col']?>";
 					$scope.col_count = <?=$col->count()?>;
 					$scope.skip = <?=$skip?>;
