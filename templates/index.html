@@ -12,11 +12,26 @@
 	</p>
 </section>
 <div ng-hide="FBAuth">
-	<button style="background: rgb(53,76,140); font-family: helvetica, arial, sans-serif; color: #fff; padding: 1em; font-weight: bold; border: none;"
-		ng-click="FBLogin()"
-	>Facebook Login</button>
+	<button class="FBButton" ng-click="FBLogin()">Facebook Login</button>
 </div>
 <section ng-show="FBAuth">
+	<!--section>
+		<h2>What do you wanna crawl?</h2>
+		<button>My data</button>
+		<button>Some Fan Page</button>
+	</section>
+	<section>
+		<h2>Craw some fan page</h2>
+		Enter the name or ID of the page.
+		<br>
+		<input placeholder="search">
+		<ul class="inlineList">
+			<li><label><input type="radio" ng-model="nodeId" value="sadfsdf">dsf</label></li>
+			<li><label><input type="radio" ng-model="nodeId" value="sadfsdaf">dsf</label></li>
+		</ul>
+		<button>Next step</button>
+	</section-->
+	<section>
 	<table border="1">
 		<tbody>
 			<tr ng-repeat="row in crawlables">
@@ -64,4 +79,5 @@
 			</dd>
 		</dl>
 	</div>
+	</section>
 </sction>
