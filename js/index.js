@@ -16,7 +16,7 @@ myApp = angular.module("myApp", ["ngRoute"])
 .controller("index", function($scope, $routeParams) {
 	FB.getLoginStatus(function(res) {
 		$scope.FBAuth = res.authResponse;
-		$scope.setType("user");	///< remove this line to enable page crawling
+		$scope.setType("page");	///< remove this line to enable user crawling
 		$scope.$apply();
 	});
 
