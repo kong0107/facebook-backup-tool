@@ -1,3 +1,5 @@
+if(location.origin == 'http://kong0107.github.io') location.href = 'https://kong0107.github.io/facebook-backup/';
+
 FB.init(FBConfig);
 
 myApp = angular.module("myApp", ["ngRoute"])
@@ -14,9 +16,10 @@ myApp = angular.module("myApp", ["ngRoute"])
 	});
 })
 .controller("index", function($scope, $routeParams) {
+	$scope.disableUserCrawl = true; 	///< remove this line to enable user crawling
 	FB.getLoginStatus(function(res) {
 		$scope.FBAuth = res.authResponse;
-		$scope.setType("page");	///< remove this line to enable user crawling
+		if($scope.disableUserCrawl) $scope.setType("page");
 		$scope.$apply();
 	});
 
@@ -128,7 +131,7 @@ myApp = angular.module("myApp", ["ngRoute"])
 		var cs = [];
 
 		cs.push({
-			name: "Posts " + subject + " published",
+			name: "已發表的文章\nPosts " + subject + " published",
 			alias: "posts",
 			path: "/" + id + "/posts",
 			type: "post",
@@ -136,7 +139,7 @@ myApp = angular.module("myApp", ["ngRoute"])
 		});
 
 		cs.push({
-			name: "Albums and photos " + subject + " published",
+			name: "相簿與照片資訊（不含照片檔）\nAlbums and photos " + subject + " published",
 			alias: "albums_and_photos",
 			path: "/" + id + "/albums",
 			type: "album",
@@ -145,7 +148,7 @@ myApp = angular.module("myApp", ["ngRoute"])
 		});
 
 		if(isUser) cs.push({
-			name: "Posts " + subject + " was tagged in",
+			name: "被標記在內的文章\nPosts " + subject + " was tagged in",
 			alias: "tagged_posts",
 			path: "/" + id + "/tagged",
 			type: "post",
@@ -153,7 +156,7 @@ myApp = angular.module("myApp", ["ngRoute"])
 		});
 
 		cs.push({
-			name: "Photos " + subject + " was tagged in",
+			name: "被標記在內的照片資訊（不含圖片檔）\nPhotos " + subject + " was tagged in",
 			alias: "tagged_photos",
 			path: "/" + id + "/photos?type=tagged",
 			type: "photo",

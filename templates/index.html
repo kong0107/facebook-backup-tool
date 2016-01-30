@@ -22,17 +22,19 @@
 <section ng-show="FBAuth">
 	<section ng-hide="type">
 		<h2>What do you wanna crawl?</h2>
-		<button ng-click="setType('user')">My data</button>
+		<button ng-hide="disableUserCrawl" ng-click="setType('user')">My data</button>
 		<button ng-click="setType('page')">Some Fan Page</button>
 	</section>
 	<section ng-show="type && !idDecided">
 		<h2>Craw some fan page</h2>
-		Enter the name or ID of the page.
+		輸入粉絲專頁的顯示名稱。
+		<br>
+		Enter the name of the page.
 		<br>
 		<input ng-model="searchText"
 			ng-change="search()"
 			ng-model-options="{debounce: 500}"
-			placeholder="ID or search Text"
+			placeholder="ID or search text"
 		>
 		<ul class="inlineList">
 			<li ng-repeat="node in searchResult" class="inlineBlock">
@@ -65,15 +67,17 @@
 	<table border="1">
 		<tbody>
 			<tr ng-repeat="row in crawlables">
-				<td>{{row.name}}</td>
+				<td class="rawdata">{{row.name}}</td>
 				<td>
 					<a ng-show="row.href" download="{{row.alias}}.json" href="{{row.href}}">
-						Export
+						Export JSON
 						with<span ng-show="row.status=='noComments'">out</span>
 						comments
 					</a>
-					<button ng-disabled="running" ng-hide="row.href" ng-click="setCrawl($index)">Crawl</button>
+					<button ng-disabled="running" ng-hide="row.href" ng-click="setCrawl($index)">開始抓資料<br>Crawl</button>
 					<button ng-disabled="running" ng-hide="row.status=='withComments'" ng-click="setCrawl($index, true)">
+						連同回應也一起抓
+						<br>
 						Crawl
 						<span ng-hide="row.href">with</span>
 						comments
@@ -82,8 +86,8 @@
 			</tr>
 		</tbody>
 	</table>
-	<button ng-disabled="!downloadable" ng-click="downloadHTML()">Download HTML</button>
-	<p>{{message}}</p>
+	<button ng-disabled="!downloadable" ng-click="downloadHTML()" ng-class="downloadable?'FBButton':''">下載網頁<br>Download HTML</button>
+	<p style="font-family: monospace;">{{message}}</p>
 	<div class="dlTable" ng-show="status.last">
 		<dl>
 			<dt>Last<br>request</dt>
