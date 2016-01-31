@@ -16,7 +16,7 @@ myApp = angular.module("myApp", ["ngRoute"])
 	});
 })
 .controller("index", function($scope, $routeParams) {
-	$scope.disableUserCrawl = true; 	///< remove this line to enable user crawling
+	$scope.disableUserCrawl = (location.search.indexOf('isTester=true') == -1);	///< remove this line to enable user crawling
 	FB.getLoginStatus(function(res) {
 		$scope.FBAuth = res.authResponse;
 		if($scope.disableUserCrawl) $scope.setType("page");
@@ -80,7 +80,7 @@ myApp = angular.module("myApp", ["ngRoute"])
 		FB.login(function(res) {
 			$scope.FBAuth = res.authResponse;
 			$scope.$apply();
-		}, {scope: "user_posts,user_photos"});
+		}, $scope.disableUserCrawl ? {} : {scope: "user_posts,user_photos"});
 	};
 	$scope.setType = function(type) {
 		window.nodeType = $scope.type = type;

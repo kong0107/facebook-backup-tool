@@ -210,6 +210,7 @@ angular.module("myApp", [])
 		 * Render the path to the downloaded photo.
 		 */
 		ret.getSourcePhoto = function(photoNode, dir) {
+			return photoNode.images[0].source;
 			if(!dir) dir = "album_" + photoNode.album.id;
 			var p = photoNode.picture;
 			var suffix = p.substr(p.indexOf('?') - 4, 4);
