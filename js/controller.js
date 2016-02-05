@@ -27,6 +27,7 @@ angular.module("myApp", [])
 			month: {},
 			search: {},
 			showDetails: {},
+			filtered: [],
 			displaySet: {
 				user: {
 					block: [
@@ -174,7 +175,7 @@ angular.module("myApp", [])
 		 *
 		 * Should be executed after comments are arranged.
 		 */
-		if(ret.albums && ret.albums.length 
+		if(ret.albums && ret.albums.length
 			&& ret.photos && ret.photos.length
 		) {
 			for(var j = 0; j < ret.albums.length; ++j)
@@ -215,6 +216,19 @@ angular.module("myApp", [])
 			var p = photoNode.picture;
 			var suffix = p.substr(p.indexOf('?') - 4, 4);
 			return "data/photos/" + dir + "/" + (photoNode._id||photoNode.id) + suffix;
+		};
+
+		/**
+		 * Pagination.
+		 */
+		ret.pages = function() {
+			if(!ret.filtered) return [];
+			var result = [];
+			for(var i = 0;
+				i < ret.filtered.length;
+				i += ret.itemsPerPage
+			) result.push(i);
+			return result;
 		};
 
 		if($window.debug_startTime)

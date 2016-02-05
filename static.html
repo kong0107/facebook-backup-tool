@@ -351,7 +351,7 @@
 				ng-change="ret.skip = 0"
 			>
 		</label>
-		<p>{{filtered.length}} {{t}}</p>
+		<p>{{ret.filtered.length}} {{t}}</p>
 	</script>
 
 	<script type="text/ng-template" id="templateMonthSelector">
@@ -368,14 +368,15 @@
 	</script>
 
 	<script type="text/ng-template" id="templatePagination">
-		<div ng-show="filtered.length > ret.itemsPerPage">
+		<div ng-show="ret.filtered.length > ret.itemsPerPage">
 			Page:
-			<ul style="display: inline-block;">
-				<li ng-repeat="d in filtered track by $index"
+			<select ng-model="ret.skip" ng-options="value as (key-0+1) for (key, value) in ret.pages()"></select>
+			<!--ul style="display: inline-block;">
+				<li ng-repeat="d in ret.filtered track by $index"
 					ng-if="!($index%ret.itemsPerPage)" ng-click="ret.skip=$index"
 					ng-class="(ret.skip==$index)?'focus':''"
 				>{{$index/ret.itemsPerPage+1}}</li>
-			</ul>
+			</ul-->
 			<span style="font-size: smaller; color: #888;">({{ret.itemsPerPage}} items per page)</span>
 		</div>
 	</script>
@@ -411,7 +412,7 @@
 			<div ng-include="'templateSearch'"></div>
 			<div ng-if="ret.months[t]" ng-include="'templateMonthSelector'"></div>
 			<nav ng-include="'templatePagination'"></nav>
-			<article ng-repeat="node in filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))|limitTo :ret.itemsPerPage :ret.skip track by (node._id||node.id)">
+			<article ng-repeat="node in ret.filtered=(ret[t]|filter:(ret.search[t]?ret.search[t]:{created_time:ret.month[t]}))|limitTo :ret.itemsPerPage :ret.skip track by (node._id||node.id)">
 				<div ng-include="'template'+({
 					posts: 'Post',
 					albums: 'Album',
@@ -435,7 +436,7 @@
 			<h2>Tagged Photos</h2>
 			<div ng-include="'templateSearch'" ng-repeat="t in ['photos']"></div>
 			<nav ng-include="'templatePagination'"></nav>
-			<article ng-repeat="node in filtered=(ret.photos|filter:ret.search.photos)|limitTo :ret.itemsPerPage :ret.skip track by (node._id||node.id)"
+			<article ng-repeat="node in ret.filtered=(ret.photos|filter:ret.search.photos)|limitTo :ret.itemsPerPage :ret.skip track by (node._id||node.id)"
 				ng-class="((node._id||node.id)==ret.displayingPhoto)?'displayingPhoto':'inlineBlock'"
 				ng-include="'templatePhoto'"
 				onload="dir = ret.type + '_' + ret.id;"
