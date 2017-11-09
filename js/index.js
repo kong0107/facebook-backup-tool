@@ -1,4 +1,4 @@
-if(location.origin == 'http://kong0107.github.io') location.href = 'https://kong0107.github.io/facebook-backup/';
+if(location.origin == 'http://kong0107.github.io') location.href = "https://" + location.hostname + location.pathname;
 
 FB.init(FBConfig);
 

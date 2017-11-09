@@ -1,6 +1,6 @@
 var FBConfig = {
-	version    : 'v2.5',
-	appId      : (location.hostname == 'localhost') ? '875679652530913' : '874284439337101',
+	version    : 'v2.11',
+	appId      : 335745016835886,
 	xfbml      : false,
 	status     : true
 };
